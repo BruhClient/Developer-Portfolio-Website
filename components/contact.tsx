@@ -25,6 +25,11 @@ const Contact = () => {
       return;
     }
 
+    console.log({
+      name: result.data.name,
+      message: result.data.message,
+      reply_to: result.data.email,
+    });
     setIsSending(true);
 
     toast.promise(
@@ -32,7 +37,7 @@ const Contact = () => {
         process.env.NEXT_PUBLIC_EMAIL_JS_SERVICE_KEY || "",
         "template_vlgc8le",
         {
-          name,
+          name: result.data.name,
           message: result.data.message,
           reply_to: result.data.email,
         },
@@ -50,6 +55,7 @@ const Contact = () => {
         },
         error: (err) => {
           console.log(err?.text);
+          console.log(err);
           setIsSending(false);
           return "Failed to send message. Please try again.";
         },

@@ -1,7 +1,6 @@
 import React from "react";
 import SectionTitle from "./section-title";
 import Image from "next/image";
-import { TypeAnimation } from "react-type-animation";
 import TypingText from "./typing-text";
 
 const AboutMe = () => {
@@ -10,7 +9,7 @@ const AboutMe = () => {
       <SectionTitle title="About Me" />
       <div className="flex gap-5 md:flex-row flex-col items-center ">
         <Image
-          src="/aboutme/hero.jpg"
+          src="/aboutme/profile.jpg"
           width={140}
           height={140}
           alt="About Me"
