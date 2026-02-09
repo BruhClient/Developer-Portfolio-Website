@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
 import Collaborators from "./collaborators";
 import { Separator } from "./ui/separator";
 import Techs from "./techs";
+import { Button } from "./ui/button";
+import { Github } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const ProjectHeader = ({
   name,
@@ -12,12 +15,12 @@ const ProjectHeader = ({
   collaborators: string[];
   techs: string[];
 }) => {
+  const router = useRouter();
   return (
     <div className="space-y-3">
       <div className="text-3xl">{name}</div>
       <Collaborators names={collaborators} />
       <Techs techs={techs} />
-      <Separator className="my-3" />
     </div>
   );
 };

@@ -23,7 +23,7 @@ const ProjectCard = ({
   return (
     <Card
       className="cursor-pointer hover:opacity-70"
-      onClick={() => router.push(`/projects/${project_slug}`)}
+      onClick={() => router.push(`${project_slug}`)}
     >
       <CardHeader>
         <CardTitle className="font-normal">{project_title}</CardTitle>

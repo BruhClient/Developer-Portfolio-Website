@@ -78,7 +78,7 @@ const Contact = () => {
       />
       <Textarea
         placeholder="Your Message"
-        className="max-h-64 min-h-32"
+        className="h-64"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
       />

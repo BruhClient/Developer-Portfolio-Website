@@ -1,6 +1,7 @@
 import AboutMe from "@/components/about-me";
 import Achievements from "@/components/achievements";
 import Contact from "@/components/contact";
+import Hackathons from "@/components/hackathons";
 
 import Intro from "@/components/intro";
 import Projects from "@/components/projects";
@@ -14,6 +15,7 @@ export default function Home() {
         <AboutMe />
 
         <Projects />
+        <Hackathons />
         <Contact />
       </div>
     </div>
