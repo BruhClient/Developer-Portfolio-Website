@@ -10,7 +10,7 @@ const AboutMe = () => {
       <SectionTitle title="About Me" />
       <div className="flex gap-5 md:flex-row flex-col items-center ">
         <Image
-          src="/aboutme/maritime.jpg"
+          src="/aboutme/hero.jpg"
           width={140}
           height={140}
           alt="About Me"

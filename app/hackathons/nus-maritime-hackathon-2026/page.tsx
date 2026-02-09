@@ -24,12 +24,17 @@ const MartimeDataVisualisation = () => {
         />
 
         <div className="flex gap-2">
-          <Button>
-            <Github />
-            GitHub
+          <Button asChild>
+            <a
+              href="https://github.com/steaksandshrooms/Maritime-Fleet-Optimisation"
+              target="_blank"
+            >
+              <Github />
+              GitHub
+            </a>
           </Button>
           <Button asChild>
-            <a href="/hackthon/showcase.ppt" download>
+            <a href="/hackathon/showcase.ppt" download>
               <Presentation />
               Presentation Slides
             </a>
@@ -50,6 +55,7 @@ const MartimeDataVisualisation = () => {
             width={500}
             height={500}
             alt="map"
+            className="rounded-sm"
           />
           <Image
             src={"/hackathon/maritime-hackathon/cost.png"}
@@ -61,19 +67,22 @@ const MartimeDataVisualisation = () => {
             src={"/hackathon/maritime-hackathon/cost-efficiency.png"}
             width={500}
             height={500}
-            alt="cost"
+            alt="cost-efficiency"
+            className="rounded-sm"
           />
           <Image
             src={"/hackathon/maritime-hackathon/distribution-main-engine.png"}
             width={500}
             height={500}
-            alt="cost"
+            alt="main-engine"
+            className="rounded-sm"
           />
           <Image
             src={"/hackathon/maritime-hackathon/distribution-safety.png"}
             width={500}
             height={500}
-            alt="cost"
+            alt="safety"
+            className="rounded-sm"
           />
         </Masonry>
         <div>

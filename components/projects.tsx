@@ -10,7 +10,19 @@ const Projects = () => {
         <ProjectCard
           project_title="Coach AI"
           project_slug="/projects/coach-ai"
-          technologies_used={["Next JS", "TypeScript", "Open AI API"]}
+          technologies_used={["Next JS", "Stripe", "Open AI API"]}
+          date="June 2024"
+        />
+        <ProjectCard
+          project_title="Millitary Stores Telegram Bot"
+          project_slug="/projects/millitary-stores-telegram-bot"
+          technologies_used={["Python", "Google Sheets API"]}
+          date="June 2024"
+        />
+        <ProjectCard
+          project_title="CalcGPA"
+          project_slug="/projects/calcGPA"
+          technologies_used={["Expo", "React Native", "TypeScript"]}
           date="June 2024"
         />
       </div>
