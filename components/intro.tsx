@@ -12,9 +12,11 @@ const Intro = () => {
         Majoring in Data Science and Artificial Intelligence
       </div>
 
-      <Button size={"lg"} variant={"outline"} className="mt-2">
-        <Download />
-        Download CV
+      <Button size="lg" variant="outline" className="mt-2 " asChild>
+        <a href="/files/resume.pdf" download>
+          <Download />
+          Download CV
+        </a>
       </Button>
     </div>
   );
