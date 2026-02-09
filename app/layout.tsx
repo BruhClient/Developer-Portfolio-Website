@@ -1,15 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Crimson_Text,
+  Geist,
+  Geist_Mono,
+  Inter,
+  Jua,
+  Lora,
+  Open_Sans,
+  Playfair_Display,
+  Poppins,
+} from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/components/navbar";
+import SocialLinksBar from "@/components/social-links-bar";
+import { BackgroundFlyingIcons } from "@/components/flying-icons";
+import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Jua({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const serif = Jua({
+  variable: "--font-serif",
   subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -23,11 +40,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${sans.variable} ${serif.variable} font-sans antialiased px-5 pt-3 pb-10`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          {children}
+          <BackgroundFlyingIcons />
+          <SocialLinksBar />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
