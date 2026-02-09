@@ -34,7 +34,7 @@ const MartimeDataVisualisation = () => {
             </a>
           </Button>
           <Button asChild>
-            <a href="/hackathon/showcase.ppt" download>
+            <a href="/hackathon/maritime-hackathon/showcase.ppt" download>
               <Presentation />
               Presentation Slides
             </a>
