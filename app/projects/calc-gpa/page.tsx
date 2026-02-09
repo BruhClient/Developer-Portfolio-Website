@@ -19,20 +19,12 @@ const CoachAI = () => {
           techs={["Expo", "React Native", "TypeScript"]}
         />
 
-        <div className="flex gap-2">
-          <Button asChild>
-            <a href="https://github.com/BruhClient/CalcGPA" target="_blank">
-              <Github />
-              GitHub
-            </a>
-          </Button>
-          <Button asChild>
-            <a href="https://coach-ai-iota.vercel.app/" target="_blank">
-              <Presentation />
-              Live Website
-            </a>
-          </Button>
-        </div>
+        <Button asChild>
+          <a href="https://github.com/BruhClient/CalcGPA" target="_blank">
+            <Github />
+            GitHub
+          </a>
+        </Button>
 
         <Separator />
         <div className="text-lg">Project Overview</div>

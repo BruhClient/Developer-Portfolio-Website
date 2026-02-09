@@ -21,7 +21,7 @@ const Projects = () => {
         />
         <ProjectCard
           project_title="CalcGPA"
-          project_slug="/projects/calcGPA"
+          project_slug="/projects/calc-gpa"
           technologies_used={["Expo", "React Native", "TypeScript"]}
           date="June 2024"
         />
