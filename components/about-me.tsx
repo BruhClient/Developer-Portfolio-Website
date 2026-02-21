@@ -18,7 +18,7 @@ const AboutMe = () => {
 
         <div>
           <TypingText
-            className="text-accent"
+            className="text-accent "
             sequence={[
               "I love writing code.",
               2000,

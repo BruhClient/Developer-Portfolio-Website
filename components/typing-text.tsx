@@ -22,7 +22,9 @@ export default function TypingText({
       cursor={true}
       repeat={repeat}
       className={className}
-      style={{ fontSize, display: "inline-block" }}
+      style={{
+        fontSize,
+      }}
     />
   );
 }

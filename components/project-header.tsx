@@ -1,10 +1,9 @@
 "use client";
+import { ChevronLeft } from "lucide-react";
 import Collaborators from "./collaborators";
-import { Separator } from "./ui/separator";
 import Techs from "./techs";
-import { Button } from "./ui/button";
-import { Github } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/button";
 
 const ProjectHeader = ({
   name,
@@ -18,6 +17,14 @@ const ProjectHeader = ({
   const router = useRouter();
   return (
     <div className="space-y-3">
+      <Button
+        className="flex items-center gap-2"
+        variant={"ghost"}
+        onClick={() => router.push("/")}
+      >
+        <ChevronLeft size={20} />
+        Back to Profile{" "}
+      </Button>
       <div className="text-3xl">{name}</div>
       <Collaborators names={collaborators} />
       <Techs techs={techs} />

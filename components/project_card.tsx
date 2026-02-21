@@ -1,4 +1,5 @@
 "use client";
+import { ArrowRight } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -39,6 +40,9 @@ const ProjectCard = ({
               {tech}{" "}
             </div>
           ))}
+        </div>
+        <div className="pt-4 flex gap-2 justify-end items-center text-sm ">
+          Click to find out more <ArrowRight size={20} />
         </div>
       </CardContent>
     </Card>

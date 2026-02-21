@@ -36,7 +36,7 @@ const SocialLinksBar = () => {
         return (
           <Button
             key={social.label}
-            variant="outline"
+            variant={"secondary"}
             size="icon-lg"
             onClick={() => router.push(social.href)}
           >
