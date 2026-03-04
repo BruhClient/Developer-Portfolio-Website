@@ -1,15 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Crimson_Text,
-  Geist,
-  Geist_Mono,
-  Inter,
-  Jua,
-  Lora,
-  Open_Sans,
-  Playfair_Display,
-  Poppins,
-} from "next/font/google";
+import { Inter, Jua } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/navbar";
@@ -52,7 +42,6 @@ export default function RootLayout({
         >
           <Navbar />
           {children}
-          <BackgroundFlyingIcons />
           <SocialLinksBar />
           <Toaster />
         </ThemeProvider>

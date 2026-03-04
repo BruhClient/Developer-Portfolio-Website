@@ -8,27 +8,20 @@ const AboutMe = () => {
     <div className="space-y-3">
       <SectionTitle title="About Me" />
       <div className="flex gap-5 md:flex-row flex-col items-center ">
-        <Image
-          src="/aboutme/profile.jpg"
-          width={140}
-          height={140}
-          alt="About Me"
-          className="rounded-lg w-full max-h-87.5 object-cover"
-        />
-
-        <div>
-          <TypingText
-            className="text-accent "
-            sequence={[
-              "I love writing code.",
-              2000,
-              "I love working with data.",
-              2000,
-              "I love creating products.",
-              2000,
-              "I love sharing ideas with others.",
-            ]}
+        <div className="shrink-0 w-full md:w-70 h-70">
+          <Image
+            src="/aboutme/profile.jpg"
+            width={280}
+            height={280}
+            alt="About Me"
+            className="rounded-lg w-full h-full object-cover"
           />
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-accent text-3xl">
+            " I love sharing ideas with others "
+          </div>
           <div>
             I’m a 22-year-old Singaporean programmer with a background in web
             development, mobile development, data analysis, and machine
@@ -45,18 +38,9 @@ const AboutMe = () => {
       <div className="flex gap-5 flex-col md:flex-row items-center">
         {/* TEXT */}
         <div className="order-2 md:order-1">
-          <TypingText
-            className="text-accent"
-            sequence={[
-              "I build for the web and mobile.",
-              2000,
-              "I work with data and machine learning.",
-              2000,
-              "I enjoy turning ideas into real products.",
-              2000,
-              "I’m always learning and improving.",
-            ]}
-          />
+          <div className="text-accent text-3xl">
+            " I enjoy turning ideas into real products "
+          </div>
 
           <div className="mt-4">
             I’m particularly fascinated by how data and AI can be used to create
@@ -73,13 +57,15 @@ const AboutMe = () => {
         </div>
 
         {/* IMAGE */}
-        <Image
-          src="/aboutme/maritime.jpg"
-          width={140}
-          height={140}
-          alt="About Me"
-          className="order-1 md:order-2 rounded-lg w-full max-h-87.5 object-cover"
-        />
+        <div className="order-1 md:order-2 shrink-0 w-full md:w-70 h-70">
+          <Image
+            src="/aboutme/maritime.jpg"
+            width={280}
+            height={280}
+            alt="About Me"
+            className="rounded-lg w-full h-full object-cover"
+          />
+        </div>
       </div>
     </div>
   );
