@@ -5,9 +5,9 @@ import TypingText from "./typing-text";
 
 const AboutMe = () => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-10">
       <SectionTitle title="About Me" />
-      <div className="flex gap-5 md:flex-row flex-col items-center ">
+      <div className="flex gap-5 md:flex-row flex-col items-center  ">
         <div className="shrink-0 w-full md:w-70 h-70">
           <Image
             src="/aboutme/profile.jpg"
@@ -43,16 +43,15 @@ const AboutMe = () => {
           </div>
 
           <div className="mt-4">
-            I’m particularly fascinated by how data and AI can be used to create
-            smarter, more efficient systems. Whether I’m extracting insights
-            from data, experimenting with machine learning models, or designing
-            scalable applications, I enjoy understanding how things work at a
-            deeper level and improving them over time. Most of my experience
-            comes from working with modern web and mobile technologies,
-            alongside data-focused workflows. I like writing clean, maintainable
-            code, learning new tools when they make sense, and shipping things
-            that solve real problems. I also enjoy sharing ideas, collaborating
-            with other developers, and learning from different perspectives.
+            I’m particularly interested in how data and AI can power smarter,
+            more efficient systems. I enjoy extracting insights from data,
+            experimenting with machine learning models, and building scalable
+            applications while continuously refining and improving them. My
+            experience spans modern web and mobile development alongside
+            data-focused workflows. I value writing clean, maintainable code,
+            learning tools that add real value, and building solutions that
+            solve meaningful problems. I also enjoy collaborating with others,
+            exchanging ideas, and learning from different perspectives.
           </div>
         </div>
 
