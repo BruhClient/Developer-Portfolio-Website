@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Jua } from "next/font/google";
+import { ABeeZee, Andika, Inter, Jua, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/navbar";
@@ -7,7 +7,7 @@ import SocialLinksBar from "@/components/social-links-bar";
 import { BackgroundFlyingIcons } from "@/components/flying-icons";
 import { Toaster } from "sonner";
 
-const sans = Jua({
+const sans = Outfit({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400"],

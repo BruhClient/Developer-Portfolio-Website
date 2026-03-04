@@ -66,7 +66,7 @@ const Contact = () => {
   return (
     <div className="space-y-4 mt-4">
       <SectionTitle title="Contact" />
-      <div className="text-xl text-accent">
+      <div className="text-xl text-primary">
         Have a project in mind? Let's connect!
       </div>
 

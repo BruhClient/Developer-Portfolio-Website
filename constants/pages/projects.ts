@@ -4,7 +4,7 @@ export const PROJECTS: PageData[] = [
   {
     slug: "coach-ai",
     title: "Coach AI - Your Personal AI Coach",
-    cardTitle: "Coach AI",
+    cardTitle: "Coach AI - Your Personal AI Coach",
     date: "June 2024",
     collaborators: [],
     techs: ["Next JS", "Open AI API", "Vapi API", "Stripe API"],
@@ -88,8 +88,8 @@ export const PROJECTS: PageData[] = [
   },
   {
     slug: "calc-gpa",
-    title: "CaclGPA -  GPA Calculator",
-    cardTitle: "CalcGPA",
+    title: "CalcGPA -  GPA Calculator",
+    cardTitle: "CalcGPA -  Grade Point Average Calculator",
     date: "June 2024",
     collaborators: [],
     techs: ["Expo", "React Native", "TypeScript"],
