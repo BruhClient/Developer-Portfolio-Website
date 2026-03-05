@@ -23,7 +23,7 @@ const ProjectCard = ({
   const router = useRouter();
   return (
     <Card
-      className="cursor-pointer hover:opacity-70"
+      className="cursor-pointer hover:opacity-70 transition-all duration-200 ease-in-out"
       onClick={() => router.push(`${project_slug}`)}
     >
       <CardHeader>
