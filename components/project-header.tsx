@@ -9,10 +9,12 @@ const ProjectHeader = ({
   name,
   collaborators,
   techs,
+  section,
 }: {
   name: string;
   collaborators: string[];
   techs: string[];
+  section: string;
 }) => {
   const router = useRouter();
   return (
@@ -20,7 +22,7 @@ const ProjectHeader = ({
       <Button
         className="flex items-center gap-2"
         variant={"ghost"}
-        onClick={() => router.push("/")}
+        onClick={() => router.push(`/#${section}`)}
       >
         <ChevronLeft size={20} />
         Back to Profile{" "}

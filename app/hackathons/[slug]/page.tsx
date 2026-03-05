@@ -40,6 +40,7 @@ export default async function HackathonPage({
           name={hackathon.title}
           collaborators={hackathon.collaborators}
           techs={hackathon.techs}
+          section="Hackathons"
         />
 
         <div className="flex gap-2">

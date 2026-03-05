@@ -40,6 +40,7 @@ export default async function ProjectPage({
           name={project.title}
           collaborators={project.collaborators}
           techs={project.techs}
+          section="Projects"
         />
 
         <div className="flex gap-2">
