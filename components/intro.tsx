@@ -6,7 +6,7 @@ const Intro = () => {
   return (
     <div className="space-y-2">
       <div className="text-xl">Hello 👋</div>
-      <div className="text-3xl">I'm Travis Ang</div>
+      <div className="text-3xl font-semibold">I'm Travis Ang</div>
       <div className="text-primary">Nanyang Technological University</div>
       <div className="text-primary">
         Majoring in Data Science and Artificial Intelligence

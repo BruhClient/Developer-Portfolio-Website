@@ -6,6 +6,8 @@ import Navbar from "@/components/navbar";
 import SocialLinksBar from "@/components/social-links-bar";
 import { BackgroundFlyingIcons } from "@/components/flying-icons";
 import { Toaster } from "sonner";
+import { DotPattern } from "@/components/ui/dot-pattern";
+import { cn } from "@/lib/utils";
 
 const sans = Outfit({
   variable: "--font-sans",
@@ -46,6 +48,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <SocialLinksBar />
+
           <Toaster />
         </ThemeProvider>
       </body>

@@ -20,7 +20,7 @@ const AboutMe = () => {
       <div className="flex gap-5 md:flex-row flex-col items-center  ">
         <div className="shrink-0 w-full md:w-70 h-70">
           <Image
-            src="/aboutme/profile.jpg"
+            src="/aboutme/profile(1).jpeg"
             width={280}
             height={280}
             alt="About Me"
