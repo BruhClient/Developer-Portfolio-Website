@@ -76,6 +76,8 @@ export default async function ProjectPage({
               height={500}
               className="rounded-sm w-full h-auto max-h-96 object-cover object-top"
               alt={image.alt}
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjAyMDIwIi8+PC9zdmc+"
             />
           ))}
         </Masonry>
