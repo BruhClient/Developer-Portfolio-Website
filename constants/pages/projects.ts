@@ -2,6 +2,38 @@ import { PageData } from "./types";
 
 export const PROJECTS: PageData[] = [
   {
+    slug: "iris-ai-assistant",
+    title: "IRIS - AI Voice Personal Assistant",
+    cardTitle: "IRIS - AI Voice Personal Assistant",
+    date: "March 2026",
+    collaborators: [],
+    techs: ["Python", "LangGraph", "LangChain", "LiveKit Agents"],
+    cardTechs: ["Python", "LangGraph", "LiveKit", "GPT-4o"],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/BruhClient/Voice-Activated-Personal-AI-Assistant",
+        icon: "github",
+      },
+    ],
+    overview:
+      "IRIS is a voice-activated personal AI assistant — a modern take on JARVIS. It runs as a LiveKit voice agent and uses a custom thinking loop built with LangGraph to plan and execute tasks using an established set of tools.",
+    images: [],
+    impacts: [
+      "Delivered a fully hands-free AI assistant with natural voice interaction.",
+      "Enabled persistent personalisation through long-term memory via ChromaDB.",
+      "Unified control over everyday tools through a single voice interface.",
+    ],
+    whatIDid: [
+      "Built a LiveKit voice agent with VAD, STT, and TTS.",
+      "Designed a thinking loop in LangGraph for multi-step planning and tool execution with GPT-4o.",
+      "Established tool integrations across 7 domains: system, Spotify, web, news, email, calendar, and memory.",
+      "Integrated ChromaDB for long-term memory and personalised greetings on startup.",
+    ],
+    reflection:
+      "Building IRIS pushed me deep into agentic AI architecture — designing the thinking loop in LangGraph and wiring up real-world APIs alongside a live voice pipeline taught me a lot about latency and keeping the agent experience feeling natural.",
+  },
+  {
     slug: "coach-ai",
     title: "Coach AI - Your Personal AI Coach",
     cardTitle: "Coach AI - Your Personal AI Coach",
@@ -85,39 +117,5 @@ export const PROJECTS: PageData[] = [
     ],
     reflection:
       "Our bot was adopted by our unit and served for about 6 months . Even without the bot being online , the codebase is still used as a reference for new bots being developed within the military.",
-  },
-  {
-    slug: "calc-gpa",
-    title: "CalcGPA -  GPA Calculator",
-    cardTitle: "CalcGPA -  Grade Point Average Calculator",
-    date: "June 2024",
-    collaborators: [],
-    techs: ["Expo", "React Native", "TypeScript"],
-    links: [
-      {
-        label: "GitHub",
-        href: "https://github.com/BruhClient/CalcGPA",
-        icon: "github",
-      },
-    ],
-    overview:
-      "This Project is a GPA Calculator app built using Expo and React Native. It allows users to easily calculate their Grade Point Average (GPA) by inputting their course grades and credit hours. The app features a user-friendly interface, making it simple for students to track their academic performance. With real-time calculations and a clean design, CalcGPA is an essential tool for students aiming to monitor and improve their GPA.",
-    images: [
-      { src: "/project/calc-gpa/cover.jpg", alt: "cover" },
-      { src: "/project/calc-gpa/create.jpg", alt: "create" },
-      { src: "/project/calc-gpa/socials.jpg", alt: "socials" },
-      { src: "/project/calc-gpa/gpa.jpg", alt: "gpa" },
-    ],
-    impacts: [
-      "Gave students a simple, offline-friendly tool to track and calculate their GPA.",
-      "Published as a fully functional mobile app available via Expo.",
-    ],
-    whatIDid: [
-      "Built a mobile app from scratch using React Native and Expo.",
-      "Designed a clean, intuitive UI with responsive layout for different screen sizes.",
-      "Managed app state using React hooks, Context API, and local storage.",
-    ],
-    reflection:
-      "This project helped me gain valuable experience in mobile app development, user experience design, and working with mobile local storage. It also improved my problem-solving skills as I navigated challenges related to mobile platforms and performance optimization.",
   },
 ];
