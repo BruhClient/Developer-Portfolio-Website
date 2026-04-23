@@ -3,11 +3,19 @@ import { PageData } from "./types";
 export const PROJECTS: PageData[] = [
   {
     slug: "iris-ai-assistant",
-    title: "IRIS - AI Voice Personal Assistant",
-    cardTitle: "IRIS - AI Voice Personal Assistant",
+    title: "IRIS — Intelligent Responsive Intelligence System",
+    cardTitle: "IRIS — AI Voice Personal Assistant",
     date: "March 2026",
     collaborators: [],
-    techs: ["Python", "LangGraph", "LangChain", "LiveKit Agents"],
+    techs: [
+      "Python",
+      "LiveKit Agents",
+      "LangGraph",
+      "LangChain",
+      "OpenAI GPT-4o",
+      "ChromaDB",
+      "Spotify API",
+    ],
     cardTechs: ["Python", "LangGraph", "LiveKit", "GPT-4o"],
     links: [
       {
@@ -17,21 +25,28 @@ export const PROJECTS: PageData[] = [
       },
     ],
     overview:
-      "IRIS is a voice-activated personal AI assistant — a modern take on JARVIS. It runs as a LiveKit voice agent and uses a custom thinking loop built with LangGraph to plan and execute tasks using an established set of tools.",
-    images: [],
+      "IRIS is a voice-activated personal AI assistant built as a modern take on JARVIS. It runs as a persistent background agent, listening for spoken commands and responding in natural speech with a calm, composed personality. Rather than a simple chatbot, IRIS is a fully agentic system — it reasons about what tools to call, executes them, and synthesizes the results into a single clean spoken response.",
+    images: [
+      { src: "/project/iris/livekit-console.jpg", alt: "livekit-console" },
+      {
+        src: "/project/iris/agent-audio-waveform.png",
+        alt: "agent-audio-waveform",
+      },
+    ],
     impacts: [
-      "Delivered a fully hands-free AI assistant with natural voice interaction.",
-      "Enabled persistent personalisation through long-term memory via ChromaDB.",
-      "Unified control over everyday tools through a single voice interface.",
+      "Delivered a fully hands-free AI assistant with natural voice interaction and a calm, composed personality.",
+      "Enabled multi-step reasoning through a LangGraph planner/responder architecture — IRIS can recall a preference, act on it, and confirm the result in one fluid turn.",
+      "Enabled persistent personalisation through long-term memory via ChromaDB, including a personalised greeting on every startup.",
+      "Unified control over everyday workflows — Spotify, email, calendar, web search, news, and OS-level controls — through a single voice interface.",
     ],
     whatIDid: [
-      "Built a LiveKit voice agent with VAD, STT, and TTS.",
-      "Designed a thinking loop in LangGraph for multi-step planning and tool execution with GPT-4o.",
-      "Established tool integrations across 7 domains: system, Spotify, web, news, email, calendar, and memory.",
-      "Integrated ChromaDB for long-term memory and personalised greetings on startup.",
+      "Built a persistent background voice agent using LiveKit Agents with VAD, STT, and TTS.",
+      "Designed a LangGraph state graph with a planner node, tool execution node, and responder node for multi-step agentic reasoning.",
+      "Integrated ChromaDB for long-term memory — storing personal facts, preferences, and people across sessions.",
+      "Built tool integrations across 7 domains: Spotify playback, real-time web search and browsing, news headlines, email reading and sending, OS-level system controls, and calendar management.",
     ],
     reflection:
-      "Building IRIS pushed me deep into agentic AI architecture — designing the thinking loop in LangGraph and wiring up real-world APIs alongside a live voice pipeline taught me a lot about latency and keeping the agent experience feeling natural.",
+      "Building IRIS pushed me deep into agentic AI architecture. Designing the planner/responder loop in LangGraph and wiring real-world APIs into a live voice pipeline taught me a lot about latency — every extra tool call is felt by the user, so knowing when to plan vs. when to just respond became the core design challenge.",
   },
   {
     slug: "coach-ai",
