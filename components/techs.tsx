@@ -1,23 +1,18 @@
-import React from "react";
-
 const Techs = ({ techs }: { techs: string[] }) => {
   return (
-    <div className="flex flex-wrap gap-2">
-      <div>
-        <div>
-          Technologies{" "}
-          <span className="bg-secondary py-1 px-2 rounded-xl text-sm text-secondary-foreground">
-            {techs.length}
+    <div className="space-y-2">
+      <div className="text-xs text-muted-foreground">
+        Technologies ({techs.length})
+      </div>
+      <div className="flex gap-1.5 flex-wrap">
+        {techs.map((name, index) => (
+          <span
+            key={index}
+            className="text-xs px-2 py-0.5 border border-primary/30 text-primary rounded"
+          >
+            [{name}]
           </span>
-        </div>
-
-        <div className="flex gap-3 flex-wrap pt-2">
-          {techs.map((name, index) => (
-            <div key={index} className="bg-card py-1 px-3 text-sm rounded-lg ">
-              {name}
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );

@@ -5,16 +5,14 @@ import ProjectHeader from "@/components/project-header";
 import Masonry from "@/components/masonry";
 import CheckText from "@/components/check-text";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { PROJECTS } from "@/constants/pages/projects";
 import { LinkIcon } from "@/constants/pages/types";
+import { TerminalWindow } from "@/components/terminal-window";
 
-// Pre-generate all known project pages at build time
 export function generateStaticParams() {
   return PROJECTS.map((project) => ({ slug: project.slug }));
 }
 
-// ISR: revalidate cached pages every hour
 export const revalidate = 3600;
 
 const ICON_MAP: Record<LinkIcon, React.ElementType> = {
@@ -34,8 +32,8 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="max-w-4xl w-full pt-6 space-y-3 pb-10">
+    <div className="flex flex-col justify-center items-center relative z-10">
+      <div className="max-w-4xl w-full pt-6 space-y-6 pb-10">
         <ProjectHeader
           name={project.title}
           collaborators={project.collaborators}
@@ -43,20 +41,24 @@ export default async function ProjectPage({
           section="Projects"
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {project.links.map((link) => {
             const Icon = ICON_MAP[link.icon];
             return (
-              <Button key={link.label} asChild>
+              <Button
+                key={link.label}
+                className="border border-primary text-primary bg-transparent hover:bg-primary/10"
+                asChild
+              >
                 {link.download ? (
                   <a href={link.href} download>
-                    <Icon />
-                    {link.label}
+                    <Icon className="mr-2 h-4 w-4" />
+                    [{link.label} →]
                   </a>
                 ) : (
-                  <a href={link.href} target="_blank">
-                    <Icon />
-                    {link.label}
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    <Icon className="mr-2 h-4 w-4" />
+                    [{link.label} →]
                   </a>
                 )}
               </Button>
@@ -64,9 +66,13 @@ export default async function ProjectPage({
           })}
         </div>
 
-        <Separator />
-        <div className="text-lg">Project Overview</div>
-        <div>{project.overview}</div>
+        <div className="h-px bg-border" />
+
+        <TerminalWindow title={`~/projects/${project.slug}/README.md`}>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {project.overview}
+          </p>
+        </TerminalWindow>
 
         <Masonry>
           {project.images.map((image) => (
@@ -74,21 +80,29 @@ export default async function ProjectPage({
           ))}
         </Masonry>
 
-        <div className="text-lg">Stakeholder Impact</div>
-        <div className="space-y-3">
-          {project.impacts.map((text) => (
-            <CheckText key={text} text={text} />
-          ))}
-        </div>
+        <TerminalWindow title="impact.log">
+          <div className="space-y-2">
+            <h3 className="text-sm text-foreground font-medium mb-2">Stakeholder Impact</h3>
+            {project.impacts.map((text) => (
+              <CheckText key={text} text={text} />
+            ))}
+          </div>
+        </TerminalWindow>
 
-        <div className="text-lg">What I Did</div>
-        <div className="space-y-3">
-          {project.whatIDid.map((text) => (
-            <CheckText key={text} text={text} />
-          ))}
-        </div>
+        <TerminalWindow title="contributions.log">
+          <div className="space-y-2">
+            <h3 className="text-sm text-foreground font-medium mb-2">What I Did</h3>
+            {project.whatIDid.map((text) => (
+              <CheckText key={text} text={text} />
+            ))}
+          </div>
+        </TerminalWindow>
 
-        <div>{project.reflection}</div>
+        <TerminalWindow title="reflection.md">
+          <p className="text-sm text-muted-foreground leading-relaxed italic">
+            {project.reflection}
+          </p>
+        </TerminalWindow>
       </div>
     </div>
   );

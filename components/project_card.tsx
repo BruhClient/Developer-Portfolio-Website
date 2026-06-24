@@ -1,51 +1,61 @@
 "use client";
+
 import { ArrowRight } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
 import { useRouter } from "next/navigation";
+import { TiltCard } from "./tilt-card";
+import { TerminalWindow } from "./terminal-window";
+
+interface ProjectCardProps {
+  project_title: string;
+  project_slug: string;
+  technologies_used: string[];
+  date: string;
+}
 
 const ProjectCard = ({
   project_title,
   project_slug,
   technologies_used,
   date,
-}: {
-  date: string;
-  project_title: string;
-  project_slug: string;
-  technologies_used: string[];
-}) => {
+}: ProjectCardProps) => {
   const router = useRouter();
+
   return (
-    <Card
-      className="cursor-pointer hover:opacity-70 transition-all duration-200 ease-in-out"
-      onClick={() => router.push(`${project_slug}`)}
-    >
-      <CardHeader>
-        <CardTitle className="font-normal">{project_title}</CardTitle>
-        <CardDescription>{date}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-3 flex-wrap">
-          {technologies_used.map((tech) => (
-            <div
-              className="bg-accent text-accent-foreground px-3 py-2 text-sm rounded-md"
-              key={tech}
-            >
-              {tech}{" "}
+    <TiltCard>
+      <div
+        className="cursor-pointer group transition-all duration-300 rounded-md"
+        onClick={() => router.push(`/projects/${project_slug}`)}
+      >
+        <TerminalWindow title={`~/projects/${project_slug}`}>
+          <div className="space-y-3">
+            <div className="flex justify-between items-start">
+              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
+                {project_title}
+              </h3>
+              <span className="text-xs text-muted-foreground whitespace-nowrap ml-3">
+                {date}
+              </span>
             </div>
-          ))}
-        </div>
-        <div className="pt-4 flex gap-2 justify-end items-center text-sm ">
-          Click to find out more <ArrowRight size={20} />
-        </div>
-      </CardContent>
-    </Card>
+
+            <div className="flex flex-wrap gap-1.5">
+              {technologies_used.map((tech) => (
+                <span
+                  key={tech}
+                  className="text-xs px-2 py-0.5 border border-primary/30 text-primary rounded"
+                >
+                  [{tech}]
+                </span>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground group-hover:text-primary transition-colors duration-200">
+              <span>View project</span>
+              <ArrowRight className="h-3 w-3" />
+            </div>
+          </div>
+        </TerminalWindow>
+      </div>
+    </TiltCard>
   );
 };
 

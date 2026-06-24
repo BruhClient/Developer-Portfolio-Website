@@ -1,20 +1,19 @@
-import React from "react";
-
 const Collaborators = ({ names }: { names: string[] }) => {
-  return (
-    <div>
-      <div>
-        Collaborators{" "}
-        <span className="bg-accent py-1 px-2 rounded-xl text-sm text-accent-foreground">
-          {names.length}
-        </span>
-      </div>
+  if (names.length === 0) return null;
 
-      <div className="flex gap-3 flex-wrap pt-2">
+  return (
+    <div className="space-y-2">
+      <div className="text-xs text-muted-foreground">
+        Collaborators ({names.length})
+      </div>
+      <div className="flex gap-1.5 flex-wrap">
         {names.map((name, index) => (
-          <div key={index} className="bg-card py-1 px-3 text-sm rounded-lg ">
-            {name}
-          </div>
+          <span
+            key={index}
+            className="text-xs px-2 py-0.5 border border-border text-foreground rounded"
+          >
+            [{name}]
+          </span>
         ))}
       </div>
     </div>
