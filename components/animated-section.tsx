@@ -2,9 +2,11 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
+import type { TargetAndTransition } from "motion/react";
+
 type Variant = "fade-up" | "fade-left" | "fade-right" | "scale";
 
-const variants: Record<Variant, { initial: object; whileInView: object }> = {
+const variants: Record<Variant, { initial: TargetAndTransition; whileInView: TargetAndTransition }> = {
   "fade-up": {
     initial: { opacity: 0, y: 40, rotateX: 5 },
     whileInView: { opacity: 1, y: 0, rotateX: 0 },
