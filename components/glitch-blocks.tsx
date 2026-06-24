@@ -79,9 +79,10 @@ function RainPatch({ cols, rows }: { cols: number; rows: number }) {
         const x = i * fontSize;
         const y = columns[i];
 
+        const mobile = canvas.width < 400;
         const opacity = isDark
-          ? 0.2 + Math.random() * 0.15
-          : 0.25 + Math.random() * 0.15;
+          ? (mobile ? 0.08 : 0.2) + Math.random() * (mobile ? 0.06 : 0.15)
+          : (mobile ? 0.1 : 0.25) + Math.random() * (mobile ? 0.08 : 0.15);
 
         ctx.fillStyle = isDark
           ? `rgba(148, 163, 184, ${opacity})`
@@ -111,16 +112,20 @@ function RainPatch({ cols, rows }: { cols: number; rows: number }) {
 
 export function GlitchBlocks() {
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
   if (!mounted) return null;
 
+  const patches = isMobile ? PATCHES.filter((_, i) => i % 3 === 0) : PATCHES;
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
-      {PATCHES.map((patch, i) => (
+      {patches.map((patch, i) => (
         <div
           key={i}
           className="absolute"

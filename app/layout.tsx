@@ -11,6 +11,7 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${mono.variable} font-mono antialiased px-5 pt-14 pb-24`}
       >
