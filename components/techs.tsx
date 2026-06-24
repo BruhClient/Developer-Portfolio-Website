@@ -10,7 +10,7 @@ const Techs = ({ techs }: { techs: string[] }) => {
             key={index}
             className="text-xs px-2 py-0.5 border border-primary/30 text-primary rounded"
           >
-            [{name}]
+            {name}
           </span>
         ))}
       </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Button } from "./ui/button";
-import { Download } from "lucide-react";
+import { Download, Github, Instagram, Linkedin, Twitter } from "lucide-react";
 import { TypingEffect } from "./typing-effect";
 
 export function HeroSection() {
@@ -72,6 +72,29 @@ export function HeroSection() {
             showCursor={false}
           />
         )}
+      </motion.div>
+
+      <motion.div variants={item} className="flex gap-2">
+        <Button size="icon" variant="outline" className="rounded-full border-border text-muted-foreground hover:text-primary hover:border-primary transition-all duration-300 h-10 w-10" asChild>
+          <a href="https://www.linkedin.com/in/travis-ang/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <Linkedin className="h-4 w-4" />
+          </a>
+        </Button>
+        <Button size="icon" variant="outline" className="rounded-full border-border text-muted-foreground hover:text-primary hover:border-primary transition-all duration-300 h-10 w-10" asChild>
+          <a href="https://github.com/BruhClient" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <Github className="h-4 w-4" />
+          </a>
+        </Button>
+        <Button size="icon" variant="outline" className="rounded-full border-border text-muted-foreground hover:text-primary hover:border-primary transition-all duration-300 h-10 w-10" asChild>
+          <a href="https://www.instagram.com/____travisang____/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <Instagram className="h-4 w-4" />
+          </a>
+        </Button>
+        <Button size="icon" variant="outline" className="rounded-full border-border text-muted-foreground hover:text-primary hover:border-primary transition-all duration-300 h-10 w-10" asChild>
+          <a href="https://twitter.com/travisang_dev" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <Twitter className="h-4 w-4" />
+          </a>
+        </Button>
       </motion.div>
 
       <motion.div variants={item}>

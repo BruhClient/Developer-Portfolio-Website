@@ -104,17 +104,17 @@
 /* ─── Dark Mode (phosphor green terminal) ─── */
 .dark {
   --background: #0D1117;
-  --foreground: #C9D1D9;
+  --foreground: #F0F2F5;
   --card: #0D1117;
-  --card-foreground: #C9D1D9;
+  --card-foreground: #F0F2F5;
   --popover: #161B22;
-  --popover-foreground: #C9D1D9;
+  --popover-foreground: #F0F2F5;
   --primary: #E2E8F0;
   --primary-foreground: #0D1117;
   --secondary: #161B22;
-  --secondary-foreground: #C9D1D9;
+  --secondary-foreground: #F0F2F5;
   --muted: #161B22;
-  --muted-foreground: #586069;
+  --muted-foreground: #8B949E;
   --accent: #94A3B8;
   --accent-foreground: #0D1117;
   --destructive: #EF4444;
@@ -219,6 +219,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
     letter-spacing: var(--tracking-normal);
   }
   html {

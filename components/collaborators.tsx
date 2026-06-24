@@ -12,7 +12,7 @@ const Collaborators = ({ names }: { names: string[] }) => {
             key={index}
             className="text-xs px-2 py-0.5 border border-border text-foreground rounded"
           >
-            [{name}]
+            {name}
           </span>
         ))}
       </div>

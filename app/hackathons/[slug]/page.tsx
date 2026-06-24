@@ -53,12 +53,12 @@ export default async function HackathonPage({
                 {link.download ? (
                   <a href={link.href} download>
                     <Icon className="mr-2 h-4 w-4" />
-                    [{link.label} →]
+                    {link.label} →
                   </a>
                 ) : (
                   <a href={link.href} target="_blank" rel="noopener noreferrer">
                     <Icon className="mr-2 h-4 w-4" />
-                    [{link.label} →]
+                    {link.label} →
                   </a>
                 )}
               </Button>
