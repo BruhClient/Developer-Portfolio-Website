@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/navbar";
 import SocialLinksBar from "@/components/social-links-bar";
+import { GlitchBlocks } from "@/components/glitch-blocks";
 import { Toaster } from "sonner";
 
 const mono = JetBrains_Mono({
@@ -33,9 +34,9 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
           disableTransitionOnChange
         >
+          <GlitchBlocks />
           <Navbar />
           {children}
           <SocialLinksBar />

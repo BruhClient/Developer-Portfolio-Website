@@ -10,6 +10,7 @@ interface ProjectCardProps {
   project_slug: string;
   technologies_used: string[];
   date: string;
+  basePath?: string;
 }
 
 const ProjectCard = ({
@@ -17,6 +18,7 @@ const ProjectCard = ({
   project_slug,
   technologies_used,
   date,
+  basePath = "projects",
 }: ProjectCardProps) => {
   const router = useRouter();
 
@@ -24,9 +26,9 @@ const ProjectCard = ({
     <TiltCard>
       <div
         className="cursor-pointer group transition-all duration-300 rounded-md"
-        onClick={() => router.push(`/projects/${project_slug}`)}
+        onClick={() => router.push(`/${basePath}/${project_slug}`)}
       >
-        <TerminalWindow title={`~/projects/${project_slug}`}>
+        <TerminalWindow title={`~/${basePath}/${project_slug}`}>
           <div className="space-y-3">
             <div className="flex justify-between items-start">
               <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200">

@@ -50,9 +50,9 @@
 
 /* ─── Light Mode (light terminal) ─── */
 :root {
-  --background: #F6F8FA;
+  --background: #E8ECF0;
   --foreground: #1A1A2E;
-  --card: #FFFFFF;
+  --card: #F3F5F7;
   --card-foreground: #1A1A2E;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A2E;
@@ -249,3 +249,4 @@
     animation: none;
   }
 }
+

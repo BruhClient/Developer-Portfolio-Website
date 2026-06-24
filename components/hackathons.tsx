@@ -40,6 +40,7 @@ const Hackathons = () => {
               project_slug={hackathon.slug}
               technologies_used={hackathon.cardTechs ?? hackathon.techs}
               date={hackathon.date}
+              basePath="hackathons"
             />
           </motion.div>
         ))}

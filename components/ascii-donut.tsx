@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useReducedMotion } from "motion/react";
+import { useTheme } from "next-themes";
 
 const LUMINANCE = ".,-~:;=!*#$@";
-const COLORS = [
+const COLORS_DARK = [
   "#78350f",
   "#92400e",
   "#a16207",
@@ -18,12 +19,27 @@ const COLORS = [
   "#fde8c8",
   "#fef3e0",
 ];
+const COLORS_LIGHT = [
+  "#1c0a00",
+  "#3b1a08",
+  "#5c2d0e",
+  "#713f12",
+  "#854d0e",
+  "#a16207",
+  "#b45309",
+  "#ca8a04",
+  "#d97706",
+  "#e5a040",
+  "#f0b96a",
+  "#f5c98a",
+];
 
 export function AsciiDonut() {
   const preRef = useRef<HTMLPreElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   const shouldReduceMotion = useReducedMotion();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const aRef = useRef(0);
   const bRef = useRef(0);
@@ -94,7 +110,8 @@ export function AsciiDonut() {
         if (k % width === width - 1) {
           html += "\n";
         } else if (nvals[k] >= 0) {
-          const color = COLORS[nvals[k]];
+          const palette = resolvedTheme === "dark" ? COLORS_DARK : COLORS_LIGHT;
+          const color = palette[nvals[k]];
           html += `<span style="color:${color}">${chars[k]}</span>`;
         } else {
           html += " ";
