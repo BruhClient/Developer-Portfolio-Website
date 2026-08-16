@@ -26,7 +26,7 @@ export const HACKATHONS: PageData[] = [
     links: [
       {
         label: "Report",
-        href: "/hackathon/naisc-singtel/NAISC Singtel Hackathon 2026 Report.pdf",
+        href: "/hackathons/naisc-2026-singtel-churn/report.pdf",
         icon: "presentation",
         download: true,
       },
@@ -35,27 +35,27 @@ export const HACKATHONS: PageData[] = [
       "For the NAISC 2026 Singtel hackathon, our team built a production-grade, drift-aware ML pipeline that predicts customer churn while actively detecting and correcting for distribution shift between training and deployment data — a problem standard models silently fail at.",
     images: [
       {
-        src: "/hackathon/naisc-singtel/drift-detection-summary.png",
+        src: "/hackathons/naisc-2026-singtel-churn/drift-detection-summary.png",
         alt: "drift-detection-summary",
       },
       {
-        src: "/hackathon/naisc-singtel/psi-per-feature.png",
+        src: "/hackathons/naisc-2026-singtel-churn/psi-per-feature.png",
         alt: "psi-per-feature",
       },
       {
-        src: "/hackathon/naisc-singtel/psi-severity-table.png",
+        src: "/hackathons/naisc-2026-singtel-churn/psi-severity-table.png",
         alt: "psi-severity-table",
       },
       {
-        src: "/hackathon/naisc-singtel/psi-by-drift-type.png",
+        src: "/hackathons/naisc-2026-singtel-churn/psi-by-drift-type.png",
         alt: "psi-by-drift-type",
       },
       {
-        src: "/hackathon/naisc-singtel/feature-importance-cbdt.png",
+        src: "/hackathons/naisc-2026-singtel-churn/feature-importance-cbdt.png",
         alt: "feature-importance-cbdt",
       },
       {
-        src: "/hackathon/naisc-singtel/model-performance-metrics.png",
+        src: "/hackathons/naisc-2026-singtel-churn/model-performance-metrics.png",
         alt: "model-performance-metrics",
       },
     ],
@@ -90,7 +90,7 @@ export const HACKATHONS: PageData[] = [
       },
       {
         label: "Presentation Slides",
-        href: "/hackathon/maritime-hackathon/showcase.ppt",
+        href: "/hackathons/nus-maritime-hackathon-2026/showcase.ppt",
         icon: "presentation",
         download: true,
       },
@@ -98,18 +98,18 @@ export const HACKATHONS: PageData[] = [
     overview:
       "This Hackathon involved creating a comprehensive maritime data visualization dashboard using Databricks. The dashboard provides insights into global shipping patterns, port activities, and maritime trade.",
     images: [
-      { src: "/hackathon/maritime-hackathon/map.png", alt: "map" },
-      { src: "/hackathon/maritime-hackathon/cost.png", alt: "cost" },
+      { src: "/hackathons/nus-maritime-hackathon-2026/map.png", alt: "map" },
+      { src: "/hackathons/nus-maritime-hackathon-2026/cost.png", alt: "cost" },
       {
-        src: "/hackathon/maritime-hackathon/cost-efficiency.png",
+        src: "/hackathons/nus-maritime-hackathon-2026/cost-efficiency.png",
         alt: "cost-efficiency",
       },
       {
-        src: "/hackathon/maritime-hackathon/distribution-main-engine.png",
+        src: "/hackathons/nus-maritime-hackathon-2026/distribution-main-engine.png",
         alt: "main-engine",
       },
       {
-        src: "/hackathon/maritime-hackathon/distribution-safety.png",
+        src: "/hackathons/nus-maritime-hackathon-2026/distribution-safety.png",
         alt: "safety",
       },
     ],

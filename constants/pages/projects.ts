@@ -27,9 +27,9 @@ export const PROJECTS: PageData[] = [
     overview:
       "IRIS is a voice-activated personal AI assistant built as a modern take on JARVIS. It runs as a persistent background agent, listening for spoken commands and responding in natural speech with a calm, composed personality. Rather than a simple chatbot, IRIS is a fully agentic system — it reasons about what tools to call, executes them, and synthesizes the results into a single clean spoken response.",
     images: [
-      { src: "/project/iris/livekit-console.jpg", alt: "livekit-console" },
+      { src: "/projects/iris-ai-assistant/livekit-console.jpg", alt: "livekit-console" },
       {
-        src: "/project/iris/agent-audio-waveform.png",
+        src: "/projects/iris-ai-assistant/agent-audio-waveform.png",
         alt: "agent-audio-waveform",
       },
     ],
@@ -71,10 +71,10 @@ export const PROJECTS: PageData[] = [
     overview:
       "This project involved creating a personal AI coach using Next.js, OpenAI, and Vapi API. The AI coach provides personalized coaching sessions and feedback to users.",
     images: [
-      { src: "/project/coach-ai/cover.png", alt: "cover" },
-      { src: "/project/coach-ai/create.png", alt: "create" },
-      { src: "/project/coach-ai/analytics.png", alt: "analytics" },
-      { src: "/project/coach-ai/coach.png", alt: "coach" },
+      { src: "/projects/coach-ai/cover.png", alt: "cover" },
+      { src: "/projects/coach-ai/create.png", alt: "create" },
+      { src: "/projects/coach-ai/analytics.png", alt: "analytics" },
+      { src: "/projects/coach-ai/coach.png", alt: "coach" },
     ],
     impacts: [
       "Enabled users to create personalised AI coaches for fitness, career, and personal development.",
@@ -110,12 +110,12 @@ export const PROJECTS: PageData[] = [
       "This project involved creating a Telegram bot for managing military stores inventory using Python and Google Sheets API. The bot allows users to interact with the inventory system through Telegram, providing a convenient way to manage stock levels and track items.",
     images: [
       {
-        src: "/project/millitary-stores-telegram-bot/overview.png",
+        src: "/projects/millitary-stores-telegram-bot/overview.png",
         alt: "cover",
       },
-      { src: "/project/millitary-stores-telegram-bot/bot.png", alt: "create" },
+      { src: "/projects/millitary-stores-telegram-bot/bot.png", alt: "create" },
       {
-        src: "/project/millitary-stores-telegram-bot/reporting.png",
+        src: "/projects/millitary-stores-telegram-bot/reporting.png",
         alt: "create",
       },
     ],

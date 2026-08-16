@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { TiltCard } from "./tilt-card";
-import { TerminalWindow } from "./terminal-window";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
+import { BLUR_DATA_URL } from "@/constants/media";
 
 interface ProjectCardProps {
   project_title: string;
@@ -11,6 +11,8 @@ interface ProjectCardProps {
   technologies_used: string[];
   date: string;
   basePath?: string;
+  /** Cover image path. Falls back to a typographic tile when absent. */
+  image?: string;
 }
 
 const ProjectCard = ({
@@ -19,45 +21,66 @@ const ProjectCard = ({
   technologies_used,
   date,
   basePath = "projects",
+  image,
 }: ProjectCardProps) => {
-  const router = useRouter();
-
   return (
-    <TiltCard>
-      <div
-        className="cursor-pointer group transition-all duration-300 rounded-md"
-        onClick={() => router.push(`/${basePath}/${project_slug}`)}
-      >
-        <TerminalWindow title={`~/${basePath}/${project_slug}`}>
-          <div className="space-y-3">
-            <div className="flex justify-between items-start">
-              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
-                {project_title}
-              </h3>
-              <span className="text-xs text-muted-foreground whitespace-nowrap ml-3">
-                {date}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              {technologies_used.map((tech) => (
-                <span
-                  key={tech}
-                  className="text-xs px-2 py-0.5 border border-primary/30 text-primary rounded"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-muted-foreground group-hover:text-primary transition-colors duration-200">
-              <span>View project</span>
-              <ArrowRight className="h-3 w-3" />
-            </div>
+    <Link
+      href={`/${basePath}/${project_slug}`}
+      // The whole card is one link, so keyboard and pointer reach it identically.
+      className="group block cursor-pointer rounded-xl border border-border bg-card transition-colors duration-300 hover:border-foreground/25 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+    >
+      {/* Cover — only the image scales, so the card never shifts the grid */}
+      <div className="relative aspect-16/10 overflow-hidden rounded-t-xl bg-secondary">
+        {image ? (
+          <Image
+            src={image}
+            alt=""
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="font-heading text-4xl font-semibold text-muted-foreground/25">
+              {project_title.charAt(0)}
+            </span>
           </div>
-        </TerminalWindow>
+        )}
+
+        {/* Bottom scrim keeps the rounded corner from looking cut off */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-card/70 to-transparent"
+        />
       </div>
-    </TiltCard>
+
+      <div className="p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="font-heading text-lg leading-snug font-semibold tracking-tight transition-colors duration-200 group-hover:text-primary">
+            {project_title}
+          </h3>
+          <ArrowUpRight
+            aria-hidden="true"
+            className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary"
+          />
+        </div>
+
+        <p className="label-mono mt-2 text-muted-foreground">{date}</p>
+
+        <ul className="mt-5 flex flex-wrap gap-1.5">
+          {technologies_used.map((tech) => (
+            <li
+              key={tech}
+              className="rounded-md border border-border bg-secondary px-2 py-1 text-[11px] font-medium text-secondary-foreground"
+            >
+              {tech}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Link>
   );
 };
 

@@ -1,51 +1,38 @@
 "use client";
 
-import ProjectCard from "./project_card";
 import SectionTitle from "./section-title";
+import ProjectCard from "./project_card";
 import { HACKATHONS } from "@/constants/pages/hackathons";
-import { motion, useReducedMotion } from "motion/react";
+import { Stagger, StaggerItem } from "./reveal";
+import { Parallax } from "./parallax";
 
 const Hackathons = () => {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
-    <div>
-      <SectionTitle title="Hackathons" />
+    <section className="mx-auto w-full max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
+      <SectionTitle
+        title="Hackathons"
+        id="hackathons"
+        index="04"
+        kicker="Competitions"
+      />
 
-      <motion.div
-        className="grid lg:grid-cols-2 gap-4 grid-cols-1"
-        variants={
-          shouldReduceMotion
-            ? {}
-            : { visible: { transition: { staggerChildren: 0.1 } } }
-        }
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-60px" }}
-      >
-        {HACKATHONS.map((hackathon) => (
-          <motion.div
-            key={hackathon.slug}
-            variants={
-              shouldReduceMotion
-                ? {}
-                : {
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1, transition: { duration: 0.4 } },
-                  }
-            }
-          >
-            <ProjectCard
-              project_title={hackathon.cardTitle}
-              project_slug={hackathon.slug}
-              technologies_used={hackathon.cardTechs ?? hackathon.techs}
-              date={hackathon.date}
-              basePath="hackathons"
-            />
-          </motion.div>
+      <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
+        {HACKATHONS.map((hackathon, i) => (
+          <StaggerItem key={hackathon.slug}>
+            <Parallax speed={i % 2 === 1 ? -48 : 0} className="h-full">
+              <ProjectCard
+                project_title={hackathon.cardTitle}
+                project_slug={hackathon.slug}
+                technologies_used={hackathon.cardTechs ?? hackathon.techs}
+                date={hackathon.date}
+                basePath="hackathons"
+                image={hackathon.images[0]?.src}
+              />
+            </Parallax>
+          </StaggerItem>
         ))}
-      </motion.div>
-    </div>
+      </Stagger>
+    </section>
   );
 };
 

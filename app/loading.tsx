@@ -1,27 +1,16 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
-const SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
-
 export default function Loading() {
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFrame((f) => (f + 1) % SPINNER.length);
-    }, 80);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-background gap-3 z-50 font-mono">
-      <span className="text-2xl terminal-green terminal-glow">
-        {SPINNER[frame]}
-      </span>
-      <span className="text-xs text-muted-foreground">
-        Loading...
-      </span>
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-background"
+    >
+      {/* Determinate-looking bar rather than a spinner — reads as progress */}
+      <div className="relative h-0.5 w-40 overflow-hidden rounded-full bg-secondary">
+        <div className="animate-shimmer absolute inset-y-0 w-1/2 rounded-full bg-primary" />
+      </div>
+      <span className="label-mono text-muted-foreground">Loading</span>
+      <span className="sr-only">Loading page content</span>
     </div>
   );
 }

@@ -1,121 +1,138 @@
 "use client";
 
-import SectionTitle from "./section-title";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
-import { TerminalWindow } from "./terminal-window";
-import { TiltCard } from "./tilt-card";
+import SectionTitle from "./section-title";
+import { MaskText, Reveal } from "./reveal";
+import { Parallax, ScrollScale } from "./parallax";
+import { BLUR_DATA_URL, SITE_IMAGES } from "@/constants/media";
 
-const BLUR_DATA_URL =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQxMTE3Ii8+PC9zdmc+";
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.15 } },
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5 } },
-};
+const DISCIPLINES = [
+  "Machine Learning",
+  "Agentic AI",
+  "Full-Stack Engineering",
+  "Data Analysis",
+  "Mobile Development",
+];
 
 const AboutMe = () => {
-  const shouldReduceMotion = useReducedMotion();
-  const variants = shouldReduceMotion ? { hidden: {}, visible: {} } : stagger;
-  const itemVariants = shouldReduceMotion ? { hidden: {}, visible: {} } : fadeIn;
-
   return (
-    <motion.div
-      className="space-y-6"
-      variants={variants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
-    >
-      <SectionTitle title="About Me" />
+    <section className="mx-auto w-full max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
+      <SectionTitle title="About" id="about" index="01" kicker="Who I am" />
 
-      <motion.div variants={itemVariants}>
-        <TiltCard>
-        <TerminalWindow title="~/about/readme.md">
-          <div className="text-sm text-muted-foreground leading-relaxed">
-            <div>
-              I&apos;m a Year 1 undergraduate with a strong passion for data science and
-              artificial intelligence, actively seeking an internship or mentorship to
-              grow as an engineer. I&apos;m committed, curious, and driven to understand
-              how production systems are built and deployed to solve real-world
-              problems. I leverage AI tools to streamline my workflow and stay current
-              with the latest tech trends, and I&apos;m eager to contribute meaningfully
-              while learning from experienced professionals in the field.
-            </div>
-          </div>
-        </TerminalWindow>
-        </TiltCard>
-      </motion.div>
+      {/* Lead statement — the one thing to read if you read nothing else */}
+      <MaskText
+        as="p"
+        text="I love turning concepts into systems people can actually use."
+        className="font-heading measure text-2xl leading-tight font-medium tracking-tight sm:text-3xl lg:text-4xl"
+        stagger={0.03}
+      />
 
-      <motion.div variants={itemVariants}>
-        <TiltCard>
-        <TerminalWindow title="~/about/philosophy.md">
-          <div className="flex gap-6 md:flex-row flex-col items-center">
-            <div className="shrink-0 w-full md:w-70 h-70 overflow-hidden rounded border border-border">
+      {/* ── Row one: portrait left, copy right ── */}
+      <div className="mt-20 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <Parallax speed={-70}>
+          <div className="relative aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 lg:aspect-4/5">
+            <ScrollScale className="h-full w-full">
               <Image
-                src="/aboutme/profile(1).jpeg"
-                width={280}
-                height={280}
-                alt="Travis at work"
-                className="w-full h-full object-cover"
+                src={SITE_IMAGES.portrait.src}
+                alt={SITE_IMAGES.portrait.alt}
+                fill
+                sizes="(max-width: 1024px) 100vw, 45vw"
+                className="object-cover"
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
               />
-            </div>
-            <div className="space-y-3">
-              <p className="text-primary text-lg">
-                // &quot;I love conceptualising ideas into solutions&quot;
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                With a background in web development, mobile development, data
-                analysis, and machine learning, I enjoy building things end-to-end.
-                This website is a space where I showcase what I&apos;m building,
-                document what I&apos;m learning, and share projects that reflect my
-                interests in software engineering, data, and AI.
-              </p>
-            </div>
+            </ScrollScale>
           </div>
-        </TerminalWindow>
-        </TiltCard>
-      </motion.div>
+        </Parallax>
 
-      <motion.div variants={itemVariants}>
-        <TiltCard>
-        <TerminalWindow title="~/about/motivation.md">
-          <div className="flex gap-6 flex-col md:flex-row items-center">
-            <div className="order-2 md:order-1 space-y-3">
-              <p className="text-primary text-lg">
-                // &quot;Passion turns effort into purpose&quot;
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                I&apos;m interested in how data and AI can power smarter, more efficient
-                systems. I enjoy working with data, experimenting with machine
-                learning models, and building scalable applications. I value clean,
-                maintainable code, practical tools, and building solutions that solve
-                real problems, and I enjoy collaborating and learning from others.
-              </p>
-            </div>
-            <div className="order-1 md:order-2 shrink-0 w-full md:w-70 h-70 overflow-hidden rounded border border-border">
+        <div>
+          <Reveal direction="up">
+            <p className="label-mono mb-4 text-primary">Background</p>
+            <p className="measure text-base leading-relaxed text-muted-foreground">
+              I&apos;m a Year 1 undergraduate at Nanyang Technological
+              University reading Data Science and Artificial Intelligence, and
+              I&apos;m actively looking for an internship or mentorship where I
+              can grow as an engineer.
+            </p>
+            <p className="measure mt-4 text-base leading-relaxed text-muted-foreground">
+              What draws me in is how production systems actually get built and
+              deployed — the gap between a notebook that works and a service
+              people depend on. I use AI tooling heavily to move faster, and I
+              care about writing code that someone else can pick up later.
+            </p>
+          </Reveal>
+
+          <Reveal direction="up" delay={0.1} className="mt-8">
+            <p className="label-mono mb-3 text-muted-foreground">
+              What I work across
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {DISCIPLINES.map((discipline) => (
+                <li
+                  key={discipline}
+                  className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+                >
+                  {discipline}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* ── Pull quote ── */}
+      <Reveal direction="up" className="my-24 lg:my-32">
+        <figure className="border-l-2 border-primary pl-6 sm:pl-10">
+          <blockquote>
+            <MaskText
+              as="p"
+              text="Passion turns effort into purpose."
+              className="font-heading text-2xl leading-tight font-medium tracking-tight sm:text-4xl"
+              stagger={0.05}
+            />
+          </blockquote>
+          <figcaption className="label-mono mt-5 text-muted-foreground">
+            How I pick what to build
+          </figcaption>
+        </figure>
+      </Reveal>
+
+      {/* ── Row two: copy left, photo right ── */}
+      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="order-2 lg:order-1">
+          <Reveal direction="up">
+            <p className="label-mono mb-4 text-primary">Motivation</p>
+            <p className="measure text-base leading-relaxed text-muted-foreground">
+              I&apos;m interested in how data and AI can make systems smarter
+              and more efficient — experimenting with models, working with real
+              data, and building applications that scale past a demo.
+            </p>
+            <p className="measure mt-4 text-base leading-relaxed text-muted-foreground">
+              I value clean, maintainable code and practical tools over clever
+              ones. Most of what I&apos;ve learned has come from building
+              alongside other people, so I look for work where that&apos;s the
+              default.
+            </p>
+          </Reveal>
+        </div>
+
+        <Parallax speed={70} className="order-1 lg:order-2">
+          <div className="relative aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 lg:aspect-4/5">
+            <ScrollScale className="h-full w-full">
               <Image
-                src="/aboutme/maritime.jpg"
-                width={280}
-                height={280}
-                alt="Maritime hackathon"
-                className="w-full h-full object-cover"
+                src={SITE_IMAGES.maritime.src}
+                alt={SITE_IMAGES.maritime.alt}
+                fill
+                sizes="(max-width: 1024px) 100vw, 45vw"
+                className="object-cover"
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
               />
-            </div>
+            </ScrollScale>
           </div>
-        </TerminalWindow>
-        </TiltCard>
-      </motion.div>
-    </motion.div>
+        </Parallax>
+      </div>
+    </section>
   );
 };
 

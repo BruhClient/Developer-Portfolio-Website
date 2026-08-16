@@ -1,61 +1,57 @@
 "use client";
 
 import { Github, Instagram, Linkedin, Twitter } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
 
-const socials = [
-  { icon: Linkedin, href: "https://www.linkedin.com/in/travis-ang/", label: "LI" },
-  { icon: Github, href: "https://github.com/BruhClient", label: "GH" },
-  { icon: Instagram, href: "https://www.instagram.com/____travisang____/", label: "IG" },
+const SOCIALS = [
+  {
+    icon: Linkedin,
+    href: "https://www.linkedin.com/in/travis-ang/",
+    label: "LinkedIn",
+  },
+  { icon: Github, href: "https://github.com/BruhClient", label: "GitHub" },
+  {
+    icon: Instagram,
+    href: "https://www.instagram.com/____travisang____/",
+    label: "Instagram",
+  },
   { icon: Twitter, href: "https://twitter.com/travisang_dev", label: "X" },
 ];
 
+/**
+ * Site footer. Replaces the old floating overlay bar, which sat on top of
+ * page content and covered it on short viewports.
+ */
 const SocialLinksBar = () => {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-1 px-3 py-1.5 rounded border border-border bg-background/90 backdrop-blur-sm">
-      {socials.map((social) => {
-        const Icon = social.icon;
-        const inner = (
-          <>
-            <Icon className="h-4 w-4" />
-            <span className="text-xs hidden sm:inline">[{social.label}]</span>
-          </>
-        );
+    <footer className="border-t border-border">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-5 py-10 sm:px-8 md:flex-row">
+        <div className="text-center md:text-left">
+          <p className="font-heading text-sm font-semibold tracking-tight">
+            Travis Ang
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            © {new Date().getFullYear()} · Built with Next.js and Three.js
+          </p>
+        </div>
 
-        if (shouldReduceMotion) {
-          return (
-            <a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 px-2 py-1.5 text-muted-foreground hover:text-primary transition-colors duration-200"
-              aria-label={social.label}
-            >
-              {inner}
-            </a>
-          );
-        }
-
-        return (
-          <motion.a
-            key={social.label}
-            href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2 py-1.5 text-muted-foreground hover:text-primary transition-colors duration-200"
-            whileHover={{ scale: 1.1, y: -3 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            aria-label={social.label}
-          >
-            {inner}
-          </motion.a>
-        );
-      })}
-    </div>
+        <ul className="flex items-center gap-1">
+          {SOCIALS.map(({ icon: Icon, href, label }) => (
+            <li key={label}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                // 44px box satisfies the minimum touch target
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors duration-200 hover:bg-secondary hover:text-foreground"
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </footer>
   );
 };
 

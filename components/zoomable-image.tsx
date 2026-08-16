@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-
-const BLUR_PLACEHOLDER =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQxMTE3Ii8+PC9zdmc+";
+import { LIGHTBOX_BLUR_DATA_URL } from "@/constants/media";
 
 interface ZoomableImageProps {
   src: string;
@@ -27,27 +25,31 @@ export default function ZoomableImage({ src, alt }: ZoomableImageProps) {
 
   return (
     <>
-      <motion.button
+      <button
         onClick={() => setOpen(true)}
-        className="w-full cursor-zoom-in block overflow-hidden rounded border border-border hover:border-primary/50 transition-colors duration-200"
-        whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
-        transition={{ duration: 0.2 }}
+        aria-label={`Enlarge image: ${alt}`}
+        // The frame stays put and only the image scales, so neighbouring
+        // masonry items never shift on hover.
+        className="group block w-full cursor-zoom-in overflow-hidden rounded-xl border border-border transition-colors duration-200 hover:border-foreground/25"
       >
         <Image
           src={src}
           width={500}
           height={500}
-          className="rounded w-full h-auto max-h-96 object-cover object-top"
+          className="h-auto max-h-96 w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
           alt={alt}
           placeholder="blur"
-          blurDataURL={BLUR_PLACEHOLDER}
+          blurDataURL={LIGHTBOX_BLUR_DATA_URL}
         />
-      </motion.button>
+      </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm cursor-zoom-out p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label={alt}
+            className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
             onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -55,16 +57,16 @@ export default function ZoomableImage({ src, alt }: ZoomableImageProps) {
             transition={{ duration: 0.2 }}
           >
             <motion.div
-              initial={shouldReduceMotion ? {} : { scale: 0.9, opacity: 0 }}
+              initial={shouldReduceMotion ? {} : { scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={shouldReduceMotion ? {} : { scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              exit={shouldReduceMotion ? {} : { scale: 0.94, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
               <Image
                 src={src}
                 width={1920}
                 height={1080}
-                className="object-contain max-h-[90vh] w-auto h-auto max-w-full rounded border border-border"
+                className="h-auto max-h-[90vh] w-auto max-w-full rounded-xl object-contain"
                 alt={alt}
               />
             </motion.div>
