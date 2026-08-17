@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useRef } from "react";
+import { useRef } from "react";
 import {
   motion,
   useScroll,
@@ -10,10 +10,6 @@ import {
 import { ArrowUpRight, Download } from "lucide-react";
 import { Button } from "./ui/button";
 import { MaskText } from "./reveal";
-
-const Hero3DScene = lazy(() =>
-  import("./hero-3d-scene").then((m) => ({ default: m.Hero3DScene }))
-);
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -138,28 +134,25 @@ export function HeroSection() {
         </motion.p>
       </motion.div>
 
-      {/* ── Device, full bleed ── */}
-      <motion.div
-        initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-        animate={shouldReduceMotion ? undefined : { opacity: 1 }}
-        transition={{ duration: 1, delay: 0.35 }}
-        // Deliberately taller than the leftover space: the device is the point,
-        // and letting it run past the fold invites the scroll that folds the
-        // Type Cover shut.
-        // On narrow screens the device is already width-bound, so extra canvas
-        // height would only add empty space — hence the smaller mobile value.
+      {/*
+        ── Device berth ──
+        The Surface Pro itself is rendered by `DeviceStage` on a fixed layer
+        behind the page, because it now travels the whole document rather than
+        living here. What stays behind is the space it occupies: a fixed canvas
+        contributes no layout height, so without this the hero would collapse
+        around the copy — taking the framing, the resting position of the
+        device, and the hero-relative scroll progress with it.
+
+        Deliberately taller than the leftover space: the device is the point,
+        and letting it run past the fold invites the scroll that starts the
+        journey. On narrow screens the device is already width-bound, so extra
+        height would only add empty space — hence the smaller mobile value.
+      */}
+      <div
+        aria-hidden="true"
+        data-device-berth=""
         className="relative mt-6 h-[44svh] w-full sm:h-[54svh] lg:mt-4 lg:h-[70svh]"
-      >
-        <Suspense
-          fallback={
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="h-40 w-64 animate-pulse rounded-xl bg-muted" />
-            </div>
-          }
-        >
-          <Hero3DScene scrollProgress={scrollYProgress} />
-        </Suspense>
-      </motion.div>
+      />
     </section>
   );
 }

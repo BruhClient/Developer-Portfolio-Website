@@ -13,16 +13,14 @@
  * account would be fabricating data, so only the shapes are decorative.
  */
 
-/* ── Browser chrome (Edge / Chrome dark on Windows) ── */
-const B = {
-  tabStrip: "#2B2B2B",
-  tabActive: "#3B3B3B",
-  toolbar: "#3B3B3B",
-  urlPill: "#262626",
-  chromeText: "#E8EAED",
-  chromeMuted: "#9AA0A6",
-  chromeIcon: "#C4C7C5",
-} as const;
+import {
+  SCREEN_W,
+  SCREEN_H,
+  CHROME_H,
+  UI_FONT,
+  roundRect,
+  drawBrowserChrome,
+} from "./screen-chrome";
 
 /* ── GitHub dark default ── */
 const G = {
@@ -42,13 +40,6 @@ const G = {
 /* Contribution heat scale, empty → hottest */
 const HEAT = ["#161B22", "#0E4429", "#006D32", "#26A641", "#39D353"] as const;
 
-/* ── Canvas geometry — 3:2, matching the Surface Pro display ── */
-export const SCREEN_W = 1152;
-export const SCREEN_H = 768;
-
-const TAB_STRIP_H = 36;
-const TOOLBAR_H = 40;
-const CHROME_H = TAB_STRIP_H + TOOLBAR_H; // 76
 const GH_HEADER_H = 56;
 const PAGE_TOP = CHROME_H + GH_HEADER_H; // 132
 
@@ -67,8 +58,6 @@ const CELL = 11;
 const CELL_PITCH = 12.9;
 const GRID_X = MAIN_X + 34;
 const GRID_Y = 500;
-
-const UI_FONT = '"Segoe UI", system-ui, -apple-system, sans-serif';
 
 const NAV_TABS = [
   "Overview",
@@ -118,24 +107,6 @@ const MONTHS = [
    Helpers
    ──────────────────────────────────────────────────────────── */
 
-function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number
-) {
-  const radius = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.arcTo(x + w, y, x + w, y + h, radius);
-  ctx.arcTo(x + w, y + h, x, y + h, radius);
-  ctx.arcTo(x, y + h, x, y, radius);
-  ctx.arcTo(x, y, x + w, y, radius);
-  ctx.closePath();
-}
-
 /**
  * Deterministic contribution level for a cell. Seeded rather than random so
  * the graph is stable across repaints (and pure, so it can run during render).
@@ -156,124 +127,24 @@ function heatLevel(week: number, day: number): number {
   return 4;
 }
 
-/* ────────────────────────────────────────────────────────────
-   Browser chrome
-   ──────────────────────────────────────────────────────────── */
-
-function drawBrowserChrome(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = B.tabStrip;
-  ctx.fillRect(0, 0, SCREEN_W, TAB_STRIP_H);
-
-  // Active tab
-  const tabW = 300;
-  ctx.fillStyle = B.tabActive;
-  roundRect(ctx, 8, 6, tabW, TAB_STRIP_H - 6, 8);
-  ctx.fill();
-
-  // GitHub mark as the favicon
+/**
+ * The GitHub mark, drawn as the tab favicon. Kept as a real shape rather than a
+ * colour swatch — at 14px it is the one detail that identifies the page before
+ * any text is legible.
+ */
+function githubFavicon(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number
+) {
   ctx.fillStyle = "#E8EAED";
   ctx.beginPath();
-  ctx.arc(28, 21, 7, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 7, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = B.tabActive;
+  ctx.fillStyle = "#3B3B3B";
   ctx.beginPath();
-  ctx.arc(28, 24.5, 3.2, 0, Math.PI * 2);
+  ctx.arc(cx, cy + 3.5, 3.2, 0, Math.PI * 2);
   ctx.fill();
-
-  ctx.font = `13px ${UI_FONT}`;
-  ctx.fillStyle = B.chromeText;
-  ctx.fillText("BruhClient (Travis Ang) · GitHub", 44, 25);
-
-  ctx.strokeStyle = B.chromeMuted;
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(tabW - 4, 17);
-  ctx.lineTo(tabW + 4, 25);
-  ctx.moveTo(tabW + 4, 17);
-  ctx.lineTo(tabW - 4, 25);
-  ctx.stroke();
-
-  // New tab
-  ctx.beginPath();
-  ctx.moveTo(tabW + 30, 21);
-  ctx.lineTo(tabW + 42, 21);
-  ctx.moveTo(tabW + 36, 15);
-  ctx.lineTo(tabW + 36, 27);
-  ctx.stroke();
-
-  // Windows caption buttons
-  const cy = TAB_STRIP_H / 2;
-  ctx.strokeStyle = B.chromeIcon;
-  ctx.beginPath();
-  ctx.moveTo(SCREEN_W - 122, cy);
-  ctx.lineTo(SCREEN_W - 112, cy);
-  ctx.stroke();
-  ctx.strokeRect(SCREEN_W - 76.5, cy - 4.5, 9, 9);
-  ctx.beginPath();
-  ctx.moveTo(SCREEN_W - 31, cy - 5);
-  ctx.lineTo(SCREEN_W - 21, cy + 5);
-  ctx.moveTo(SCREEN_W - 21, cy - 5);
-  ctx.lineTo(SCREEN_W - 31, cy + 5);
-  ctx.stroke();
-
-  /* ── Toolbar ── */
-  ctx.fillStyle = B.toolbar;
-  ctx.fillRect(0, TAB_STRIP_H, SCREEN_W, TOOLBAR_H);
-
-  const ty = TAB_STRIP_H + TOOLBAR_H / 2;
-  ctx.strokeStyle = B.chromeIcon;
-  ctx.lineWidth = 1.6;
-
-  // Back
-  ctx.beginPath();
-  ctx.moveTo(30, ty);
-  ctx.lineTo(42, ty);
-  ctx.moveTo(35, ty - 5);
-  ctx.lineTo(30, ty);
-  ctx.lineTo(35, ty + 5);
-  ctx.stroke();
-
-  // Forward (dimmed)
-  ctx.strokeStyle = "#6B6F73";
-  ctx.beginPath();
-  ctx.moveTo(64, ty);
-  ctx.lineTo(76, ty);
-  ctx.moveTo(71, ty - 5);
-  ctx.lineTo(76, ty);
-  ctx.lineTo(71, ty + 5);
-  ctx.stroke();
-
-  // Reload
-  ctx.strokeStyle = B.chromeIcon;
-  ctx.beginPath();
-  ctx.arc(106, ty, 7, 0.6, Math.PI * 1.9);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(112, ty - 8);
-  ctx.lineTo(113, ty - 1);
-  ctx.lineTo(106, ty - 3);
-  ctx.closePath();
-  ctx.fillStyle = B.chromeIcon;
-  ctx.fill();
-
-  // URL pill
-  ctx.fillStyle = B.urlPill;
-  roundRect(ctx, 132, TAB_STRIP_H + 7, SCREEN_W - 132 - 96, TOOLBAR_H - 14, 13);
-  ctx.fill();
-
-  // Padlock
-  ctx.strokeStyle = B.chromeMuted;
-  ctx.lineWidth = 1.3;
-  ctx.strokeRect(150, ty - 2, 9, 7);
-  ctx.beginPath();
-  ctx.arc(154.5, ty - 2, 3.2, Math.PI, 0);
-  ctx.stroke();
-
-  ctx.font = `14px ${UI_FONT}`;
-  ctx.fillStyle = B.chromeMuted;
-  ctx.fillText("github.com", 172, ty + 5);
-  ctx.fillStyle = B.chromeText;
-  ctx.fillText("/BruhClient", 172 + ctx.measureText("github.com").width, ty + 5);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -679,5 +550,10 @@ export function drawGitHub(
   drawContributions(ctx, progress);
   drawActivity(ctx);
   drawGitHubHeader(ctx);
-  drawBrowserChrome(ctx);
+  drawBrowserChrome(ctx, {
+    title: "BruhClient (Travis Ang) · GitHub",
+    host: "github.com",
+    path: "/BruhClient",
+    favicon: githubFavicon,
+  });
 }

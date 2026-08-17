@@ -1,15 +1,25 @@
 "use client";
 
-import { Suspense, useRef, useMemo, useLayoutEffect } from "react";
+/**
+ * The travelling Surface Pro.
+ *
+ * Formerly `hero-3d-scene.tsx`, when the device lived and died inside the hero.
+ * It now rides a fixed canvas the length of the document, taking up a pose at
+ * each section (see `lib/device-stations.ts`) and changing what its display
+ * shows as it goes. `components/device-stage.tsx` owns the canvas layer and
+ * feeds this scene its scroll readout.
+ */
+
+import { Suspense, useRef, useMemo, useLayoutEffect, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   Environment,
   Lightformer,
   ContactShadows,
   RoundedBox,
+  Html,
   useGLTF,
 } from "@react-three/drei";
-import { useReducedMotion, type MotionValue } from "motion/react";
 import { useTheme } from "next-themes";
 import { SITE_IMAGES } from "@/constants/media";
 import type {
@@ -19,7 +29,33 @@ import type {
   PerspectiveCamera,
 } from "three";
 import { CanvasTexture, SRGBColorSpace, MathUtils, Matrix4 } from "three";
-import { drawGitHub, SCREEN_W, SCREEN_H } from "@/lib/github-screen";
+import { drawGitHub } from "@/lib/github-screen";
+import {
+  drawProject,
+  PROJECT_IMAGE_SRCS,
+  PROJECT_SLIDE_COUNT,
+} from "@/lib/project-screen";
+import { drawContact } from "@/lib/contact-screen";
+import {
+  DeviceContactPanel,
+  PANEL_W,
+  PANEL_H,
+} from "./device-contact-panel";
+import {
+  SCREEN_W,
+  SCREEN_H,
+  applyScreenScale,
+} from "@/lib/screen-chrome";
+import {
+  STATION_POSES,
+  LAST_STATION,
+  PROJECT_SCRUB_FROM,
+  PROJECT_SCRUB_TO,
+  blendPose,
+  smootherstep,
+  type ScreenId,
+  type StageReadout,
+} from "@/lib/device-stations";
 
 /** Seconds for the contribution graph to fill, then hold, before looping. */
 const GRAPH_FILL = 3.2;
@@ -71,12 +107,21 @@ const KICK_DEPLOYED = 0.9484;
 const KICK_FOLDED = 0.03;
 const COVER_FLAT = 0.055; // resting on the desk, back edge slightly raised
 /*
-  Folded flat against the display, keys inward. Derived, not eyeballed:
-  the cover's local +z must end parallel to the display's up axis, so
-  atan2(-sin, cos) = atan2(-cos(0.30), -sin(0.30)) → -1.8711 rad (~107°),
-  i.e. 90° to vertical plus the tablet's 17° lean.
+  Folded flat against the display, keys inward. Derived, not eyeballed: the
+  cover's local +z must end parallel to the display's up axis, so
+  atan2(-cos(L), -sin(L)) for a tablet leaning L radians — which simplifies to
+  −π/2 − L. At the deployed lean of 0.30 that is −1.8711 rad (~107°): 90° to
+  vertical plus the tablet's 17° lean.
+
+  It has to be a *function* of the current lean rather than a constant. The
+  closing beat straightens the tablet as the cover comes back, and a fixed
+  angle solved for one lean swings the cover straight through the display at
+  any other — which is precisely the failure the original derivation existed to
+  prevent, reintroduced by animating the thing it depended on.
 */
-const COVER_CLOSED = -1.8711;
+function coverClosedFor(tabletLean: number) {
+  return -Math.PI / 2 + tabletLean;
+}
 /*
   Hinge sits half a cover-thickness proud of the display plane, so the closed
   cover rests against the screen instead of intersecting it.
@@ -136,6 +181,47 @@ const STOW_IN = 0.3;
 const STOW_OUT = 0.68;
 
 /*
+  There is deliberately no closing "fold shut" beat.
+
+  An earlier version had the Type Cover fly back on and the panel power down as
+  the reader hit the bottom. It looked good and was exactly wrong: the display
+  is the contact form by then, so the finale's payoff was covering up the one
+  interactive thing on the page. The device squaring up to present the form is
+  the ending instead — see the `contact` pose in `lib/device-stations.ts`.
+*/
+
+/* Damping rates. Low on purpose — the lag is what makes the device read as
+   following the reader down rather than being welded to the scrollbar. */
+const POSE_LAMBDA = 3.2;
+const TURN_LAMBDA = 3;
+const BANK_LAMBDA = 4;
+
+/* Scroll velocity → roll. Clamped hard; this is a garnish, not a barrel roll. */
+const BANK_GAIN = 0.16;
+const BANK_MAX = 0.14;
+/*
+  Scroll events stop firing the moment the reader stops, with no final "zero"
+  event, so velocity has to be treated as stale rather than waited on.
+*/
+const VELOCITY_STALE_MS = 120;
+
+/**
+ * Resolves the station readout into a pose. Shared by the assembly and the
+ * display, which need different halves of the same interpolation.
+ */
+function poseAt(stationT: number) {
+  const i = Math.min(Math.floor(stationT), LAST_STATION);
+  const next = Math.min(i + 1, LAST_STATION);
+  const f = smootherstep(stationT - i);
+  return {
+    ...blendPose(STATION_POSES[i], STATION_POSES[next], f),
+    from: STATION_POSES[i].screen,
+    to: STATION_POSES[next].screen,
+    mix: STATION_POSES[i].screen === STATION_POSES[next].screen ? 0 : f,
+  };
+}
+
+/*
   The "present" beat exists because the cover cannot just leave.
 
   Lying flat, the deck is ~71° off-axis from the camera, which squashes the key
@@ -192,7 +278,15 @@ const ALCANTARA = {
    Display — a live GitHub profile drawn to a canvas texture.
    ──────────────────────────────────────────────────────────── */
 
-function Display({ reduced }: { reduced: boolean }) {
+function Display({
+  reduced,
+  stage,
+  textureScale,
+}: {
+  reduced: boolean;
+  stage: RefObject<StageReadout>;
+  textureScale: number;
+}) {
   /*
     The canvas and its texture are built on the first frame rather than during
     render: the texture is mutated on every repaint, so it can be neither a
@@ -202,6 +296,13 @@ function Display({ reduced }: { reduced: boolean }) {
   const store = useRef<{
     ctx: CanvasRenderingContext2D;
     texture: CanvasTexture;
+    /*
+      Second buffer, allocated on the first screen change and not before. A
+      crossfade needs both pages resident at once, and every painter begins by
+      filling its whole background — so they cannot simply be drawn one over
+      the other with a lowered alpha.
+    */
+    scratch: CanvasRenderingContext2D | null;
   } | null>(null);
   const matRef = useRef<MeshBasicMaterial>(null);
 
@@ -211,8 +312,8 @@ function Display({ reduced }: { reduced: boolean }) {
 
   const anim = useRef({
     elapsed: reduced ? GRAPH_FILL : 0,
-    lastStep: -1,
-    hadAvatar: false,
+    /* Whatever the last repaint depicted. Repainting is keyed off this. */
+    lastKey: "",
   });
 
   // The profile photo doubles as the GitHub avatar. Loaded imperatively so a
@@ -228,6 +329,27 @@ function Display({ reduced }: { reduced: boolean }) {
     };
     return () => {
       img.onload = null;
+    };
+  }, []);
+
+  /*
+    Project cover shots, loaded on the same terms as the avatar: the screen
+    draws a labelled placeholder until each one lands, so a slow network costs
+    nothing but a plainer panel.
+  */
+  const shotsRef = useRef<Map<string, HTMLImageElement>>(new Map());
+
+  useLayoutEffect(() => {
+    const images = PROJECT_IMAGE_SRCS.map((src) => {
+      const img = new window.Image();
+      img.src = src;
+      img.onload = () => {
+        shotsRef.current.set(src, img);
+      };
+      return img;
+    });
+    return () => {
+      for (const img of images) img.onload = null;
     };
   }, []);
 
@@ -256,28 +378,23 @@ function Display({ reduced }: { reduced: boolean }) {
 
   useFrame((frame, delta) => {
     const st = anim.current;
+    const readout = stage.current;
 
     if (store.current === null) {
       const canvas = document.createElement("canvas");
-      canvas.width = SCREEN_W;
-      canvas.height = SCREEN_H;
+      canvas.width = Math.round(SCREEN_W * textureScale);
+      canvas.height = Math.round(SCREEN_H * textureScale);
       const ctx = canvas.getContext("2d")!;
       const texture = new CanvasTexture(canvas);
       texture.colorSpace = SRGBColorSpace;
       texture.anisotropy = frame.gl.capabilities.getMaxAnisotropy();
-      store.current = { ctx, texture };
+      store.current = { ctx, texture, scratch: null };
     }
 
     const held = store.current;
 
     if (matRef.current && matRef.current.map !== held.texture) {
       matRef.current.map = held.texture;
-      /*
-        The material colour *multiplies* the map. It starts near-black to stand
-        in for the panel's off state, so it has to go white the moment the
-        texture lands — otherwise the whole page renders at ~6% brightness.
-      */
-      matRef.current.color.set("#FFFFFF");
       matRef.current.needsUpdate = true;
     }
 
@@ -286,20 +403,87 @@ function Display({ reduced }: { reduced: boolean }) {
       if (st.elapsed > GRAPH_FILL + GRAPH_HOLD) st.elapsed = 0;
     }
 
-    const progress = Math.min(1, st.elapsed / GRAPH_FILL);
+    const graph = Math.min(1, st.elapsed / GRAPH_FILL);
     const avatar = avatarRef.current;
+    const pose = poseAt(readout.stationT);
 
-    // Quantise to the number of graph columns so a repaint happens once per
-    // new column rather than once per frame.
-    const step = Math.round(progress * 53);
-    const avatarArrived = Boolean(avatar) !== st.hadAvatar;
+    /*
+      Which project the carousel is showing. Scroll-driven rather than timed:
+      the reader flips through the work by scrolling, which is the premise of
+      the whole journey.
+    */
+    const scrub =
+      (readout.stationT - PROJECT_SCRUB_FROM) /
+      (PROJECT_SCRUB_TO - PROJECT_SCRUB_FROM);
+    const projectIndex = MathUtils.clamp(
+      Math.floor(scrub * PROJECT_SLIDE_COUNT),
+      0,
+      PROJECT_SLIDE_COUNT - 1
+    );
 
-    if (step !== st.lastStep || avatarArrived) {
-      drawGitHub(held.ctx, { progress, avatar });
-      held.texture.needsUpdate = true;
-      st.lastStep = step;
-      st.hadAvatar = Boolean(avatar);
+    /*
+      The material colour *multiplies* the map, which makes it the cheapest
+      possible dimmer — no second material, no post pass. It also means getting
+      this wrong renders the whole page dark, which is exactly how it once
+      failed, so the full-brightness case must land on precisely 1.
+
+      Guarded on the map: with no texture attached, a white colour would paint
+      the panel as a blank sheet rather than the off state it starts in.
+    */
+    if (matRef.current?.map) {
+      matRef.current.color.setScalar(1 - pose.panelDim * 0.62);
     }
+
+    /*
+      Repaint key. The panel is redrawn only when what it depicts actually
+      changes — a new graph column, a new project, a step of a crossfade — not
+      once per frame. Quantising the crossfade to 24 steps is imperceptible at
+      the size the panel occupies and turns a per-frame repaint into a handful.
+    */
+    const step = Math.round(graph * 53);
+    const key = [
+      pose.from,
+      pose.to,
+      Math.round(pose.mix * 24),
+      pose.from === "github" || pose.to === "github" ? step : 0,
+      pose.from === "projects" || pose.to === "projects" ? projectIndex : 0,
+      avatar ? 1 : 0,
+      shotsRef.current.size,
+    ].join("|");
+
+    if (key === st.lastKey) return;
+    st.lastKey = key;
+
+    const paint = (ctx: CanvasRenderingContext2D, screen: ScreenId) => {
+      applyScreenScale(ctx, textureScale);
+      if (screen === "github") {
+        drawGitHub(ctx, { progress: graph, avatar });
+      } else if (screen === "projects") {
+        drawProject(ctx, { index: projectIndex, images: shotsRef.current });
+      } else {
+        drawContact(ctx);
+      }
+    };
+
+    paint(held.ctx, pose.from);
+
+    if (pose.mix > 0.001) {
+      if (held.scratch === null) {
+        const canvas = document.createElement("canvas");
+        canvas.width = held.ctx.canvas.width;
+        canvas.height = held.ctx.canvas.height;
+        held.scratch = canvas.getContext("2d")!;
+      }
+      paint(held.scratch, pose.to);
+
+      // Blit in device pixels — the scale transform is a painter concern only.
+      held.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      held.ctx.globalAlpha = pose.mix;
+      held.ctx.drawImage(held.scratch.canvas, 0, 0);
+      held.ctx.globalAlpha = 1;
+    }
+
+    held.texture.needsUpdate = true;
   });
 
   return (
@@ -325,6 +509,65 @@ function Display({ reduced }: { reduced: boolean }) {
         />
       </mesh>
     </>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────
+   Live panel — the display as real DOM, for the contact station
+   ────────────────────────────────────────────────────────────
+   The last thing the device does is stop depicting a contact page
+   and become one: real inputs, real links, real focus.
+
+   The fit is derived, not eyeballed. drei's transform mode maps
+   `worldWidth = clientWidth × distanceFactor / 400` (see the
+   occlusion-plane sizing in its source), so the factor that lands a
+   PANEL_W-wide element exactly on a DISPLAY_W-wide plane falls
+   straight out of the two constants. Tuning it by eye would drift
+   the moment either changed.
+   ──────────────────────────────────────────────────────────── */
+
+const PANEL_DISTANCE_FACTOR = (400 * DISPLAY_W) / PANEL_W;
+
+function LivePanel({
+  active,
+  portal,
+}: {
+  active: boolean;
+  portal: RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <Html
+      transform
+      /*
+        Portalled out of the canvas wrapper, which is aria-hidden — a form
+        inside it would be invisible to assistive tech. The target sits in the
+        same fixed layer at the same origin, so the projection still lands.
+      */
+      portal={portal as RefObject<HTMLElement>}
+      distanceFactor={PANEL_DISTANCE_FACTOR}
+      // A hair in front of the glass sheen, so the live panel replaces the
+      // painted texture rather than z-fighting with it.
+      position={[0, TABLET_H / 2, TABLET_T / 2 + 0.008]}
+      style={{ width: PANEL_W, height: PANEL_H }}
+    >
+      {/*
+        Kept mounted once reached so a half-typed message survives scrolling
+        away, but `inert` while the device is elsewhere — otherwise the page
+        would carry a focusable, screen-reader-visible form the whole way down.
+      */}
+      <div
+        inert={!active}
+        style={{
+          opacity: active ? 1 : 0,
+          // Slow enough to read as the page finishing loading on the display
+          // rather than as a panel being switched on.
+          transition: "opacity 420ms ease",
+          pointerEvents: active ? "auto" : "none",
+        }}
+      >
+        <DeviceContactPanel />
+      </div>
+    </Html>
   );
 }
 
@@ -419,10 +662,17 @@ function Keys() {
 
 function SurfacePro({
   reduced,
-  scrollProgress,
+  stage,
+  textureScale,
+  livePanel,
+  panelActive,
 }: {
   reduced: boolean;
-  scrollProgress: MotionValue<number>;
+  stage: RefObject<StageReadout>;
+  textureScale: number;
+  /** Portal target for the live contact panel; null once past its usefulness. */
+  livePanel: RefObject<HTMLDivElement | null> | null;
+  panelActive: boolean;
 }) {
   const rootRef = useRef<Group>(null);
   const tabletRef = useRef<Group>(null);
@@ -435,18 +685,26 @@ function SurfacePro({
     const tablet = tabletRef.current;
     const kick = kickRef.current;
     const cover = coverRef.current;
+    const readout = stage.current;
+
+    /*
+      Frames can be arbitrarily long after a hidden tab resumes or a slow
+      paint. Left uncapped, `damp` would resolve almost fully in one step and
+      the device would appear to teleport into its new pose.
+    */
+    const dt = Math.min(delta, 0.05);
 
     /* ── Intro: kickstand deploys, tablet leans back, cover drops open ── */
     const io = intro.current;
     if (!reduced) {
       io.elapsed += delta;
       const target = io.elapsed > 0.5 ? 0 : 1;
-      io.remaining = MathUtils.damp(io.remaining, target, 2.2, delta);
+      io.remaining = MathUtils.damp(io.remaining, target, 2.2, dt);
     }
     const deployed = 1 - io.remaining;
 
-    /* ── Scroll: the Type Cover releases and the tablet turns face-on ── */
-    const p = reduced ? 0 : scrollProgress.get();
+    /* ── Hero scroll: the Type Cover releases and the tablet turns face-on ── */
+    const p = readout.heroP;
     // Present, then depart. The windows overlap by 0.02 so the cover is already
     // moving away as it finishes tilting — no pause between the two beats.
     const present = MathUtils.smoothstep(p, PRESENT_IN, PRESENT_OUT);
@@ -454,29 +712,38 @@ function SurfacePro({
     const square = MathUtils.smoothstep(p, SQUARE_IN, SQUARE_OUT);
     const stow = MathUtils.smoothstep(p, STOW_IN, STOW_OUT);
 
-    if (tablet) {
-      tablet.rotation.x = MathUtils.lerp(
-        TABLET_UPRIGHT,
-        TABLET_LEAN,
-        deployed
-      );
-    }
+    const tabletLean = MathUtils.lerp(TABLET_UPRIGHT, TABLET_LEAN, deployed);
+    if (tablet) tablet.rotation.x = tabletLean;
 
     if (kick) {
       // Intro deploys the kickstand; scroll stows it again. One expression,
       // so the two never fight over the same rotation.
-      kick.rotation.x = MathUtils.lerp(
-        KICK_FOLDED,
-        KICK_DEPLOYED,
-        deployed * (1 - stow)
-      );
+      const out = deployed * (1 - stow);
+      kick.rotation.x = MathUtils.lerp(KICK_FOLDED, KICK_DEPLOYED, out);
+
+      /*
+        …and retracts into its recess as it folds.
+
+        The plate is 1.06 long on a hinge 0.9 up the back, which is what makes
+        the deployed foot land exactly on the desk — but it also means a folded
+        stand hangs 0.16 below the tablet's bottom edge. Behind a full-frame
+        hero device that never showed; at the station poses the device is small
+        enough that it reads as a grey slab parked underneath it.
+
+        Scaling the group's length rather than hiding it keeps the fix
+        continuous — the stand slides in and out of the chassis, which is what
+        the real one does — and leaves the derived angles alone.
+      */
+      kick.scale.y = MathUtils.lerp(0.001, 1, out);
     }
 
     if (cover) {
-      // Intro still swings it down from closed; present tilts it up to be read;
-      // depart carries it away.
+      // Intro swings it down from closed; present tilts it up to be read;
+      // depart carries it away. The closed angle is solved against the tablet's
+      // current lean rather than hard-coded, so the intro swing stays flat on
+      // the display while the tablet is still leaning back.
       cover.rotation.x =
-        MathUtils.lerp(COVER_FLAT, COVER_CLOSED, io.remaining) +
+        MathUtils.lerp(COVER_FLAT, coverClosedFor(tabletLean), io.remaining) +
         present * COVER_PRESENT_TIP +
         depart * COVER_DEPART_TIP;
       cover.rotation.z = depart * COVER_ROLL;
@@ -485,24 +752,74 @@ function SurfacePro({
         COVER_HINGE[1] + present * COVER_LIFT - depart * COVER_DROP,
         COVER_HINGE[2] + present * COVER_PRESENT_Z + depart * COVER_SLIDE
       );
+      /*
+        Once it has left, it has left. COVER_DROP was sized to clear the bottom
+        of frame in the hero shot, where the device fills the viewport; the
+        station poses push it back and shrink it, which widens the frame enough
+        that a merely off-screen cover is not reliably off-screen. Cheaper than
+        a bigger drop, and it takes the keys' instanced mesh with it.
+      */
+      cover.visible = depart < 1;
     }
 
     if (!root) return;
 
-    /* ── Pointer lean, easing out as the device settles square ── */
-    const settle = 1 - square * 0.7;
+    /* ── Station pose: where the device sits on this stretch of the page ── */
+    const pose = poseAt(readout.stationT);
+
+    /*
+      Pointer lean, easing out as the device settles square — and off entirely
+      by the contact station.
+
+      The lean is what makes the device feel alive while it is scenery. Once
+      the display is a form, it is the opposite: the pointer moving toward an
+      input tilts the panel, so the input moves away from the cursor. A target
+      that dodges is not a target. This fades the lean out over the last leg of
+      the journey rather than switching it off, so nothing snaps.
+    */
+    const steady = smootherstep(
+      MathUtils.clamp(readout.stationT - (LAST_STATION - 1), 0, 1)
+    );
+    const settle = (1 - square * 0.7) * (1 - steady);
     const { x, y } = frame.pointer;
     const pitch = reduced ? 0 : y * 0.07 * settle;
     const yaw = reduced ? 0 : x * 0.14 * settle;
 
-    root.rotation.x = MathUtils.damp(root.rotation.x, pitch, 3, delta);
+    /*
+      Scroll velocity banks the device. Treated as stale rather than waited on,
+      because the browser fires no final event when scrolling stops.
+    */
+    const fresh =
+      performance.now() - readout.velocityAt < VELOCITY_STALE_MS
+        ? readout.velocity
+        : 0;
+    const bank = MathUtils.clamp(fresh * BANK_GAIN, -BANK_MAX, BANK_MAX);
+
+    root.position.y = MathUtils.damp(root.position.y, pose.y, POSE_LAMBDA, dt);
+    root.position.z = MathUtils.damp(root.position.z, pose.z, POSE_LAMBDA, dt);
+
+    root.rotation.x = MathUtils.damp(
+      root.rotation.x,
+      pitch + pose.pitch,
+      TURN_LAMBDA,
+      dt
+    );
     root.rotation.y = MathUtils.damp(
       root.rotation.y,
-      BASE_YAW * (1 - square) + yaw,
-      3,
-      delta
+      BASE_YAW * (1 - square) + yaw + pose.yaw,
+      TURN_LAMBDA,
+      dt
     );
-    root.scale.setScalar(1 + square * (SCALE_END - 1));
+    root.rotation.z = MathUtils.damp(root.rotation.z, bank, BANK_LAMBDA, dt);
+
+    /*
+      Station scale multiplies the hero choreography's own growth rather than
+      replacing it, so the opening beat still ends at exactly SCALE_END.
+    */
+    const scale = (1 + square * (SCALE_END - 1)) * pose.scale;
+    root.scale.setScalar(
+      MathUtils.damp(root.scale.x, scale, BANK_LAMBDA, dt)
+    );
   });
 
   return (
@@ -537,7 +854,15 @@ function SurfacePro({
                 />
               </mesh>
 
-              <Display reduced={reduced} />
+              <Display
+                reduced={reduced}
+                stage={stage}
+                textureScale={textureScale}
+              />
+
+              {livePanel && (
+                <LivePanel active={panelActive} portal={livePanel} />
+              )}
 
               {/* Windows Hello camera cluster in the top bezel */}
               {[-0.09, 0, 0.09].map((dx, i) => (
@@ -722,41 +1047,92 @@ function StudioRig({ isDark }: { isDark: boolean }) {
    ──────────────────────────────────────────────────────────── */
 
 /*
-  Scroll progress is handed down from the hero section rather than measured
-  here. The canvas's own crossing of the viewport starts partway through at
-  page load — by a different amount on every viewport — so the device would
-  begin mid-animation. The hero's progress is reliably 0 with the page at rest.
+  Scroll comes from the stage's measurement loop rather than being measured
+  here. The canvas is fixed, so it has no viewport crossing of its own to read
+  — and even when it did, that crossing was already 29–37% complete at page
+  load, varying by viewport, which started the device mid-animation.
 */
-export function Hero3DScene({
-  scrollProgress,
+export function DeviceScene({
+  stage,
+  reduced,
+  lowPower,
+  /*
+    Grounding shadow, only while the device is still standing on the hero's
+    desk. Once it recedes there is no floor for it to fall on, and it is a
+    full extra render pass every frame — so it is unmounted for the ~90% of
+    the page where it means nothing.
+  */
+  grounded,
+  paused,
+  livePanel,
+  panelActive,
 }: {
-  scrollProgress: MotionValue<number>;
+  stage: RefObject<StageReadout>;
+  reduced: boolean;
+  lowPower: boolean;
+  grounded: boolean;
+  paused: boolean;
+  /**
+   * Where to portal the live contact panel. Null on touch and small screens,
+   * where the form renders as an ordinary section instead — a form on a
+   * perspective-transformed surface is not something a phone can use.
+   */
+  livePanel: RefObject<HTMLDivElement | null> | null;
+  panelActive: boolean;
 }) {
-  const reduced = useReducedMotion() ?? false;
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme !== "light";
+
+  /*
+    A phone renders the panel around 280px wide, so a half-size backing store
+    is already past what it can resolve — and it quarters the texture upload.
+  */
+  const textureScale = lowPower ? 0.5 : 1;
 
   return (
     <div className="h-full w-full" aria-hidden="true">
       <Canvas
         camera={{ fov: FOV, position: [0, 1.9, 5] }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        dpr={[1, lowPower ? 1.5 : 2]}
+        frameloop={paused ? "never" : "always"}
+        /*
+          The stage is pointer-events:none so the page underneath stays
+          clickable, which means this canvas never receives a pointermove of
+          its own. Reading events off the body keeps the pointer lean alive
+          through a layer that cannot be hit-tested.
+        */
+        eventSource={
+          typeof document === "undefined" ? undefined : document.body
+        }
+        eventPrefix="client"
+        gl={{
+          antialias: !lowPower,
+          alpha: true,
+          powerPreference: "high-performance",
+        }}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
           <FitCamera />
           <ambientLight intensity={isDark ? 0.3 : 0.6} />
           <StudioRig isDark={isDark} />
-          <SurfacePro reduced={reduced} scrollProgress={scrollProgress} />
-          <ContactShadows
-            position={[0, DESK_Y, 0]}
-            opacity={isDark ? 0.55 : 0.4}
-            scale={9}
-            blur={2.6}
-            far={2.4}
-            resolution={512}
+          <SurfacePro
+            reduced={reduced}
+            stage={stage}
+            textureScale={textureScale}
+            livePanel={livePanel}
+            panelActive={panelActive}
           />
+          {grounded && (
+            <ContactShadows
+              position={[0, DESK_Y, 0]}
+              opacity={isDark ? 0.55 : 0.4}
+              scale={9}
+              blur={2.6}
+              far={2.4}
+              resolution={lowPower ? 256 : 512}
+            />
+          )}
         </Suspense>
       </Canvas>
     </div>
