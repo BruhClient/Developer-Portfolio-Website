@@ -103,7 +103,7 @@ export function ContactForm({
       setName("");
       setEmail("");
       setMessage("");
-      toast.success("Message sent — I'll get back to you soon.");
+      toast.success("Message sent. I'll get back to you soon.");
     } catch (error) {
       console.error("Contact form submission failed:", error);
       toast.error("Failed to send message. Please try again or email me directly.");

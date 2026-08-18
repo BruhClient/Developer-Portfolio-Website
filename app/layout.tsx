@@ -31,7 +31,7 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Travis Ang — Data Science & AI",
+    default: "Travis Ang · Data Science & AI",
     template: "%s · Travis Ang",
   },
   description:
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Travis Ang" }],
   openGraph: {
-    title: "Travis Ang — Data Science & AI",
+    title: "Travis Ang · Data Science & AI",
     description:
       "Building agentic AI systems, full-stack products, and data tooling.",
     type: "website",

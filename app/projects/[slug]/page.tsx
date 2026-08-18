@@ -7,6 +7,14 @@ export function generateStaticParams() {
   return PROJECTS.map((project) => ({ slug: project.slug }));
 }
 
+/*
+  Every project is known at build time, so an unlisted slug is a dead URL and
+  should say so with a real 404. Left on, Next renders those on demand and the
+  `notFound()` below streams after the headers, answering 200 — a soft 404 that
+  search engines keep indexing long after an entry is removed.
+*/
+export const dynamicParams = false;
+
 export const revalidate = 3600;
 
 export async function generateMetadata({

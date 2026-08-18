@@ -39,7 +39,7 @@ export function drawContact(ctx: CanvasRenderingContext2D) {
   /* ── Section kicker, matching the site's numbered headings ── */
   ctx.font = `12px ${MONO_FONT}`;
   ctx.fillStyle = SITE.primary;
-  ctx.fillText("06 — CONTACT", PAD_X, y);
+  ctx.fillText("06 / CONTACT", PAD_X, y);
 
   /* ── Lead ── */
   y += 62;

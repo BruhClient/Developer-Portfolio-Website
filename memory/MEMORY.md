@@ -13,7 +13,12 @@ Next.js 16 App Router portfolio site with Tailwind CSS 4, ShadCN UI, TypeScript.
 ## Adding New Content
 To add a new project: append an entry to `PROJECTS` array in `constants/pages/projects.ts`
 To add a new hackathon: append an entry to `HACKATHONS` array in `constants/pages/hackathons.ts`
-No new files needed — the dynamic template handles rendering automatically.
+No new files needed. The dynamic template handles rendering automatically.
+
+Card covers: `cardImageOf()` in `constants/pages/types.ts` is the single source of
+truth, read by both card grids and `lib/project-screen.ts`. It returns the
+optional `cardImage` if set, else the **last** entry in `images`. Set `cardImage`
+when the last shot is small or unflattering at 16:10.
 
 ## Key Shared Components
 - `ProjectHeader` — name, collaborators, techs + back button (client component)

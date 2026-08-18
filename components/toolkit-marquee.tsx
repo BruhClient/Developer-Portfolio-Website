@@ -13,22 +13,20 @@ const ROW_ONE = [
   "Python",
   "TypeScript",
   "PyTorch",
-  "LangGraph",
-  "Next.js",
-  "React",
   "Pandas",
-  "scikit-learn",
+  "SQL",
+  "Supabase",
+  "Databricks",
 ];
 
 const ROW_TWO = [
-  "PostgreSQL",
+  "Claude Code",
+  "OpenClaw",
+  "MCP",
+  "Hermes",
+  "n8n",
   "Docker",
-  "FastAPI",
-  "ChromaDB",
-  "Tailwind CSS",
-  "Three.js",
-  "Git",
-  "Vercel",
+  "Google Cloud",
 ];
 
 function Row({
@@ -42,8 +40,9 @@ function Row({
   reduced: boolean;
   scrollShift: ReturnType<typeof useSpring>;
 }) {
-  // Duplicated so the -50% keyframe lands exactly on a seam.
-  const doubled = [...items, ...items];
+  // Repeated an even number of times so the -50% keyframe lands exactly on a
+  // seam, and often enough that a short row still fills a wide viewport.
+  const track = [...items, ...items, ...items, ...items];
 
   const content = (
     <div
@@ -54,7 +53,7 @@ function Row({
         reduced || !reversed ? undefined : { animationDirection: "reverse" }
       }
     >
-      {(reduced ? items : doubled).map((item, i) => (
+      {(reduced ? items : track).map((item, i) => (
         <span
           key={`${item}-${i}`}
           className="shrink-0 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium whitespace-nowrap"
@@ -105,7 +104,12 @@ const ToolkitMarquee = () => {
 
       <div className="space-y-3">
         <Row items={ROW_ONE} reduced={reduced} scrollShift={shiftLeft} />
-        <Row items={ROW_TWO} reversed reduced={reduced} scrollShift={shiftRight} />
+        <Row
+          items={ROW_TWO}
+          reversed
+          reduced={reduced}
+          scrollShift={shiftRight}
+        />
       </div>
 
       {/* Edge fades so items enter and leave instead of being clipped */}

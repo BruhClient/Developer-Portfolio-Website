@@ -59,7 +59,7 @@ export function DeviceContactPanel() {
       <div className="flex min-h-0 flex-1 gap-10 px-12 py-8">
         {/* ── Invitation + direct channels ── */}
         <div className="flex w-[42%] shrink-0 flex-col">
-          <p className="label-mono text-primary">06 — CONTACT</p>
+          <p className="label-mono text-primary">06 / CONTACT</p>
 
           <h2 className="font-heading mt-4 text-3xl leading-tight font-semibold tracking-tight">
             Let&apos;s build something together.

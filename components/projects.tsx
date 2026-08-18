@@ -3,6 +3,7 @@
 import SectionTitle from "./section-title";
 import ProjectCard from "./project_card";
 import { PROJECTS } from "@/constants/pages/projects";
+import { cardImageOf } from "@/constants/pages/types";
 import { Stagger, StaggerItem } from "./reveal";
 import { Parallax } from "./parallax";
 
@@ -26,7 +27,9 @@ const Projects = () => {
                 project_slug={project.slug}
                 technologies_used={project.cardTechs ?? project.techs}
                 date={project.date}
-                image={project.images[0]?.src}
+                image={cardImageOf(project)}
+                kicker={project.cardKicker}
+                award={project.award}
               />
             </Parallax>
           </StaggerItem>

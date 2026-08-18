@@ -3,6 +3,7 @@
 import SectionTitle from "./section-title";
 import ProjectCard from "./project_card";
 import { HACKATHONS } from "@/constants/pages/hackathons";
+import { cardImageOf } from "@/constants/pages/types";
 import { Stagger, StaggerItem } from "./reveal";
 import { Parallax } from "./parallax";
 
@@ -26,7 +27,9 @@ const Hackathons = () => {
                 technologies_used={hackathon.cardTechs ?? hackathon.techs}
                 date={hackathon.date}
                 basePath="hackathons"
-                image={hackathon.images[0]?.src}
+                image={cardImageOf(hackathon)}
+                kicker={hackathon.cardKicker}
+                award={hackathon.award}
               />
             </Parallax>
           </StaggerItem>

@@ -7,6 +7,9 @@ export function generateStaticParams() {
   return HACKATHONS.map((hackathon) => ({ slug: hackathon.slug }));
 }
 
+/* Same reasoning as the projects template — an unlisted slug is a hard 404. */
+export const dynamicParams = false;
+
 export const revalidate = 3600;
 
 export async function generateMetadata({

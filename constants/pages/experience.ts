@@ -2,12 +2,12 @@ export interface ExperienceEntry {
   id: string;
   role: string;
   organisation: string;
-  /** e.g. "Jan 2023 — Nov 2024" */
+  /** e.g. "Jan 2023 to Nov 2024" */
   period: string;
   /** e.g. "Part-time", "National Service" */
   type?: string;
   location?: string;
-  /** Bullets under the role — the block is skipped when empty. */
+  /** Bullets under the role. The block is skipped when empty. */
   highlights?: string[];
   /** Optional link out, e.g. to work built during the role. */
   link?: { label: string; href: string };
@@ -23,13 +23,13 @@ export interface CertificateEntry {
   credentialUrl?: string;
 }
 
-/* Newest first — the timeline renders in array order. */
+/* Newest first, since the timeline renders in array order. */
 export const EXPERIENCE: ExperienceEntry[] = [
   {
     id: "lalagreen",
     role: "AI and Automation Specialist",
     organisation: "LaLaGreen",
-    period: "May 2026 — Aug 2026",
+    period: "May 2026 to Aug 2026",
     type: "Internship",
     location: "Singapore · Hybrid",
     highlights: [
@@ -45,7 +45,7 @@ export const EXPERIENCE: ExperienceEntry[] = [
     id: "mindflex-tuition-academy",
     role: "Tuition Teacher",
     organisation: "MindFlex Tuition Academy",
-    period: "Jan 2025 — Jul 2025",
+    period: "Jan 2025 to Jul 2025",
     type: "Part-time",
     location: "Singapore",
     highlights: [],
@@ -54,7 +54,7 @@ export const EXPERIENCE: ExperienceEntry[] = [
     id: "singapore-armed-forces",
     role: "Platoon Sergeant",
     organisation: "Singapore Armed Forces",
-    period: "Jan 2023 — Nov 2024",
+    period: "Jan 2023 to Nov 2024",
     type: "National Service",
     location: "Singapore",
     highlights: [

@@ -11,7 +11,7 @@ const DISCIPLINES = [
   "Agentic AI",
   "Full-Stack Engineering",
   "Data Analysis",
-  "Mobile Development",
+  "Automation & Deployment",
 ];
 
 const AboutMe = () => {
@@ -22,7 +22,7 @@ const AboutMe = () => {
       {/* Lead statement — the one thing to read if you read nothing else */}
       <MaskText
         as="p"
-        text="I love turning concepts into systems people can actually use."
+        text="Every system I build starts with the problem and the people who have it."
         className="font-heading measure text-2xl leading-tight font-medium tracking-tight sm:text-3xl lg:text-4xl"
         stagger={0.03}
       />
@@ -49,16 +49,16 @@ const AboutMe = () => {
           <Reveal direction="up">
             <p className="label-mono mb-4 text-primary">Background</p>
             <p className="measure text-base leading-relaxed text-muted-foreground">
-              I&apos;m a Year 1 undergraduate at Nanyang Technological
-              University reading Data Science and Artificial Intelligence, and
-              I&apos;m actively looking for an internship or mentorship where I
-              can grow as an engineer.
+              Second year at Nanyang Technological University reading Data
+              Science and Artificial Intelligence, looking for my next
+              internship. So far I have built automation systems at LaLaGreen,
+              shipped a desktop Git client with installers, and reached the
+              finals of BrainHack Code EXP 2026.
             </p>
             <p className="measure mt-4 text-base leading-relaxed text-muted-foreground">
-              What draws me in is how production systems actually get built and
-              deployed — the gap between a notebook that works and a service
-              people depend on. I use AI tooling heavily to move faster, and I
-              care about writing code that someone else can pick up later.
+              I&apos;m interested in AI applied to real operational problems.
+              Claude Code and MCP are part of my daily workflow, and I look for
+              repetitive work worth automating.
             </p>
           </Reveal>
 
@@ -86,13 +86,13 @@ const AboutMe = () => {
           <blockquote>
             <MaskText
               as="p"
-              text="Passion turns effort into purpose."
+              text="Automation only counts when someone depends on it."
               className="font-heading text-2xl leading-tight font-medium tracking-tight sm:text-4xl"
               stagger={0.05}
             />
           </blockquote>
           <figcaption className="label-mono mt-5 text-muted-foreground">
-            How I pick what to build
+            How I judge what I build
           </figcaption>
         </figure>
       </Reveal>
@@ -101,17 +101,17 @@ const AboutMe = () => {
       <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className="order-2 lg:order-1">
           <Reveal direction="up">
-            <p className="label-mono mb-4 text-primary">Motivation</p>
+            <p className="label-mono mb-4 text-primary">How I work</p>
             <p className="measure text-base leading-relaxed text-muted-foreground">
-              I&apos;m interested in how data and AI can make systems smarter
-              and more efficient — experimenting with models, working with real
-              data, and building applications that scale past a demo.
+              Before building, I want to know who it is for and what they
+              actually need. That habit came from leading a platoon of twenty
+              and from pitching automation to stakeholders who do not work in
+              English.
             </p>
             <p className="measure mt-4 text-base leading-relaxed text-muted-foreground">
-              I value clean, maintainable code and practical tools over clever
-              ones. Most of what I&apos;ve learned has come from building
-              alongside other people, so I look for work where that&apos;s the
-              default.
+              I present my work carefully, whether that is pitching to a
+              business owner or a case competition panel. Good work nobody
+              understands does not go anywhere.
             </p>
           </Reveal>
         </div>

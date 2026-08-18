@@ -66,6 +66,16 @@ const Experience = () => {
             {entry.link && (
               <Link
                 href={entry.link.href}
+                // Some entries point off-site, so those open in a new tab
+                // rather than dropping the reader out of the timeline.
+                target={
+                  entry.link.href.startsWith("http") ? "_blank" : undefined
+                }
+                rel={
+                  entry.link.href.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
                 className="group mt-5 inline-flex cursor-pointer items-center gap-1.5 rounded-md text-sm font-medium text-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
               >
                 {entry.link.label}

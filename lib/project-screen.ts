@@ -12,6 +12,7 @@
  */
 
 import { PROJECTS } from "@/constants/pages/projects";
+import { cardImageOf } from "@/constants/pages/types";
 import {
   SCREEN_W,
   SCREEN_H,
@@ -35,14 +36,14 @@ const COL_L_W = 372;
 const COL_R_X = PAD_X + COL_L_W + 42;
 const COL_R_W = SCREEN_W - COL_R_X - PAD_X;
 
-/** Cycle order. `images[0]` is the cover shot on every entry. */
+/** Cycle order. The cover comes from `cardImageOf`, same as the real cards. */
 const SLIDES = PROJECTS.map((project, i) => ({
   slug: project.slug,
   title: project.cardTitle,
   date: project.date,
   techs: project.cardTechs ?? project.techs,
   overview: project.overview,
-  image: project.images[0]?.src ?? null,
+  image: cardImageOf(project) ?? null,
   index: i,
 }));
 

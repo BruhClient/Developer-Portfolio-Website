@@ -92,7 +92,7 @@ const PINNED = [
   {
     name: "portfolio-website",
     short: "portfolio-website",
-    desc: "This site — Next.js, React Three Fiber and Tailwind CSS.",
+    desc: "This site, built with Next.js, React Three Fiber and Tailwind CSS.",
     lang: "TypeScript",
     color: "#3178C6",
   },
