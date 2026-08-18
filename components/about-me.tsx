@@ -28,15 +28,20 @@ const AboutMe = () => {
       />
 
       {/* ── Row one: portrait left, copy right ── */}
-      <div className="mt-20 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+      <div className="mt-20 grid items-center gap-10 md:grid-cols-2 lg:gap-16">
         <Parallax speed={-70}>
-          <div className="relative aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 lg:aspect-4/5">
+          {/*
+            The 4:5 portrait derives its height from the column width, so on a short
+            laptop screen it resolves to ~640px and swallows the fold. Cap it against
+            the viewport instead: tall displays keep the full ratio, short ones crop.
+          */}
+          <div className="relative w-full aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 md:aspect-4/5 md:max-h-[64svh]">
             <ScrollScale className="h-full w-full">
               <Image
                 src={SITE_IMAGES.portrait.src}
                 alt={SITE_IMAGES.portrait.alt}
                 fill
-                sizes="(max-width: 1024px) 100vw, 45vw"
+                sizes="(max-width: 768px) 100vw, 45vw"
                 className="object-cover"
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
@@ -97,9 +102,9 @@ const AboutMe = () => {
         </figure>
       </Reveal>
 
-      {/* ── Row two: copy left, photo right ── */}
-      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="order-2 lg:order-1">
+      {/* ── Row two: row one mirrored — copy left, photo right ── */}
+      <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">
+        <div className="order-2 md:order-1">
           <Reveal direction="up">
             <p className="label-mono mb-4 text-primary">How I work</p>
             <p className="measure text-base leading-relaxed text-muted-foreground">
@@ -116,15 +121,20 @@ const AboutMe = () => {
           </Reveal>
         </div>
 
-        <Parallax speed={70} className="order-1 lg:order-2">
-          <div className="relative aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 lg:aspect-4/5">
+        <Parallax speed={70} className="order-1 md:order-2">
+          {/*
+            Same frame as row one so the two read as a pair. This photo is 3:2
+            landscape though, and a centred 4:5 crop lands on empty whiteboard —
+            so the focal point is pushed right, onto the subject.
+          */}
+          <div className="relative w-full aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 md:aspect-4/5 md:max-h-[64svh]">
             <ScrollScale className="h-full w-full">
               <Image
                 src={SITE_IMAGES.maritime.src}
                 alt={SITE_IMAGES.maritime.alt}
                 fill
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover object-[80%_50%]"
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
               />

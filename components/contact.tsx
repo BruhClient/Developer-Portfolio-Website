@@ -54,7 +54,7 @@ const Contact = () => {
           {/* Anchoring lives on the section, so this one only needs a slug. */}
           <SectionTitle title="Get in touch" index="06" kicker="Contact" />
 
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             {/* ── Invitation + direct links ── */}
             <div>
               <MaskText

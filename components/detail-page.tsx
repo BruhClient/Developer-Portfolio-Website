@@ -152,7 +152,7 @@ export default function DetailPage({
       )}
 
       {/* ── Impact + contributions ── */}
-      <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="mt-20 grid gap-12 md:grid-cols-2 lg:gap-16">
         <Reveal direction="up">
           <h2 className="label-mono mb-6 text-primary">Stakeholder impact</h2>
           <ul className="space-y-4">

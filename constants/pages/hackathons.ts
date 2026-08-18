@@ -61,7 +61,8 @@ export const HACKATHONS: PageData[] = [
       },
     ],
     // Last image is a 208px metrics table, far too small to stretch to a card.
-    cardImage: "/hackathons/naisc-2026-singtel-churn/psi-per-feature.png",
+    // The severity table is the only shot near 16:10, so it survives the crop.
+    cardImage: "/hackathons/naisc-2026-singtel-churn/psi-severity-table.png",
     impacts: [
       "Tested every feature for drift with KS, PSI, Wasserstein, Chi-square, CBDT, MMD and Fisher z-tests, with Benjamini-Hochberg correction across hundreds of tests.",
       "Reweighted the training samples using seven combined strategies to correct for covariate and concept drift.",
@@ -163,31 +164,36 @@ export const HACKATHONS: PageData[] = [
         href: "https://github.com/BruhClient/BunkerNex",
         icon: "github",
       },
+      {
+        label: "Live site",
+        href: "https://bunker-nex.vercel.app/",
+        icon: "globe",
+      },
+      {
+        label: "Report",
+        href: "/hackathons/maritime-one-case-summit-2026/bunkernex-report.pdf",
+        icon: "presentation",
+        download: true,
+      },
     ],
     overview:
       "We took on Pacific International Lines' bunkering case and built BunkerNex, a map of PIL's container services with a simulated 62-vessel fleet, fuel prices and a bunkering optimiser layered on top. You can scrub through three months of voyages, watch tanks run down, and get back the three cheapest ways to fuel the rest of the route.",
     images: [
       {
-        src: "/hackathons/maritime-one-case-summit-2026/explorer-map.png",
-        alt: "explorer-map",
+        src: "/hackathons/maritime-one-case-summit-2026/map.png",
+        alt: "map",
       },
       {
-        src: "/hackathons/maritime-one-case-summit-2026/vessel-panel.png",
-        alt: "vessel-panel",
+        src: "/hackathons/maritime-one-case-summit-2026/route-optimisation.png",
+        alt: "route-optimisation",
       },
       {
-        src: "/hackathons/maritime-one-case-summit-2026/supplier-hq.png",
-        alt: "supplier-hq",
-      },
-      {
-        src: "/hackathons/maritime-one-case-summit-2026/route-plan-combinations.png",
-        alt: "route-plan-combinations",
-      },
-      {
-        src: "/hackathons/maritime-one-case-summit-2026/price-forecast.png",
-        alt: "price-forecast",
+        src: "/hackathons/maritime-one-case-summit-2026/supplier-analysis.png",
+        alt: "supplier-analysis",
       },
     ],
+    // Last image is a dense chart panel; the fleet map is the readable cover.
+    cardImage: "/hackathons/maritime-one-case-summit-2026/map.png",
     impacts: [
       "Pulled a fuel buying decision out of spreadsheets and broker emails into three screens: a fleet map, a supplier desk and a route optimiser.",
       "Ranked the three best bunkering combinations over the next five port calls, with a cost comparison and a plain explanation of why the winner wins.",
@@ -241,26 +247,28 @@ export const HACKATHONS: PageData[] = [
       "Fall In takes the admin out of running a unit. Commanders set up groups, build events with timelines and packing lists, and everyone gets told what they need on Telegram instead of in a mass text half the company scrolls past. We reached the finalist stage at BrainHack CODE_EXP 2026. I built the notification pipeline and the AI assistant that does the setting up for you.",
     images: [
       {
-        src: "/hackathons/brainhack-code-exp-2026/dashboard.png",
-        alt: "dashboard",
+        src: "/hackathons/brainhack-code-exp-2026/infographic.png",
+        alt: "infographic",
       },
       {
-        src: "/hackathons/brainhack-code-exp-2026/groups.png",
-        alt: "groups",
+        src: "/hackathons/brainhack-code-exp-2026/logo.png",
+        alt: "logo",
       },
       {
-        src: "/hackathons/brainhack-code-exp-2026/event-timeline.png",
-        alt: "event-timeline",
+        src: "/hackathons/brainhack-code-exp-2026/showcase.jpg",
+        alt: "showcase",
       },
       {
-        src: "/hackathons/brainhack-code-exp-2026/ai-assistant.png",
-        alt: "ai-assistant",
+        src: "/hackathons/brainhack-code-exp-2026/final-showcase.jpg",
+        alt: "final-showcase",
       },
       {
-        src: "/hackathons/brainhack-code-exp-2026/telegram-notification.png",
-        alt: "telegram-notification",
+        src: "/hackathons/brainhack-code-exp-2026/podium.jpg",
+        alt: "podium",
       },
     ],
+    // The infographic fronts the card rather than the team photo.
+    cardImage: "/hackathons/brainhack-code-exp-2026/infographic.png",
     impacts: [
       "Reached the finalist stage at BrainHack CODE_EXP 2026.",
       "Put unit admin in one place: groups, events, timelines, packing lists and announcements, with roles deciding who can change what.",
