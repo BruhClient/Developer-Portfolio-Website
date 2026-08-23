@@ -2,6 +2,64 @@ import { PageData } from "./types";
 
 export const PROJECTS: PageData[] = [
   {
+    slug: "git-dummy",
+    title: "Git Dummy",
+    cardTitle: "Git Dummy",
+    date: "2026",
+    collaborators: [],
+    techs: [
+      "Python",
+      "PyQt5",
+      "GitPython",
+      "GitHub REST API",
+      "PyInstaller",
+      "NSIS",
+      "pytest",
+      "GitHub Actions",
+    ],
+    cardTechs: ["Python", "PyQt5", "GitPython"],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/BruhClient/Git-Dummy",
+        icon: "github",
+      },
+      {
+        label: "Download",
+        href: "https://github.com/BruhClient/Git-Dummy/releases/latest",
+        icon: "globe",
+      },
+    ],
+    overview:
+      "A desktop git client for people who don't know git. It draws the repo as a map instead of a log: every commit is a node, every branch is a lane, and the commands you'd have to memorise are buttons in plain English.",
+    images: [
+      { src: "/projects/git-dummy/commit-graph.png", alt: "commit-graph" },
+      {
+        src: "/projects/git-dummy/branch-management.png",
+        alt: "branch-management",
+      },
+      { src: "/projects/git-dummy/diff-viewer.png", alt: "diff-viewer" },
+      { src: "/projects/git-dummy/pull-requests.png", alt: "pull-requests" },
+    ],
+    // The graph is the whole idea of the app, so it fronts the card rather than
+    // the PR inbox that happens to sit last in the gallery.
+    cardImage: "/projects/git-dummy/commit-graph.png",
+    impacts: [
+      "Shipped eight releases as a Windows installer, with in-app updates checked against the release checksums.",
+      "Guards every destructive action. Reverting, force pushing and dropping uncommitted work all say what they'd destroy first.",
+      "Tested against real throwaway repos instead of mocks, which caught line ending, push rejection and ref resolution bugs.",
+    ],
+    whatIDid: [
+      "Wrote the lane algorithm that lays out the commit graph, diverged local and remote branches included.",
+      "Built the PyQt5 UI: pannable canvas with a minimap, diff viewer, and a pull request inbox you can review and merge from.",
+      "Put conflict resolution in the app, keep mine or keep theirs per hunk, so nobody hand edits conflict markers.",
+      "Kept all git work off the GUI thread, with a test that asserts zero main thread subprocess calls.",
+      "Set up the release pipeline with PyInstaller, NSIS and GitHub Actions.",
+    ],
+    reflection:
+      "The hard part wasn't the interface, it was making the app admit what a button is about to destroy. I also stopped trusting my own mocks. I'd written both the fake GitHub responses and the assertions about them, so they stayed green while being wrong together. Real repos and real payloads found bugs the same afternoon.",
+  },
+  {
     slug: "millitary-stores-telegram-bot",
     title: "Military Stores Telegram Bot",
     cardTitle: "Military Stores Telegram Bot",
