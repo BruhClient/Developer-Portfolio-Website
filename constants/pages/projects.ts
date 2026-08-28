@@ -25,33 +25,37 @@ export const PROJECTS: PageData[] = [
         icon: "github",
       },
       {
+        label: "Website",
+        href: "https://git-dummy-website.vercel.app/",
+        icon: "globe",
+      },
+      {
         label: "Download",
         href: "https://github.com/BruhClient/Git-Dummy/releases/latest",
-        icon: "globe",
+        icon: "download",
       },
     ],
     overview:
       "A desktop git client for people who don't know git. It draws the repo as a map instead of a log: every commit is a node, every branch is a lane, and the commands you'd have to memorise are buttons in plain English.",
     images: [
       { src: "/projects/git-dummy/commit-graph.png", alt: "commit-graph" },
-      {
-        src: "/projects/git-dummy/branch-management.png",
-        alt: "branch-management",
-      },
-      { src: "/projects/git-dummy/diff-viewer.png", alt: "diff-viewer" },
-      { src: "/projects/git-dummy/pull-requests.png", alt: "pull-requests" },
+      { src: "/projects/git-dummy/track-a-project.png", alt: "track-a-project" },
+      { src: "/projects/git-dummy/sign-in.png", alt: "sign-in" },
     ],
-    // The graph is the whole idea of the app, so it fronts the card rather than
-    // the PR inbox that happens to sit last in the gallery.
-    cardImage: "/projects/git-dummy/commit-graph.png",
+    // The app mark fronts the card, so it isn't repeated in the gallery below.
+    // Card covers are cropped to 16:10 and `logo.png` is square, which shaved
+    // the head and the base, so `logo-card.png` is that mark padded to 16:10.
+    // Transparent on purpose, so it picks up the card surface in either theme.
+    cardImage: "/projects/git-dummy/logo-card.png",
     impacts: [
-      "Shipped eight releases as a Windows installer, with in-app updates checked against the release checksums.",
+      "Shipped twelve releases as a Windows installer, with in-app updates checked against the release checksums.",
       "Guards every destructive action. Reverting, force pushing and dropping uncommitted work all say what they'd destroy first.",
       "Tested against real throwaway repos instead of mocks, which caught line ending, push rejection and ref resolution bugs.",
     ],
     whatIDid: [
       "Wrote the lane algorithm that lays out the commit graph, diverged local and remote branches included.",
       "Built the PyQt5 UI: pannable canvas with a minimap, diff viewer, and a pull request inbox you can review and merge from.",
+      "Wrote a guided tour that runs on a sandbox repo, so first timers can practise without touching their own files.",
       "Put conflict resolution in the app, keep mine or keep theirs per hunk, so nobody hand edits conflict markers.",
       "Kept all git work off the GUI thread, with a test that asserts zero main thread subprocess calls.",
       "Set up the release pipeline with PyInstaller, NSIS and GitHub Actions.",

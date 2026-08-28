@@ -3,7 +3,7 @@ export interface PageImage {
   alt: string;
 }
 
-export type LinkIcon = "github" | "presentation" | "globe";
+export type LinkIcon = "github" | "presentation" | "globe" | "download";
 
 export interface PageLink {
   label: string;

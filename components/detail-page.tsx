@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Check,
+  Download,
   Github,
   Globe,
   Presentation,
@@ -18,6 +19,7 @@ const ICON_MAP: Record<LinkIcon, ComponentType<SVGProps<SVGSVGElement>>> = {
   github: Github,
   presentation: Presentation,
   globe: Globe,
+  download: Download,
 };
 
 interface DetailPageProps {
