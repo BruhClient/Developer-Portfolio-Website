@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import SectionTitle from "./section-title";
-import { MaskText, Reveal } from "./reveal";
-import { Parallax, ScrollScale } from "./parallax";
+import { Reveal } from "./reveal";
 import { BLUR_DATA_URL, SITE_IMAGES } from "@/constants/media";
 
 const DISCIPLINES = [
@@ -20,35 +19,33 @@ const AboutMe = () => {
       <SectionTitle title="About" id="about" index="01" kicker="Who I am" />
 
       {/* Lead statement — the one thing to read if you read nothing else */}
-      <MaskText
-        as="p"
-        text="Every system I build starts with the problem and the people who have it."
-        className="font-heading measure text-2xl leading-tight font-medium tracking-tight sm:text-3xl lg:text-4xl"
-        stagger={0.03}
-      />
+      <Reveal>
+        <p className="font-heading measure text-2xl leading-tight font-medium tracking-tight sm:text-3xl lg:text-4xl">
+          Every system I build starts with the problem and the people who have
+          it.
+        </p>
+      </Reveal>
 
       {/* ── Row one: portrait left, copy right ── */}
       <div className="mt-20 grid items-center gap-10 md:grid-cols-2 lg:gap-16">
-        <Parallax speed={-70}>
+        <Reveal>
           {/*
             The 4:5 portrait derives its height from the column width, so on a short
             laptop screen it resolves to ~640px and swallows the fold. Cap it against
             the viewport instead: tall displays keep the full ratio, short ones crop.
           */}
           <div className="relative w-full aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 md:aspect-4/5 md:max-h-[64svh]">
-            <ScrollScale className="h-full w-full">
-              <Image
-                src={SITE_IMAGES.portrait.src}
-                alt={SITE_IMAGES.portrait.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 45vw"
-                className="object-cover"
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-              />
-            </ScrollScale>
+            <Image
+              src={SITE_IMAGES.portrait.src}
+              alt={SITE_IMAGES.portrait.alt}
+              fill
+              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover"
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+            />
           </div>
-        </Parallax>
+        </Reveal>
 
         <div>
           <Reveal direction="up">
@@ -89,12 +86,9 @@ const AboutMe = () => {
       <Reveal direction="up" className="my-24 lg:my-32">
         <figure className="border-l-2 border-primary pl-6 sm:pl-10">
           <blockquote>
-            <MaskText
-              as="p"
-              text="Automation only counts when someone depends on it."
-              className="font-heading text-2xl leading-tight font-medium tracking-tight sm:text-4xl"
-              stagger={0.05}
-            />
+            <p className="font-heading text-2xl leading-tight font-medium tracking-tight sm:text-4xl">
+              Automation only counts when someone depends on it.
+            </p>
           </blockquote>
           <figcaption className="label-mono mt-5 text-muted-foreground">
             How I judge what I build
@@ -121,26 +115,24 @@ const AboutMe = () => {
           </Reveal>
         </div>
 
-        <Parallax speed={70} className="order-1 md:order-2">
+        <Reveal className="order-1 md:order-2">
           {/*
             Same frame as row one so the two read as a pair. This photo is 3:2
             landscape though, and a centred 4:5 crop lands on empty whiteboard —
             so the focal point is pushed right, onto the subject.
           */}
           <div className="relative w-full aspect-4/5 overflow-hidden rounded-xl border border-border sm:aspect-3/2 md:aspect-4/5 md:max-h-[64svh]">
-            <ScrollScale className="h-full w-full">
-              <Image
-                src={SITE_IMAGES.maritime.src}
-                alt={SITE_IMAGES.maritime.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 45vw"
-                className="object-cover object-[80%_50%]"
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-              />
-            </ScrollScale>
+            <Image
+              src={SITE_IMAGES.maritime.src}
+              alt={SITE_IMAGES.maritime.alt}
+              fill
+              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover object-[80%_50%]"
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+            />
           </div>
-        </Parallax>
+        </Reveal>
       </div>
     </section>
   );

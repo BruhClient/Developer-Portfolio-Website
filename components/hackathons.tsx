@@ -5,7 +5,6 @@ import ProjectCard from "./project_card";
 import { HACKATHONS } from "@/constants/pages/hackathons";
 import { cardImageOf } from "@/constants/pages/types";
 import { Stagger, StaggerItem } from "./reveal";
-import { Parallax } from "./parallax";
 
 const Hackathons = () => {
   return (
@@ -18,20 +17,18 @@ const Hackathons = () => {
       />
 
       <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
-        {HACKATHONS.map((hackathon, i) => (
-          <StaggerItem key={hackathon.slug}>
-            <Parallax speed={i % 2 === 1 ? -48 : 0} className="h-full">
-              <ProjectCard
-                project_title={hackathon.cardTitle}
-                project_slug={hackathon.slug}
-                technologies_used={hackathon.cardTechs ?? hackathon.techs}
-                date={hackathon.date}
-                basePath="hackathons"
-                image={cardImageOf(hackathon)}
-                kicker={hackathon.cardKicker}
-                award={hackathon.award}
-              />
-            </Parallax>
+        {HACKATHONS.map((hackathon) => (
+          <StaggerItem key={hackathon.slug} className="h-full">
+            <ProjectCard
+              project_title={hackathon.cardTitle}
+              project_slug={hackathon.slug}
+              technologies_used={hackathon.cardTechs ?? hackathon.techs}
+              date={hackathon.date}
+              basePath="hackathons"
+              image={cardImageOf(hackathon)}
+              kicker={hackathon.cardKicker}
+              award={hackathon.award}
+            />
           </StaggerItem>
         ))}
       </Stagger>

@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
-import { MaskText } from "./reveal";
 
 interface SectionTitleProps {
   title: string;
@@ -47,12 +46,17 @@ const SectionTitle = ({ title, id, kicker, index }: SectionTitleProps) => {
             </motion.p>
           )}
 
-          <MaskText
-            as="h2"
-            text={title}
+          {/* Rides the same `inView` as the index and the rule beside it */}
+          <motion.h2
             className="text-3xl font-semibold tracking-tight sm:text-4xl"
-            stagger={0.05}
-          />
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
+            animate={
+              inView && !shouldReduceMotion ? { opacity: 1, y: 0 } : undefined
+            }
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {title}
+          </motion.h2>
         </div>
       </div>
 

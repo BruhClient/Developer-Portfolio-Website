@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion, AnimatePresence } from "motion/react";
 import { Menu, X } from "lucide-react";
-import { ModeToggle } from "./mode-toggle";
 
 const NAV_TABS = [
   { label: "About", id: "about" },
@@ -120,7 +119,6 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-1">
-          <ModeToggle />
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}

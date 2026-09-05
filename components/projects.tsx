@@ -5,7 +5,6 @@ import ProjectCard from "./project_card";
 import { PROJECTS } from "@/constants/pages/projects";
 import { cardImageOf } from "@/constants/pages/types";
 import { Stagger, StaggerItem } from "./reveal";
-import { Parallax } from "./parallax";
 
 const Projects = () => {
   return (
@@ -18,20 +17,17 @@ const Projects = () => {
       />
 
       <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
-        {PROJECTS.map((project, i) => (
-          <StaggerItem key={project.slug}>
-            {/* Odd cards drift against the scroll so the grid never reads as a static table */}
-            <Parallax speed={i % 2 === 1 ? -48 : 0} className="h-full">
-              <ProjectCard
-                project_title={project.cardTitle}
-                project_slug={project.slug}
-                technologies_used={project.cardTechs ?? project.techs}
-                date={project.date}
-                image={cardImageOf(project)}
-                kicker={project.cardKicker}
-                award={project.award}
-              />
-            </Parallax>
+        {PROJECTS.map((project) => (
+          <StaggerItem key={project.slug} className="h-full">
+            <ProjectCard
+              project_title={project.cardTitle}
+              project_slug={project.slug}
+              technologies_used={project.cardTechs ?? project.techs}
+              date={project.date}
+              image={cardImageOf(project)}
+              kicker={project.cardKicker}
+              award={project.award}
+            />
           </StaggerItem>
         ))}
       </Stagger>

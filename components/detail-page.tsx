@@ -12,7 +12,7 @@ import {
   Presentation,
 } from "lucide-react";
 import ZoomableImage from "./zoomable-image";
-import { MaskText, Reveal, Stagger, StaggerItem } from "./reveal";
+import { Reveal, Stagger, StaggerItem } from "./reveal";
 import type { LinkIcon, PageData } from "@/constants/pages/types";
 
 const ICON_MAP: Record<LinkIcon, ComponentType<SVGProps<SVGSVGElement>>> = {
@@ -55,12 +55,11 @@ export default function DetailPage({
           {data.date}
         </p>
 
-        <MaskText
-          as="h1"
-          text={data.title}
-          className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl"
-          stagger={0.04}
-        />
+        <Reveal>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            {data.title}
+          </h1>
+        </Reveal>
 
         <Reveal direction="up" delay={0.15} className="mt-10">
           <div className="grid gap-8 border-t border-border pt-8 sm:grid-cols-2">

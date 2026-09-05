@@ -1,15 +1,9 @@
 "use client";
 
-import { useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Download } from "lucide-react";
 import { Button } from "./ui/button";
-import { MaskText } from "./reveal";
+import { DeviceHero } from "./device-hero";
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -20,37 +14,17 @@ const FACTS = [
 ];
 
 export function HeroSection() {
-  const sectionRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-
-  // Copy drifts up and dims faster than the page scrolls away, so the device
-  // below is left alone on screen as the hero exits.
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, -110]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
-  const copyStyle = shouldReduceMotion
-    ? undefined
-    : { y: copyY, opacity: copyOpacity };
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative flex min-h-svh flex-col overflow-hidden pt-24 pb-8 lg:pt-28"
-    >
+    <section className="relative flex min-h-svh flex-col overflow-hidden pt-24 pb-8 lg:pt-28">
       {/* Blueprint grid, dissolved at the edges */}
       <div
         aria-hidden="true"
         className="grid-backdrop mask-radial-fade pointer-events-none absolute inset-0 -z-10"
       />
       {/* ── Copy ── */}
-      <motion.div
-        style={copyStyle}
-        className="relative z-10 mx-auto w-full max-w-4xl px-5 text-center sm:px-8"
-      >
+      <div className="relative z-10 mx-auto w-full max-w-4xl px-5 text-center sm:px-8">
         <motion.p
           initial={shouldReduceMotion ? undefined : { opacity: 0, y: 12 }}
           animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -62,20 +36,23 @@ export function HeroSection() {
           <span className="h-px w-8 bg-primary" aria-hidden="true" />
         </motion.p>
 
-        <MaskText
-          as="h1"
-          text="Travis Ang"
+        <motion.h1
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: EASE_OUT }}
           className="text-5xl font-semibold tracking-tight sm:text-6xl"
-          stagger={0.06}
-        />
+        >
+          Travis Ang
+        </motion.h1>
 
-        <MaskText
-          as="p"
-          text="I build agentic AI systems and the products around them."
+        <motion.p
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
+          animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.26, ease: EASE_OUT }}
           className="mx-auto mt-5 max-w-2xl text-xl leading-snug text-muted-foreground sm:text-2xl"
-          delay={0.18}
-          stagger={0.028}
-        />
+        >
+          I build agentic AI systems and the products around them.
+        </motion.p>
 
         {/* ── Actions ── */}
         <motion.div
@@ -132,27 +109,14 @@ export function HeroSection() {
             </span>
           ))}
         </motion.p>
-      </motion.div>
+      </div>
 
       {/*
-        ── Device berth ──
-        The Surface Pro itself is rendered by `DeviceStage` on a fixed layer
-        behind the page, because it now travels the whole document rather than
-        living here. What stays behind is the space it occupies: a fixed canvas
-        contributes no layout height, so without this the hero would collapse
-        around the copy — taking the framing, the resting position of the
-        device, and the hero-relative scroll progress with it.
-
-        Deliberately taller than the leftover space: the device is the point,
-        and letting it run past the fold invites the scroll that starts the
-        journey. On narrow screens the device is already width-bound, so extra
-        height would only add empty space — hence the smaller mobile value.
+        ── The device ──
+        Large, centred, and directly under the copy. It owns its own container
+        height and its own capability checks — see `components/device-hero.tsx`.
       */}
-      <div
-        aria-hidden="true"
-        data-device-berth=""
-        className="relative mt-6 h-[44svh] w-full sm:h-[54svh] lg:mt-4 lg:h-[70svh]"
-      />
+      <DeviceHero />
     </section>
   );
 }

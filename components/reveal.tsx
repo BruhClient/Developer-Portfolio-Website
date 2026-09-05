@@ -7,73 +7,13 @@ import { cn } from "@/lib/utils";
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 /* ────────────────────────────────────────────────────────────
-   MaskText — words rise out from behind a clipping edge.
-
-   Each word sits in an overflow-hidden box; the inner span starts
-   pushed fully below that box and slides up. Nothing fades, so the
-   type stays crisp and the motion reads as physical.
-   ──────────────────────────────────────────────────────────── */
-
-interface MaskTextProps {
-  text: string;
-  className?: string;
-  /** Seconds before the first word starts. */
-  delay?: number;
-  /** Seconds between consecutive words. */
-  stagger?: number;
-  as?: "h1" | "h2" | "h3" | "p" | "span" | "div";
-}
-
-export function MaskText({
-  text,
-  className,
-  delay = 0,
-  stagger = 0.045,
-  as: Tag = "div",
-}: MaskTextProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-12% 0px" });
-  const shouldReduceMotion = useReducedMotion();
-
-  const words = text.split(" ");
-
-  if (shouldReduceMotion) {
-    return <Tag className={className}>{text}</Tag>;
-  }
-
-  return (
-    <Tag ref={ref as never} className={className}>
-      <span className="sr-only">{text}</span>
-      <span aria-hidden="true">
-        {words.map((word, i) => (
-          <span
-            key={`${word}-${i}`}
-            // pb/-mb gives descenders (g, y, p) room so the clip doesn't shave them
-            className="inline-block overflow-hidden pb-[0.14em] -mb-[0.14em] align-bottom"
-          >
-            <motion.span
-              className="inline-block"
-              initial={{ y: "110%" }}
-              animate={inView ? { y: "0%" } : { y: "110%" }}
-              transition={{
-                duration: 0.85,
-                delay: delay + i * stagger,
-                ease: EASE_OUT,
-              }}
-            >
-              {word}
-              {i < words.length - 1 ? " " : ""}
-            </motion.span>
-          </span>
-        ))}
-      </span>
-    </Tag>
-  );
-}
-
-/* ────────────────────────────────────────────────────────────
    Reveal — directional entrance for blocks of content.
    Travels a real distance; opacity is a secondary cue only.
+
+   This is the only entrance the site has. A per-word masked text
+   reveal used to live here too, but splitting every heading into
+   one animated span per word was the most expensive effect on the
+   page for the least payoff — headings now come in as one block.
    ──────────────────────────────────────────────────────────── */
 
 type RevealDirection = "up" | "down" | "left" | "right" | "none";

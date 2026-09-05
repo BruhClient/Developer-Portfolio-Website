@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/navbar";
 import SocialLinksBar from "@/components/social-links-bar";
 import { ScrollProgress } from "@/components/scroll-progress";
@@ -60,30 +59,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${display.variable} ${body.variable} ${mono.variable} font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
+        {/* Skip link — first tab stop, visible only when focused */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
         >
-          {/* Skip link — first tab stop, visible only when focused */}
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
-          >
-            Skip to content
-          </a>
+          Skip to content
+        </a>
 
-          <ScrollProgress />
-          <Navbar />
-          <main id="main">{children}</main>
-          <SocialLinksBar />
-          <Toaster position="bottom-right" richColors closeButton />
-        </ThemeProvider>
+        <ScrollProgress />
+        <Navbar />
+        <main id="main">{children}</main>
+        <SocialLinksBar />
+        <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>
   );
