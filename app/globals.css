@@ -300,172 +300,186 @@
 }
 
 /* ─────────────────────────────────────────────
-   Hover bubble.
+   Signs.
 
-   The room has no nav bar, so this is the only thing that ever tells you what
-   an object is before you commit to clicking it. It has to appear the instant
-   you touch something and read at a glance, which is why it is a speech bubble
-   with a tail rather than a floating pill: the tail is what ties the words to
-   the object under them when six things are close together.
+   Six objects in the room open a section, and each wears a sign naming it, all
+   the time. This IS the navigation - there is no rail and no nav bar - so it
+   has to be legible to someone who has not moved the pointer yet.
 
-   Rendered as DOM over the canvas, so it stays sharp while the room behind it
-   is deliberately chunky.
+   These replaced a glowing dot. The dot marked the six objects out from the
+   other forty-three but never said what any of them was; you learned that by
+   hovering, which is a deal a recruiter will not take and a phone cannot offer.
+
+   Rendered as DOM over the canvas, so the words stay sharp while the room
+   behind them is deliberately chunky, and sized in screen pixels rather than
+   world units, so the far corner of the room reads as easily as the near one.
    ───────────────────────────────────────────── */
-.room-bubble-anchor {
-  /* drei centres its wrapper on the anchor point; this lifts the bubble clear
-     so its tail, not its middle, lands on the object. */
+.room-sign-anchor {
+  /* drei centres its wrapper on the anchor point; this lifts the sign clear so
+     its tail, not its middle, lands on the object.
+
+     The entrance fade lives here and touches opacity ONLY. A filled animation
+     beats a transition on the same property, so an entrance that animated the
+     sign's own transform would then hold that transform forever and quietly
+     win against anything the sign's states try to do with it. */
   transform: translateY(-50%);
+  animation: room-sign-in 220ms ease-out both;
 }
 
-.room-bubble {
-  --bubble-bg: rgba(18, 20, 30, 0.94);
-  --bubble-border: rgba(255, 217, 160, 0.38);
+/* A real button, so the reset comes first. It is the thing that looks
+   clickable, so it has to be the thing that IS clickable - for the pointer,
+   the keyboard and a screen reader alike. drei's wrapper keeps pointer events
+   off so the room behind stays reachable; they come back on here. */
+.room-sign {
+  --sign-bg: rgba(14, 16, 24, 0.62);
+  --sign-border: rgba(255, 217, 160, 0.18);
+  --sign-text: rgba(244, 234, 217, 0.8);
+  --sign-dot: rgba(255, 217, 160, 0.8);
+  --sign-glow: 0 0 6px 1px rgba(255, 186, 105, 0.35);
 
+  appearance: none;
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 5px 11px 6px;
-  border: 1px solid var(--bubble-border);
-  border-radius: 9px;
-  background: var(--bubble-bg);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  white-space: nowrap;
-  user-select: none;
-  animation: room-bubble-in 90ms ease-out both;
-}
-
-/* Keyboard focus gets the brighter edge, so tabbing is as legible as hovering. */
-.room-bubble[data-focused] {
-  --bubble-border: #ffd9a0;
-}
-
-.room-bubble__kicker {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #d9a15f;
-}
-
-.room-bubble__title {
-  font-size: 13px;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 3px 9px 4px;
+  border: 1px solid var(--sign-border);
+  border-radius: 999px;
+  background: var(--sign-bg);
+  color: var(--sign-text);
+  font-family: inherit;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
-  color: #f4ead9;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    border-color 130ms ease-out,
+    background-color 130ms ease-out,
+    color 130ms ease-out;
 }
 
-/* A rotated square, so the tail carries the bubble's border on its two
-   outer edges and its fill everywhere else. */
-.room-bubble__tail {
+.room-sign__dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--sign-dot);
+  box-shadow: var(--sign-glow);
+}
+
+/* A rotated square, so the tail carries the sign's border on its two outer
+   edges and its fill everywhere else. It is what ties the words to the object
+   underneath when two signs are close together. */
+.room-sign__tail {
   position: absolute;
   left: 50%;
-  bottom: -5px;
-  width: 9px;
-  height: 9px;
-  background: var(--bubble-bg);
-  border-right: 1px solid var(--bubble-border);
-  border-bottom: 1px solid var(--bubble-border);
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+  background: var(--sign-bg);
+  border-right: 1px solid var(--sign-border);
+  border-bottom: 1px solid var(--sign-border);
   transform: translateX(-50%) rotate(45deg);
 }
 
-@keyframes room-bubble-in {
+/* Until the first thing is opened, the dot beats. Only the dot: pulsing a
+   word makes it harder to read, which is the opposite of the point. */
+.room-sign[data-hint] .room-sign__dot {
+  animation: room-sign-beat 1.4s ease-in-out infinite;
+}
+
+/* Opened already: still named, so you can find your way back and see at a
+   glance what you have covered, but no longer competing for attention. */
+.room-sign[data-seen] {
+  --sign-bg: rgba(14, 16, 24, 0.45);
+  --sign-border: rgba(255, 217, 160, 0.1);
+  --sign-text: rgba(244, 234, 217, 0.45);
+  --sign-dot: rgba(255, 217, 160, 0.25);
+  --sign-glow: none;
+}
+
+/* Hover, and keyboard focus with it, so tabbing is as legible as pointing.
+   Last, so it wins over [data-seen] when both are set.
+
+   Colour only - deliberately no transform. The sign is now its own hit target,
+   and anything that moves it on hover moves it out from under the pointer that
+   triggered the hover. */
+.room-sign[data-active],
+.room-sign[data-focused] {
+  --sign-bg: rgba(26, 23, 28, 0.94);
+  --sign-border: #ffd9a0;
+  --sign-text: #fff6e6;
+  --sign-dot: #ffd9a0;
+  --sign-glow: 0 0 10px 2px rgba(255, 186, 105, 0.75);
+}
+
+.room-sign:focus-visible {
+  outline: 2px solid #ffd9a0;
+  outline-offset: 3px;
+}
+
+/* Narrow screens: the room is the same size and the signs are not, so six of
+   them at desktop size start colliding. */
+@media (max-width: 640px) {
+  .room-sign {
+    gap: 5px;
+    padding: 3px 8px 4px;
+    font-size: 10px;
+  }
+}
+
+@keyframes room-sign-in {
   from {
     opacity: 0;
-    transform: translateY(3px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: none;
+  }
+}
+
+@keyframes room-sign-beat {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
   }
 }
 
 /* Keyframes stay at the top level, by convention rather than necessity.
 
-   I first blamed a silent failure here on nesting this @keyframes inside the
-   @media below, and "fixed" it by lifting it out. That diagnosis was wrong. The
+   I first blamed a silent failure here on nesting an @keyframes inside a
+   @media block, and "fixed" it by lifting it out. That diagnosis was wrong. The
    same symptom came back later for a block containing no nested keyframes at
    all: the dev server keeps serving the PREVIOUS stylesheet after an edit to
    this file, so new rules simply do not exist in the page and every element
    using them renders unstyled, with no error in the build, the console or the
-   terminal. Rewriting the file to bump its mtime shakes it loose. The project
-   sits in a OneDrive folder and file-watch events there are unreliable, which
-   is the most likely cause - the same sync has already restored deleted files
-   in this repo once.
+   terminal. Restarting the dev server clears it; bumping the file's mtime on
+   its own did not. The project sits in a OneDrive folder and file-watch events
+   there are unreliable, which is the most likely cause - the same sync has
+   already restored deleted files in this repo once.
 
    If a style you just added appears to do nothing, check whether the rule is
-   actually in document.styleSheets before you go looking for a CSS bug. */
-@keyframes room-bubble-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
+   actually in the served stylesheet before you go looking for a CSS bug. */
 @media (prefers-reduced-motion: reduce) {
-  .room-bubble {
-    animation-name: room-bubble-fade;
+  .room-sign[data-hint] .room-sign__dot {
+    animation: none;
   }
 }
 
 /* ─────────────────────────────────────────────
-   Markers and the first-run line.
+   The first-run line.
 
-   Six of the room's forty-nine objects do something. Without a permanent
-   marker the only way to find out which is to hover the right quarter of the
-   room, which is fine for someone exploring and useless for a recruiter
-   skimming — and impossible on a phone, where there is no hover at all.
-
-   The marker is sized in SCREEN pixels, not world units, so this is its size
-   on a phone too. It is deliberately large: there are only six of them, they
-   are the one thing a first-time visitor has to notice, and a marker that has
-   to be looked for is not doing the job.
+   The signs say what each object is; this says that they can be clicked at
+   all, once, and then leaves for good.
    ───────────────────────────────────────────── */
-.room-pip {
-  display: block;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #ffd9a0;
-  box-shadow:
-    0 0 0 5px rgba(255, 217, 160, 0.16),
-    0 0 20px 5px rgba(255, 186, 105, 0.5);
-  animation: room-pip-breathe 2.4s ease-in-out infinite;
-}
-
-/* Until the first thing is opened, the markers beat harder. This replaces an
-   idle timer that any mouse movement cancelled — see Room.tsx. */
-.room-pip[data-hint] {
-  animation-duration: 1.15s;
-}
-
-/* Opened already: still there, so you can find your way back, but quiet — and
-   it doubles as a record of what you have seen. */
-.room-pip[data-seen] {
-  width: 9px;
-  height: 9px;
-  background: rgba(255, 217, 160, 0.4);
-  box-shadow: none;
-  animation: none;
-}
-
-@keyframes room-pip-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.82;
-  }
-  /* A smaller peak than the marker used to have. The travel is a fraction of
-     the marker's size, so keeping 1.4x here would have turned a bigger dot
-     into a throbbing one. */
-  50% {
-    transform: scale(1.22);
-    opacity: 1;
-  }
-}
-
 .room-hint {
   position: fixed;
   bottom: 22px;
@@ -499,11 +513,10 @@
   }
 }
 
+/* After .room-hint's own `animation` shorthand on purpose: a media query adds
+   no specificity, so an override written earlier in the file would simply
+   lose. */
 @media (prefers-reduced-motion: reduce) {
-  .room-pip {
-    animation: none;
-  }
-
   .room-hint {
     animation-name: room-hint-fade;
   }

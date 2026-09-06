@@ -1,12 +1,13 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { ARCHITECTURE, SCENE } from "../data/scene";
+import { ARCHITECTURE, INTERACTIVE, SCENE } from "../data/scene";
 import { ZONES, ZONE_ORDER } from "../data/zones";
 import { CameraRig, FOV } from "./CameraRig";
 import { Floor } from "./Floor";
 import { InteractiveProp } from "./Prop";
 import { useRoom } from "./roomState";
+import { tabOrder } from "./tabOrder";
 import { SceneryProp } from "./Scenery";
 import { MonitorScreen } from "../ui/MonitorScreen";
 import { Carpets } from "../ui/Carpets";
@@ -27,6 +28,17 @@ import { Carpets } from "../ui/Carpets";
   where you actually see it, without the models turning to mush.
 */
 const PIXEL_SCALE = 0.85;
+
+/*
+  The six clickable objects, in Tab order rather than manifest order.
+
+  Each one's sign is a real <button>, so the six of them are now the page's
+  only tab stops, and a button's place in the tab ring is its place in the DOM.
+  Rendering them in the order tabOrder() defines is what makes that ring walk
+  the room section by section instead of following whatever order the manifest
+  happens to list the furniture in.
+*/
+const TABBABLE = tabOrder().map((id) => INTERACTIVE.find((prop) => prop.id === id)!);
 
 /*
   A cutaway box: floor, back-left wall, back-right wall, no front walls. The
@@ -138,7 +150,7 @@ export function Room() {
         {SCENE.filter((p) => !p.binding).map((prop) => (
           <SceneryProp key={prop.id} prop={prop} />
         ))}
-        {SCENE.filter((p) => p.binding).map((prop) => (
+        {TABBABLE.map((prop) => (
           <InteractiveProp key={prop.id} prop={prop} hint={hint} />
         ))}
         <MonitorScreen />

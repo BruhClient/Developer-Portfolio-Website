@@ -180,9 +180,21 @@ export const SCENE: readonly Prop[] = [
   // corner. Measured with four test sets on the floor, one per quarter turn,
   // after guessing at 215 and 35 and getting an edge-on black shard both times.
   { id: "hackathons:tv", model: "television", zone: "hackathons", position: { x: 1.9, y: 0.82, z: 0.4 }, rotationY: 180 },
-  { id: "hackathons:nes", model: "nes", zone: "hackathons", position: { x: 1.75, y: 0, z: 1.25 }, rotationY: 215, binding: "hackathons" },
-  { id: "hackathons:controller", model: "nes_controller", zone: "hackathons", position: { x: 1.15, y: 0, z: 1.5 }, rotationY: 170 },
   { id: "hackathons:footrest", model: "footrest", zone: "hackathons", position: { x: 2.15, y: 0, z: 1.45 }, rotationY: 0 },
+  /*
+    The console stands on the stool, not on the floor.
+
+    y is the stool's own measured height, not a guess: footrest is 0.525 x
+    0.425 x 0.550 and every model is re-anchored base-at-zero, so 0.425 puts
+    the console exactly on its top face. The console is 0.275 x 0.300, so it
+    sits well inside that face.
+
+    It is also the object that opens Hackathons, and it was easy to miss lying
+    flat on the floorboards at 0.1 tall - waist height and on its own pedestal
+    is a much better read for the one thing in this corner you can click.
+  */
+  { id: "hackathons:nes", model: "nes", zone: "hackathons", position: { x: 2.15, y: 0.425, z: 1.45 }, rotationY: 215, binding: "hackathons" },
+  { id: "hackathons:controller", model: "nes_controller", zone: "hackathons", position: { x: 1.15, y: 0, z: 1.5 }, rotationY: 170 },
   /*
     Cartridges out of their boxes, scattered the way they actually end up.
 

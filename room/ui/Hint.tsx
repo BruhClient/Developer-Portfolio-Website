@@ -10,8 +10,9 @@ import { useRoom } from "../engine/roomState";
   The room deliberately has no nav bar, which leaves a first-time visitor with
   no statement of the rule - and the people this site is for are recruiters,
   who arrive with about thirty seconds of patience and no reason to assume a
-  picture of a bedroom is an interface. The markers show them WHERE; this says
-  WHAT, in one sentence, and then gets out of the way permanently.
+  picture of a bedroom is an interface. The signs name the six sections; this
+  says the one thing a sign cannot say about itself, which is that it can be
+  clicked, and then gets out of the way permanently.
 
   It waits for the establishing sweep to land so it is not competing with a
   moving camera, and it leaves the moment anything is opened - at that point
@@ -30,7 +31,7 @@ export function Hint() {
 
   return (
     <p className="room-hint" role="status">
-      Click anything glowing
+      Click a sign to open it
       <span className="room-hint__dot" aria-hidden="true">
         ·
       </span>
