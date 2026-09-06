@@ -112,3 +112,12 @@ export function useRoom(): { state: RoomState } & typeof actions {
   const snapshot = useSyncExternalStore(subscribe, getRoomState, getRoomState);
   return { state: snapshot, ...actions };
 }
+
+/*
+  Development-only handle for `scripts/drive-room.mjs`. Clicking a specific 3D
+  object from outside the page is guesswork; driving the same store the pointer
+  handler drives is not, and it exercises the panel and camera for real.
+*/
+if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+  Object.assign(window, { __roomOpenItem: openItem, __roomState: getRoomState });
+}

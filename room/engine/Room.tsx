@@ -10,6 +10,8 @@ import { useRoom } from "./roomState";
 import { SceneryProp } from "./Scenery";
 import { SceneProbe } from "./SceneProbe";
 import { Floor } from "./Shell";
+import { MonitorScreen } from "../ui/MonitorScreen";
+import { ZoneDecals } from "../ui/ZoneDecal";
 
 const IDLE_MS = 8000;
 const NUDGE_EVENTS = ["pointerdown", "pointermove", "wheel", "keydown"] as const;
@@ -127,6 +129,7 @@ export function Room() {
           <meshBasicMaterial color="#0b0d16" />
         </mesh>
         <Floor />
+        <ZoneDecals />
         {ARCHITECTURE.map((prop) => (
           <SceneryProp key={prop.id} prop={prop} />
         ))}
@@ -136,6 +139,7 @@ export function Room() {
         {SCENE.filter((p) => p.binding).map((prop) => (
           <InteractiveProp key={prop.id} prop={prop} idleHint={idleHint} />
         ))}
+        <MonitorScreen />
       </group>
     </Canvas>
   );
