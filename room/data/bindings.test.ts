@@ -3,6 +3,7 @@ import { PROJECTS } from "@/constants/pages/projects";
 import { HACKATHONS } from "@/constants/pages/hackathons";
 import { CERTIFICATES, EXPERIENCE } from "@/constants/pages/experience";
 import { BINDINGS, resolveBinding, siblingsOf, titleOf } from "./bindings";
+import { reachableBindings } from "./navigation";
 import { INTERACTIVE } from "./scene";
 
 /*
@@ -15,6 +16,12 @@ import { INTERACTIVE } from "./scene";
 
   This is the carried-over descendant of world/content/coverage.test.ts and is
   the single most valuable test in the suite.
+
+  It asks whether content is REACHABLE, not whether it sits on its own object.
+  Those were the same question while every hackathon had its own cartridge, and
+  stopped being when the console started opening the group instead. Reachability
+  is the property that actually matters - content must not fall off the site -
+  and it survives the next regrouping too.
 */
 describe("the room covers the content", () => {
   test("every prop binding resolves to real content", () => {
@@ -27,24 +34,26 @@ describe("the room covers the content", () => {
     expect(new Set(used).size).toBe(used.length);
   });
 
-  test("every project has an object in the room", () => {
-    const placed = new Set(INTERACTIVE.map((p) => p.binding));
-    const missing = PROJECTS.filter((p) => !placed.has(`project:${p.slug}`));
+  test("every project can be reached from the room", () => {
+    const reachable = reachableBindings();
+    const missing = PROJECTS.filter((p) => !reachable.has(`project:${p.slug}`));
     expect(
       missing.map((p) => p.slug),
       "add an object with this binding to room/data/scene.ts",
     ).toEqual([]);
   });
 
-  test("every hackathon has a cartridge", () => {
-    const placed = new Set(INTERACTIVE.map((p) => p.binding));
-    const missing = HACKATHONS.map((_, i) => `hackathon:${i}`).filter((id) => !placed.has(id));
-    expect(missing, "add a cartridge to room/data/scene.ts").toEqual([]);
+  test("every hackathon can be reached from the room", () => {
+    const reachable = reachableBindings();
+    const missing = HACKATHONS.map((_, i) => `hackathon:${i}`).filter((id) => !reachable.has(id));
+    expect(missing, "the console's list in bindings.ts should cover it").toEqual([]);
   });
 
   test("every certificate has a frame", () => {
-    const placed = new Set(INTERACTIVE.map((p) => p.binding));
-    const missing = CERTIFICATES.map((_, i) => `certificate:${i}`).filter((id) => !placed.has(id));
+    const reachable = reachableBindings();
+    const missing = CERTIFICATES.map((_, i) => `certificate:${i}`).filter(
+      (id) => !reachable.has(id),
+    );
     expect(missing, "add a painting to room/data/scene.ts").toEqual([]);
   });
 

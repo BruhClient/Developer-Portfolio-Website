@@ -105,7 +105,7 @@ function buildWalls(): Prop[] {
   return walls;
 }
 
-/** Walls. The floor is a single tiled plane in Shell.tsx, not props. */
+/** Walls. The floor is laid tile by tile in engine/Floor.tsx, not here. */
 export const ARCHITECTURE: readonly Prop[] = buildWalls();
 
 /*
@@ -171,11 +171,18 @@ export const SCENE: readonly Prop[] = [
   { id: "hackathons:nes", model: "nes", zone: "hackathons", position: { x: 1.75, y: 0, z: 1.25 }, rotationY: 215, binding: "hackathons" },
   { id: "hackathons:controller", model: "nes_controller", zone: "hackathons", position: { x: 1.15, y: 0, z: 1.5 }, rotationY: 170 },
   { id: "hackathons:footrest", model: "footrest", zone: "hackathons", position: { x: 2.15, y: 0, z: 1.45 }, rotationY: 0 },
-  // Cartridges out of their boxes, scattered the way they actually end up.
-  { id: "hackathons:cart-1", model: "cartridge1", zone: "hackathons", position: { x: 0.85, y: 0, z: 1.15 }, rotationY: 12, binding: "hackathon:0" },
-  { id: "hackathons:cart-2", model: "cartridge2", zone: "hackathons", position: { x: 1.05, y: 0, z: 1.9 }, rotationY: -18, binding: "hackathon:1" },
-  { id: "hackathons:cart-3", model: "cartridge3", zone: "hackathons", position: { x: 0.7, y: 0, z: 1.7 }, rotationY: 30, binding: "hackathon:2" },
-  { id: "hackathons:cart-4", model: "cartridge4", zone: "hackathons", position: { x: 1.45, y: 0, z: 2.15 }, rotationY: -6, binding: "hackathon:3" },
+  /*
+    Cartridges out of their boxes, scattered the way they actually end up.
+
+    Scenery, not four separate doors. They each opened one hackathon directly,
+    which made the pile five clickable things saying almost the same thing and
+    gave a visitor no sense that the four belonged together. The console opens
+    the group and you choose from there, so the section reads as a section.
+  */
+  { id: "hackathons:cart-1", model: "cartridge1", zone: "hackathons", position: { x: 0.85, y: 0, z: 1.15 }, rotationY: 12 },
+  { id: "hackathons:cart-2", model: "cartridge2", zone: "hackathons", position: { x: 1.05, y: 0, z: 1.9 }, rotationY: -18 },
+  { id: "hackathons:cart-3", model: "cartridge3", zone: "hackathons", position: { x: 0.7, y: 0, z: 1.7 }, rotationY: 30 },
+  { id: "hackathons:cart-4", model: "cartridge4", zone: "hackathons", position: { x: 1.45, y: 0, z: 2.15 }, rotationY: -6 },
   { id: "hackathons:plant", model: "plant2", zone: "hackathons", position: { x: 2.3, y: 0, z: -0.35 }, rotationY: 0 },
 
   // ------------------------------------------------------------- CONTACT ME

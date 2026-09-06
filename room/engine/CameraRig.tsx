@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { propForBinding } from "../data/navigation";
 import { ROOM, SCENE } from "../data/scene";
 import { ZONES, type ZoneId } from "../data/zones";
 import { SWEEP_DURATION_MS, sweepAt } from "./attract";
@@ -134,7 +135,7 @@ export function CameraRig() {
       // Keyboard focus wins over the open item, so tabbing moves the camera
       // even while a panel is open.
       const propId =
-        state.focused ?? SCENE.find((p) => p.binding === state.item)?.id ?? "";
+        state.focused ?? (state.item ? propForBinding(state.item) : undefined) ?? "";
       bounds = boundsForProp(propId);
     } else if (state.level === "zone" && state.zone) {
       bounds = boundsForZone(state.zone);

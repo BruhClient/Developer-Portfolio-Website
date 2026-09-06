@@ -29,7 +29,10 @@ export function Carpets() {
               id: `carpet:${id}`,
               model: zone.carpet,
               zone: id,
-              position: { x: zone.origin.x, y: 0, z: zone.origin.z },
+              // 3mm up. A rug's underside and the floor's top face are
+              // otherwise exactly coplanar, and which one wins is then down to
+              // depth-buffer rounding - it flickers as the camera moves.
+              position: { x: zone.origin.x, y: 0.003, z: zone.origin.z },
               rotationY: 0,
             }}
           />

@@ -5,10 +5,10 @@ import { Canvas } from "@react-three/fiber";
 import { ARCHITECTURE, SCENE } from "../data/scene";
 import { ZONES, ZONE_ORDER } from "../data/zones";
 import { CameraRig, FOV } from "./CameraRig";
+import { Floor } from "./Floor";
 import { InteractiveProp } from "./Prop";
 import { useRoom } from "./roomState";
 import { SceneryProp } from "./Scenery";
-import { Floor } from "./Shell";
 import { MonitorScreen } from "../ui/MonitorScreen";
 import { Carpets } from "../ui/Carpets";
 
