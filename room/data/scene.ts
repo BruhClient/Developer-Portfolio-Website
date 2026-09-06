@@ -29,6 +29,18 @@ export interface Prop {
   tint?: string;
   /** Binding id resolved by room/data/bindings.ts. Absent means scenery. */
   binding?: string;
+  /*
+    This object is WHERE a piece of content lives, without being a way in to it.
+
+    Exactly six objects are clickable - one per section - because twelve
+    scattered entry points gave a visitor no sense of what belonged with what.
+    The rest of the content is picked from a list inside the panel, and when it
+    is, the camera flies to the object named here: choose a certificate and the
+    room turns to that frame on the wall, choose a hackathon and it turns to
+    that cartridge on the floor. So the room still holds every item, and
+    browsing the panel is what moves you through it.
+  */
+  anchorFor?: string;
 }
 
 /*
@@ -124,22 +136,22 @@ export const SCENE: readonly Prop[] = [
   // the lamp, the speakers and the mugs nobody has washed.
   { id: "projects:desk", model: "desk", zone: "projects", position: { x: -0.85, y: 0, z: -1.85 }, rotationY: 0 },
   { id: "projects:chair", model: "chair", zone: "projects", position: { x: -0.85, y: 0, z: -0.95 }, rotationY: 180 },
-  { id: "projects:monitor", model: "computer_screen", zone: "projects", position: { x: -1.0, y: 0.75, z: -2.0 }, rotationY: 0, binding: "project:git-dummy" },
+  { id: "projects:monitor", model: "computer_screen", zone: "projects", position: { x: -1.0, y: 0.75, z: -2.0 }, rotationY: 0, binding: "projects", anchorFor: "project:git-dummy" },
   { id: "projects:keyboard", model: "keyboard", zone: "projects", position: { x: -0.9, y: 0.75, z: -1.63 }, rotationY: 0 },
   { id: "projects:mouse", model: "mouse", zone: "projects", position: { x: -0.43, y: 0.75, z: -1.63 }, rotationY: 0 },
   { id: "projects:lamp", model: "lamp", zone: "projects", position: { x: -1.5, y: 0.75, z: -1.97 }, rotationY: 0 },
   { id: "projects:speaker-l", model: "speaker", zone: "projects", position: { x: -1.3, y: 0.75, z: -1.99 }, rotationY: 15 },
   { id: "projects:speaker-r", model: "speaker2", zone: "projects", position: { x: -0.32, y: 0.75, z: -1.99 }, rotationY: -15 },
   { id: "projects:cup", model: "cupblue", zone: "projects", position: { x: -0.15, y: 0.75, z: -1.78 }, rotationY: 0 },
-  { id: "projects:briefcase", model: "briefcase_black", zone: "projects", position: { x: 0.1, y: 0, z: -1.35 }, rotationY: -25, binding: "project:millitary-stores-telegram-bot" },
+  { id: "projects:briefcase", model: "briefcase_black", zone: "projects", position: { x: 0.1, y: 0, z: -1.35 }, rotationY: -25, anchorFor: "project:millitary-stores-telegram-bot" },
   { id: "projects:blinds", model: "blinds", zone: "projects", position: { x: -1.0, y: 1.78, z: WALL_FACE }, rotationY: 90 },
 
   // ---------------------------------------------------------- CERTIFICATIONS
   // Framed two-up on the back end of the left wall, above a low shelf.
-  { id: "certifications:frame-1", model: "painting_lighthouse", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.95 }, rotationY: 0, mount: "wall-left", binding: "certificate:0" },
-  { id: "certifications:frame-2", model: "painting_shaman", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.15 }, rotationY: 0, mount: "wall-left", binding: "certificate:1" },
-  { id: "certifications:frame-3", model: "painting_hyperlightdrifter", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.95 }, rotationY: 0, mount: "wall-left", binding: "certificate:2" },
-  { id: "certifications:frame-4", model: "painting_halflife", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.15 }, rotationY: 0, mount: "wall-left", binding: "certificate:3" },
+  { id: "certifications:frame-1", model: "painting_lighthouse", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.95 }, rotationY: 0, mount: "wall-left", binding: "certifications", anchorFor: "certificate:0" },
+  { id: "certifications:frame-2", model: "painting_shaman", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.15 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:1" },
+  { id: "certifications:frame-3", model: "painting_hyperlightdrifter", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.95 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:2" },
+  { id: "certifications:frame-4", model: "painting_halflife", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.15 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:3" },
   { id: "certifications:shelf", model: "bookcase_small", zone: "certifications", position: { x: -2.2, y: 0, z: -1.95 }, rotationY: 90 },
   { id: "certifications:plant", model: "plant3", zone: "certifications", position: { x: -2.2, y: 0, z: -2.3 }, rotationY: 0 },
 
@@ -154,8 +166,8 @@ export const SCENE: readonly Prop[] = [
   // it runs along the left wall rather than across it.
   { id: "about:bed", model: "bedsingle", zone: "about", position: { x: -2.05, y: 0, z: 0.85 }, rotationY: 0, binding: "about" },
   { id: "about:nightstand", model: "nightstand", zone: "about", position: { x: -2.15, y: 0, z: 1.65 }, rotationY: 90 },
-  { id: "about:mug", model: "mugred", zone: "about", position: { x: -2.2, y: 0.5, z: 1.6 }, rotationY: 0, binding: "credits" },
-  { id: "about:bookcase", model: "bookcasetall", zone: "about", position: { x: -2.1, y: 0, z: 2.15 }, rotationY: 90, binding: "toolkit" },
+  { id: "about:mug", model: "mugred", zone: "about", position: { x: -2.2, y: 0.5, z: 1.6 }, rotationY: 0, anchorFor: "credits" },
+  { id: "about:bookcase", model: "bookcasetall", zone: "about", position: { x: -2.1, y: 0, z: 2.15 }, rotationY: 90, anchorFor: "toolkit" },
   { id: "about:lamp-tall", model: "lamp_tall", zone: "about", position: { x: -1.35, y: 0, z: 1.7 }, rotationY: 0 },
   { id: "about:plant", model: "plant1", zone: "about", position: { x: -1.1, y: 0, z: 2.25 }, rotationY: 0 },
   // Clothes on the floor. Nobody's room is tidy at 2am.
@@ -174,15 +186,15 @@ export const SCENE: readonly Prop[] = [
   /*
     Cartridges out of their boxes, scattered the way they actually end up.
 
-    Scenery, not four separate doors. They each opened one hackathon directly,
+    Not doors, but not dead either. They each opened one hackathon directly,
     which made the pile five clickable things saying almost the same thing and
     gave a visitor no sense that the four belonged together. The console opens
-    the group and you choose from there, so the section reads as a section.
+    the group; choosing an entry from that list turns the room to its cartridge.
   */
-  { id: "hackathons:cart-1", model: "cartridge1", zone: "hackathons", position: { x: 0.85, y: 0, z: 1.15 }, rotationY: 12 },
-  { id: "hackathons:cart-2", model: "cartridge2", zone: "hackathons", position: { x: 1.05, y: 0, z: 1.9 }, rotationY: -18 },
-  { id: "hackathons:cart-3", model: "cartridge3", zone: "hackathons", position: { x: 0.7, y: 0, z: 1.7 }, rotationY: 30 },
-  { id: "hackathons:cart-4", model: "cartridge4", zone: "hackathons", position: { x: 1.45, y: 0, z: 2.15 }, rotationY: -6 },
+  { id: "hackathons:cart-1", model: "cartridge1", zone: "hackathons", position: { x: 0.85, y: 0, z: 1.15 }, rotationY: 12, anchorFor: "hackathon:0" },
+  { id: "hackathons:cart-2", model: "cartridge2", zone: "hackathons", position: { x: 1.05, y: 0, z: 1.9 }, rotationY: -18, anchorFor: "hackathon:1" },
+  { id: "hackathons:cart-3", model: "cartridge3", zone: "hackathons", position: { x: 0.7, y: 0, z: 1.7 }, rotationY: 30, anchorFor: "hackathon:2" },
+  { id: "hackathons:cart-4", model: "cartridge4", zone: "hackathons", position: { x: 1.45, y: 0, z: 2.15 }, rotationY: -6, anchorFor: "hackathon:3" },
   { id: "hackathons:plant", model: "plant2", zone: "hackathons", position: { x: 2.3, y: 0, z: -0.35 }, rotationY: 0 },
 
   // ------------------------------------------------------------- CONTACT ME

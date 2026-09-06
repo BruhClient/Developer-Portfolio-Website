@@ -6,7 +6,7 @@ import { ABOUT, type AboutData } from "@/constants/pages/about";
 import { TOOLKIT_ROWS } from "@/constants/toolkit";
 import { CONTACT_CHANNELS, type ContactChannel } from "@/constants/contact";
 import type { PageData } from "@/constants/pages/types";
-import type { ZoneId } from "./zones";
+import { ZONES, ZONE_ORDER, type ZoneId } from "./zones";
 
 /*
   What a prop opens.
@@ -19,7 +19,14 @@ export type PanelContent =
   | { kind: "experience"; zone: ZoneId; entries: ExperienceEntry[]; resumeHref: string }
   | { kind: "certificate"; zone: ZoneId; entry: CertificateEntry }
   | { kind: "list"; zone: ZoneId; title: string; of: string[] }
-  | { kind: "about"; zone: ZoneId; data: AboutData }
+  /*
+    `leadsTo` is the About panel's own links, as data rather than as JSX buried
+    in a body component. Toolkit and Credits stopped having objects of their
+    own in the room, so this is the only route to them - and writing it down
+    here is what lets the coverage guard walk it and prove they are still
+    reachable.
+  */
+  | { kind: "about"; zone: ZoneId; data: AboutData; leadsTo: readonly string[] }
   | { kind: "toolkit"; zone: ZoneId; rows: string[][] }
   | { kind: "contact"; zone: ZoneId; channels: readonly ContactChannel[] }
   | { kind: "credits"; zone: ZoneId };
@@ -55,13 +62,30 @@ export const BINDINGS: Record<string, PanelContent> = {
     entries: EXPERIENCE,
     resumeHref: RESUME_HREF,
   },
+  /*
+    The six section entries. Each one is what a single object in the room opens,
+    and the binding id is deliberately the same string as the zone id - see
+    SECTION_ORDER below.
+  */
+  projects: {
+    kind: "list",
+    zone: "projects",
+    title: "Projects",
+    of: PROJECTS.map((data) => `project:${data.slug}`),
+  },
   hackathons: {
     kind: "list",
     zone: "hackathons",
     title: "Hackathons",
     of: HACKATHONS.map((_, i) => `hackathon:${i}`),
   },
-  about: { kind: "about", zone: "about", data: ABOUT },
+  certifications: {
+    kind: "list",
+    zone: "certifications",
+    title: "Certifications",
+    of: CERTIFICATES.map((_, i) => `certificate:${i}`),
+  },
+  about: { kind: "about", zone: "about", data: ABOUT, leadsTo: ["toolkit", "credits"] },
   toolkit: { kind: "toolkit", zone: "about", rows: TOOLKIT_ROWS },
   contact: { kind: "contact", zone: "contact", channels: CONTACT_CHANNELS },
   credits: { kind: "credits", zone: "about" },
@@ -69,6 +93,26 @@ export const BINDINGS: Record<string, PanelContent> = {
 
 export function resolveBinding(id: string): PanelContent | undefined {
   return BINDINGS[id];
+}
+
+/*
+  The six sections, in the spec's order, as binding ids.
+
+  A section's binding id and its zone id are the same string on purpose: one
+  object in the room opens each, and every panel offers the other five, so the
+  two ideas are the same idea and giving them two vocabularies would only
+  create a mapping table to keep in sync. sections.test.ts holds it to that.
+*/
+export const SECTION_ORDER: readonly ZoneId[] = ZONE_ORDER;
+
+export function sectionLabel(zone: ZoneId): string {
+  return ZONES[zone].label;
+}
+
+/** Title for a binding id, for links that only have the id to hand. */
+export function titleForBinding(id: string): string | undefined {
+  const content = BINDINGS[id];
+  return content ? titleOf(content) : undefined;
 }
 
 /** Title for a binding, used by the panel header and the sibling list. */

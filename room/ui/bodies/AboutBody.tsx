@@ -1,7 +1,18 @@
 import Image from "next/image";
 import type { AboutData } from "@/constants/pages/about";
 
-export function AboutBody({ data, onToolkit }: { data: AboutData; onToolkit: () => void }) {
+export function AboutBody({
+  data,
+  leadsTo,
+  onPick,
+}: {
+  data: AboutData;
+  /* Where this panel goes on to - the toolkit and the credits, neither of
+     which has an object in the room any more. Passed in rather than hard-coded
+     so bindings.ts stays the one place that says where anything leads. */
+  leadsTo: { id: string; title: string }[];
+  onPick: (id: string) => void;
+}) {
   return (
     <article className="space-y-6">
       <Image
@@ -40,12 +51,17 @@ export function AboutBody({ data, onToolkit }: { data: AboutData; onToolkit: () 
         ))}
       </ul>
 
-      <button
-        onClick={onToolkit}
-        className="rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
-      >
-        See the toolkit
-      </button>
+      <div className="flex flex-wrap gap-2">
+        {leadsTo.map((link) => (
+          <button
+            key={link.id}
+            onClick={() => onPick(link.id)}
+            className="rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
+          >
+            {link.title}
+          </button>
+        ))}
+      </div>
     </article>
   );
 }

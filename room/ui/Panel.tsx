@@ -1,6 +1,14 @@
 "use client";
 
-import { resolveBinding, siblingsOf, titleOf, type PanelContent } from "../data/bindings";
+import {
+  resolveBinding,
+  sectionLabel,
+  siblingsOf,
+  titleForBinding,
+  titleOf,
+  type PanelContent,
+} from "../data/bindings";
+import { otherSections } from "../data/navigation";
 import { useRoom } from "../engine/roomState";
 import { AboutBody } from "./bodies/AboutBody";
 import { CertificateBody } from "./bodies/CertificateBody";
@@ -78,6 +86,35 @@ export function Panel() {
               </ul>
             </nav>
           )}
+
+          {/*
+            Where next. The room has no rail by design, which is fine once you
+            know the room but leaves someone who has opened one thing with no
+            idea there are five more. Each panel hands you on to the rest, in
+            the spec's order so it reads as a tour, and picking one turns the
+            room to that section's object on the way.
+          */}
+          <nav className="mt-8 border-t border-amber-200/15 pt-5">
+            <p className="pb-2.5 text-xs uppercase tracking-widest text-amber-200/50">
+              Explore the room
+            </p>
+            <ul className="flex flex-wrap gap-1.5">
+              {otherSections(content.zone).map((zone, i) => (
+                <li key={zone}>
+                  <button
+                    onClick={() => openItem(zone)}
+                    className={
+                      i === 0
+                        ? "rounded-full border border-amber-200/45 bg-amber-200/10 px-3 py-1 text-xs text-amber-50"
+                        : "rounded-full border border-amber-200/20 px-3 py-1 text-xs text-amber-100/65 hover:border-amber-200/45 hover:text-amber-50"
+                    }
+                  >
+                    {i === 0 ? `Next · ${sectionLabel(zone)}` : sectionLabel(zone)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       )}
     </aside>
@@ -101,7 +138,16 @@ function Body({
     case "list":
       return <ListBody of={content.of} onPick={onPick} />;
     case "about":
-      return <AboutBody data={content.data} onToolkit={() => onPick("toolkit")} />;
+      return (
+        <AboutBody
+          data={content.data}
+          leadsTo={content.leadsTo.map((id) => ({
+            id,
+            title: titleForBinding(id) ?? id,
+          }))}
+          onPick={onPick}
+        />
+      );
     case "toolkit":
       return <ToolkitBody rows={content.rows} />;
     case "contact":
