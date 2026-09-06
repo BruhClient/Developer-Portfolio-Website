@@ -413,20 +413,25 @@
 /* ─────────────────────────────────────────────
    Markers and the first-run line.
 
-   Twelve of the room's forty-nine objects do something. Without a permanent
+   Six of the room's forty-nine objects do something. Without a permanent
    marker the only way to find out which is to hover the right quarter of the
    room, which is fine for someone exploring and useless for a recruiter
    skimming — and impossible on a phone, where there is no hover at all.
+
+   The marker is sized in SCREEN pixels, not world units, so this is its size
+   on a phone too. It is deliberately large: there are only six of them, they
+   are the one thing a first-time visitor has to notice, and a marker that has
+   to be looked for is not doing the job.
    ───────────────────────────────────────────── */
 .room-pip {
   display: block;
-  width: 9px;
-  height: 9px;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
   background: #ffd9a0;
   box-shadow:
-    0 0 0 3px rgba(255, 217, 160, 0.16),
-    0 0 10px 2px rgba(255, 186, 105, 0.55);
+    0 0 0 5px rgba(255, 217, 160, 0.16),
+    0 0 20px 5px rgba(255, 186, 105, 0.5);
   animation: room-pip-breathe 2.4s ease-in-out infinite;
 }
 
@@ -439,8 +444,8 @@
 /* Opened already: still there, so you can find your way back, but quiet — and
    it doubles as a record of what you have seen. */
 .room-pip[data-seen] {
-  width: 5px;
-  height: 5px;
+  width: 9px;
+  height: 9px;
   background: rgba(255, 217, 160, 0.4);
   box-shadow: none;
   animation: none;
@@ -452,8 +457,11 @@
     transform: scale(1);
     opacity: 0.82;
   }
+  /* A smaller peak than the marker used to have. The travel is a fraction of
+     the marker's size, so keeping 1.4x here would have turned a bigger dot
+     into a throbbing one. */
   50% {
-    transform: scale(1.4);
+    transform: scale(1.22);
     opacity: 1;
   }
 }

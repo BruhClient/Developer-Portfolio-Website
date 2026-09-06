@@ -22,10 +22,10 @@ const LIFT = 0.02; // 2cm, the spec's hover lift
   no ghosting of its neighbours. The room stays exactly as it was so that a
   hover reads as "this one is alive", not "everything else just left".
 
-  Every one of them also wears a marker at all times. Twelve of the room's
+  Every one of them also wears a marker at all times. Six of the room's
   forty-nine objects do something, and until this existed the only way to learn
-  which twelve was to hover the right quarter of the room - fine for someone
-  who came to play, useless for a recruiter giving the page thirty seconds. The
+  which six was to hover the right quarter of the room - fine for someone who
+  came to play, useless for a recruiter giving the page thirty seconds. The
   marker is also the only affordance that survives on a phone, where there is
   no hover and so no bubble at all.
 */
