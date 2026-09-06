@@ -298,3 +298,103 @@
 .room-stage canvas {
   image-rendering: pixelated;
 }
+
+/* ─────────────────────────────────────────────
+   Hover bubble.
+
+   The room has no nav bar, so this is the only thing that ever tells you what
+   an object is before you commit to clicking it. It has to appear the instant
+   you touch something and read at a glance, which is why it is a speech bubble
+   with a tail rather than a floating pill: the tail is what ties the words to
+   the object under them when six things are close together.
+
+   Rendered as DOM over the canvas, so it stays sharp while the room behind it
+   is deliberately chunky.
+   ───────────────────────────────────────────── */
+.room-bubble-anchor {
+  /* drei centres its wrapper on the anchor point; this lifts the bubble clear
+     so its tail, not its middle, lands on the object. */
+  transform: translateY(-50%);
+}
+
+.room-bubble {
+  --bubble-bg: rgba(18, 20, 30, 0.94);
+  --bubble-border: rgba(255, 217, 160, 0.38);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 11px 6px;
+  border: 1px solid var(--bubble-border);
+  border-radius: 9px;
+  background: var(--bubble-bg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  user-select: none;
+  animation: room-bubble-in 90ms ease-out both;
+}
+
+/* Keyboard focus gets the brighter edge, so tabbing is as legible as hovering. */
+.room-bubble[data-focused] {
+  --bubble-border: #ffd9a0;
+}
+
+.room-bubble__kicker {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d9a15f;
+}
+
+.room-bubble__title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f4ead9;
+}
+
+/* A rotated square, so the tail carries the bubble's border on its two
+   outer edges and its fill everywhere else. */
+.room-bubble__tail {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--bubble-bg);
+  border-right: 1px solid var(--bubble-border);
+  border-bottom: 1px solid var(--bubble-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@keyframes room-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Keyframes stay at the top level. Nesting an @keyframes inside a @media is
+   legal CSS but Lightning CSS, which Tailwind 4 builds with, failed on it - and
+   the failure was silent: the dev server just kept serving the previous
+   stylesheet, so the bubble rendered as unstyled text with no error anywhere. */
+@keyframes room-bubble-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-bubble {
+    animation-name: room-bubble-fade;
+  }
+}

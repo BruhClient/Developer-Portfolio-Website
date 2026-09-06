@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { BINDINGS, titleOf } from "../data/bindings";
+import { ZONES } from "../data/zones";
 import { MODEL_SCALE } from "../data/models";
 import type { Prop } from "../data/scene";
 import { mountingFor } from "./mount";
@@ -32,6 +33,26 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
     const content = BINDINGS[binding];
     return content ? titleOf(content) : prop.id;
   }, [binding, prop.id]);
+
+  /*
+    Where the bubble's tail should touch: the top of this particular object,
+    not a fixed height. A cartridge on the floor and a tall bookcase both get a
+    bubble sitting just clear of themselves, which is what makes the tail read
+    as pointing AT the thing rather than floating near it.
+  */
+  const anchorY = useMemo(() => {
+    const margin = 0.14 / MODEL_SCALE;
+    if (!model) return 0.6 / MODEL_SCALE;
+    const box = new THREE.Box3().setFromObject(model);
+    /*
+      Wall art is stood upright by the inner tilt group, which the box below
+      does not see - it measures the model lying flat. So for a mounted piece
+      the height to clear is half its z-extent, which is what the tilt turns
+      into height.
+    */
+    const height = prop.mount ? (box.max.z - box.min.z) / 2 : box.max.y;
+    return height + margin;
+  }, [model, prop.mount]);
 
   const isFocused = state.focused === prop.id;
   const unopened = !state.opened.has(binding);
@@ -82,9 +103,9 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
       </group>
 
       {/*
-        The rim light and label sit inside a group scaled to MODEL_SCALE, so
-        their own units have to be divided back out or a 1.6-unit light would
-        become a 4cm one and the label would be microscopic.
+        The rim light and the bubble's anchor sit inside a group scaled to
+        MODEL_SCALE, so their own units have to be divided back out or a
+        1.6-unit light would become a 4cm one.
       */}
       {active && (
         <pointLight
@@ -97,25 +118,19 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
       )}
 
       {active && (
-        <Html
-          center
-          distanceFactor={9 / MODEL_SCALE}
-          position={[0, 0.9 / MODEL_SCALE, 0]}
-          style={{ pointerEvents: "none" }}
-        >
-          <span
-            style={{
-              background: "rgba(12,14,22,0.86)",
-              border: isFocused ? "1px solid #ffd9a0" : "1px solid rgba(255,217,160,0.35)",
-              color: "#f4ead9",
-              padding: "3px 9px",
-              borderRadius: 999,
-              fontSize: 12,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {label}
-          </span>
+        <Html center position={[0, anchorY, 0]} style={{ pointerEvents: "none" }}>
+          {/*
+            Constant screen size on purpose - no distanceFactor. A tooltip that
+            shrinks with distance is unreadable on exactly the objects that are
+            furthest away, which are the ones you most need naming.
+          */}
+          <div className="room-bubble-anchor">
+            <div className="room-bubble" data-focused={isFocused || undefined}>
+              <span className="room-bubble__kicker">{ZONES[prop.zone].label}</span>
+              <span className="room-bubble__title">{label}</span>
+              <i className="room-bubble__tail" aria-hidden="true" />
+            </div>
+          </div>
         </Html>
       )}
     </group>
