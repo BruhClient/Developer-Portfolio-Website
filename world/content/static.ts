@@ -1,3 +1,5 @@
+import { ABOUT } from "@/constants/pages/about";
+import { TOOLKIT_ROWS } from "@/constants/toolkit";
 import type { Action } from "./dialogue";
 
 export interface StaticEntry {
@@ -9,12 +11,9 @@ export interface StaticEntry {
 /*
   Interactables that are not filled from the content arrays.
 
-  The About and toolkit copy here is deliberately thin. The real prose still
-  lives as hard coded JSX in `components/about-me.tsx` and the tech lists in
-  `components/toolkit-marquee.tsx`; milestone 4 lifts both into
-  `constants/pages/about.ts` and points this file and the components at it.
-  Until `/about` exists, the portrait offers no read more rather than linking
-  to a page that would 404.
+  About and toolkit copy is read from `constants/pages/about.ts` and
+  `constants/toolkit.ts`, the same source `/about` renders from, so the beats
+  here can never drift from the page they send the reader to.
 */
 export const STATIC_REFS: Record<string, StaticEntry> = {
   "npc:travis": {
@@ -28,15 +27,12 @@ export const STATIC_REFS: Record<string, StaticEntry> = {
   },
   "about:portrait": {
     title: "About me",
-    beats: ["Second year at NTU reading Data Science and Artificial Intelligence."],
-    action: null,
+    beats: [ABOUT.lead, ...ABOUT.sections[0].paragraphs],
+    action: { label: "Read more", href: "/about", mode: "internal" },
   },
   "about:toolkit": {
     title: "Toolkit",
-    beats: [
-      "Python · TypeScript · PyTorch · Pandas · SQL · Supabase · Databricks",
-      "Claude Code · MCP · n8n · Docker · Google Cloud",
-    ],
+    beats: TOOLKIT_ROWS.map((row) => row.join(" · ")),
     action: null,
   },
   "action:resume": {

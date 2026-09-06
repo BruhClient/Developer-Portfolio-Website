@@ -2,7 +2,7 @@
 import puppeteer from "puppeteer-core";
 
 const OUT = process.argv[2];
-const URL = process.argv[3] || "http://localhost:3001/world";
+const URL = process.argv[3] || "http://localhost:3001/";
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const browser = await puppeteer.launch({

@@ -35,9 +35,9 @@ export interface PageData {
   overview: string;
   images: PageImage[];
   /**
-   * Cover shot for the home card and the 3D device screen. Defaults to the
-   * last image, which is usually the most finished one. Set this to any `src`
-   * to override, including a shot that is not in `images` at all.
+   * Cover shot for the entry. Defaults to the last image, which is usually the
+   * most finished one. Set this to any `src` to override, including a shot that
+   * is not in `images` at all.
    */
   cardImage?: string;
   impacts: string[];
@@ -46,9 +46,8 @@ export interface PageData {
 }
 
 /**
- * The one place that decides which image fronts an entry. Both card grids and
- * the device screen read through this, so the panel on the tablet can never
- * show a different cover than the card it depicts.
+ * The one place that decides which image fronts an entry, so every surface that
+ * depicts a project agrees on its cover.
  */
 export function cardImageOf(data: PageData): string | undefined {
   return data.cardImage ?? data.images[data.images.length - 1]?.src;

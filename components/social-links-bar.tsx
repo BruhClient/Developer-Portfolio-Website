@@ -34,6 +34,19 @@ const SocialLinksBar = () => {
           </p>
         </div>
 
+        {/* Attribution is a condition of the world's tileset licence. */}
+        <p className="text-xs text-muted-foreground">
+          Pixel art by{" "}
+          <a
+            href="https://limezu.itch.io/moderninteriors"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            LimeZu
+          </a>
+        </p>
+
         <ul className="flex items-center gap-1">
           {SOCIALS.map(({ icon: Icon, href, label }) => (
             <li key={label}>

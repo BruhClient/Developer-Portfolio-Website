@@ -96,7 +96,7 @@ const Navbar = () => {
             return (
               <a
                 key={tab.id}
-                href={`/#${tab.id}`}
+                href={`/?room=${tab.id}`}
                 aria-current={isActive ? "true" : undefined}
                 className={`relative cursor-pointer rounded-full px-3.5 py-1.5 text-sm transition-colors duration-200 ${
                   isActive
@@ -146,7 +146,7 @@ const Navbar = () => {
             {NAV_TABS.map((tab) => (
               <a
                 key={tab.id}
-                href={`/#${tab.id}`}
+                href={`/?room=${tab.id}`}
                 onClick={() => setMenuOpen(false)}
                 // 44px min height keeps these comfortable as touch targets
                 className={`flex min-h-11 cursor-pointer items-center rounded-xl px-4 text-sm transition-colors duration-200 ${

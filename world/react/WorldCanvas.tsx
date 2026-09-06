@@ -23,6 +23,9 @@ import { PROJECTS } from "@/constants/pages/projects";
 import { HACKATHONS } from "@/constants/pages/hackathons";
 import { CERTIFICATES, EXPERIENCE } from "@/constants/pages/experience";
 import { DialogueBox } from "./DialogueBox";
+import { WorldFallback } from "./WorldFallback";
+import { ContactModal } from "./ContactModal";
+import { resolveSpawn, type Point } from "../content/spawn";
 import {
   facingFrom,
   frameAt,
@@ -43,6 +46,33 @@ const FOOT_H = 8;
 
 const DRAWN_LAYERS = ["floor", "walls", "decor"];
 const REACH = 24; // 1.5 tiles, so you must actually walk up to a thing
+const SAVED_POSITION = "world:position";
+
+/*
+  Where the player was standing, so that leaving for a project page and pressing
+  back does not respawn them in the lobby. Session storage throws outright in
+  some privacy modes, so every access is guarded and simply forgets on failure.
+*/
+function readSaved(): Point | null {
+  try {
+    const raw = sessionStorage.getItem(SAVED_POSITION);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Point;
+    return typeof parsed?.x === "number" && typeof parsed?.y === "number"
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSaved(point: Point) {
+  try {
+    sessionStorage.setItem(SAVED_POSITION, JSON.stringify(point));
+  } catch {
+    // Nothing to do; the player simply starts from the map's spawn next time.
+  }
+}
 
 function footBody(x: number, y: number): Rect {
   return { x: x - FOOT_W / 2, y: y - FOOT_H, w: FOOT_W, h: FOOT_H };
@@ -59,6 +89,8 @@ export function WorldCanvas() {
   const hostRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const [failed, setFailed] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [prompt, setPrompt] = useState<Interactable | null>(null);
   const [dialogue, setDialogue] = useState<{
     item: Interactable;
@@ -67,6 +99,11 @@ export function WorldCanvas() {
 
   // The Pixi ticker is created once and closes over its first render. Refs are
   // how the simulation reads state that React owns.
+  const contactRef = useRef(contactOpen);
+  useEffect(() => {
+    contactRef.current = contactOpen;
+  }, [contactOpen]);
+
   const dialogueRef = useRef(dialogue);
   const promptRef = useRef(prompt);
   useEffect(() => {
@@ -88,7 +125,15 @@ export function WorldCanvas() {
 
   const follow = useCallback(() => {
     const action = dialogueRef.current?.item.action;
-    if (!action?.href) return;
+    if (!action) return;
+
+    if (action.mode === "modal") {
+      setDialogue(null);
+      setContactOpen(true);
+      return;
+    }
+
+    if (!action.href) return;
     if (action.mode === "internal") router.push(action.href);
     else if (action.mode === "external") window.open(action.href, "_blank");
     else window.location.href = action.href;
@@ -102,6 +147,8 @@ export function WorldCanvas() {
   useEffect(() => {
     followRef.current = follow;
   }, [follow]);
+
+  const positionRef = useRef<Point | null>(null);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -234,13 +281,21 @@ export function WorldCanvas() {
       world.addChild(promptView);
 
       const solids = collisionFrom(map);
-      const spawn = spawnFrom(map);
+      // A link says where to go, a remembered position brings you back, and the
+      // map's own spawn is the fallback.
+      const spawn = resolveSpawn({
+        room: new URLSearchParams(window.location.search).get("room"),
+        saved: readSaved(),
+        anchors: anchorsFrom(map),
+        mapSpawn: spawnFrom(map),
+      });
       const mapSize = {
         width: map.width * map.tilewidth,
         height: map.height * map.tileheight,
       };
 
       const player = { x: spawn.x, y: spawn.y };
+      positionRef.current = player;
       let facing: Direction = "down";
       let animMs = 0;
       let accumulator = 0;
@@ -255,7 +310,7 @@ export function WorldCanvas() {
         accumulator = remainder;
 
         // Reading a textbox should not also walk you out of the room.
-        const frozen = dialogueRef.current !== null;
+        const frozen = dialogueRef.current !== null || contactRef.current;
         const direction = frozen ? { x: 0, y: 0 } : directionVector(keys);
         const moving = direction.x !== 0 || direction.y !== 0;
         facing = facingFrom(direction, facing);
@@ -296,14 +351,27 @@ export function WorldCanvas() {
           Math.round(-camera.y * ZOOM),
         );
       });
-    })();
+    })().catch((error) => {
+      // A blocked GPU, a missing tileset, a corrupt map: whatever the cause,
+      // the visitor gets the readable version of the site rather than a black
+      // rectangle.
+      console.error("world failed to start", error);
+      if (!disposed) setFailed(true);
+    });
+
+    const remember = () => {
+      if (positionRef.current) writeSaved(positionRef.current);
+    };
 
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", onBlur);
+    window.addEventListener("pagehide", remember);
 
     return () => {
       disposed = true;
+      remember();
+      window.removeEventListener("pagehide", remember);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
@@ -313,7 +381,13 @@ export function WorldCanvas() {
 
   return (
     <>
-      <div ref={hostRef} className="h-dvh w-full touch-none" />
+      {!failed ? (
+        <div ref={hostRef} className="h-dvh w-full touch-none" />
+      ) : null}
+      <WorldFallback visible={failed} />
+      {contactOpen ? (
+        <ContactModal onClose={() => setContactOpen(false)} />
+      ) : null}
       {dialogue ? (
         <DialogueBox
           item={dialogue.item}
