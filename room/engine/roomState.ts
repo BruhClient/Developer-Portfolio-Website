@@ -26,6 +26,15 @@ import type { ZoneId } from "../data/zones";
 export type RoomLevel = "home" | "item";
 
 export interface RoomState {
+  /*
+    Whether the visitor has come through the welcome screen.
+
+    It lives in the store rather than in the component that draws the welcome
+    because the camera needs it: the establishing sweep is the room's one
+    unrepeatable four seconds, and running it behind a backdrop nobody is
+    looking past would waste it. So the sweep does not start until this is true.
+  */
+  entered: boolean;
   level: RoomLevel;
   zone: ZoneId | null;
   /** Binding id of the open item, e.g. "project:git-dummy". */
@@ -38,6 +47,7 @@ export interface RoomState {
 }
 
 const INITIAL: RoomState = {
+  entered: false,
   level: "home",
   zone: null,
   item: null,
@@ -89,6 +99,17 @@ export function back(): void {
   set({ ...state, level: "home", zone: null, item: null });
 }
 
+/**
+ * Dismisses the welcome screen and lets the room begin.
+ *
+ * Not persisted anywhere on purpose: the welcome is meant to greet every
+ * arrival, so a reload is a fresh arrival.
+ */
+export function enterRoom(): void {
+  if (state.entered) return;
+  set({ ...state, entered: true });
+}
+
 export function setHovered(id: string | null): void {
   if (state.hovered === id) return;
   set({ ...state, hovered: id });
@@ -100,6 +121,7 @@ export function setFocused(id: string | null): void {
 }
 
 const actions = {
+  enterRoom,
   openItem,
   back,
   setHovered,

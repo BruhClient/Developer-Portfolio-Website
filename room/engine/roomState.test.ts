@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { back, getRoomState, openItem, resetRoom, setFocused } from "./roomState";
+import { back, enterRoom, getRoomState, openItem, resetRoom, setFocused } from "./roomState";
 
 /*
   The camera model is the part of the spec a visitor feels most directly, and
@@ -22,6 +22,7 @@ describe("opening things", () => {
   test("an unknown binding changes nothing, rather than opening an empty panel", () => {
     openItem("project:does-not-exist");
     expect(getRoomState()).toEqual({
+      entered: false,
       level: "home",
       zone: null,
       item: null,
@@ -71,5 +72,26 @@ describe("focus", () => {
     setFocused("hackathons:cart-2");
     expect(getRoomState().focused).toBe("hackathons:cart-2");
     expect(getRoomState().level).toBe("home");
+  });
+});
+
+describe("the welcome screen", () => {
+  test("a fresh arrival has not entered, so the welcome shows", () => {
+    expect(getRoomState().entered).toBe(false);
+  });
+
+  test("entering is one-way within a visit", () => {
+    enterRoom();
+    expect(getRoomState().entered).toBe(true);
+    // Closing a panel must not put the visitor back on the front door.
+    openItem("project:git-dummy");
+    back();
+    expect(getRoomState().entered).toBe(true);
+  });
+
+  test("entering does not open anything", () => {
+    enterRoom();
+    expect(getRoomState().level).toBe("home");
+    expect(getRoomState().item).toBeNull();
   });
 });

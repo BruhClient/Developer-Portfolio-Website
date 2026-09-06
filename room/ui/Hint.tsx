@@ -22,10 +22,13 @@ export function Hint() {
   const { state } = useRoom();
   const [ready, setReady] = useState(false);
 
+  // Counted from entry rather than from mount, so the line still lands just
+  // after the sweep no matter how long the welcome screen was left up.
   useEffect(() => {
+    if (!state.entered) return;
     const timer = window.setTimeout(() => setReady(true), GUIDANCE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [state.entered]);
 
   if (!ready || state.opened.size > 0) return null;
 

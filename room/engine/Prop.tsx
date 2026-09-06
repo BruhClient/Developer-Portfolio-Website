@@ -136,8 +136,15 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
       )}
 
       {/*
-        Always mounted, never conditional on hover. Navigation that only exists
-        while the pointer is already on it is not navigation.
+        Held back until the visitor has come through the welcome screen. drei
+        renders Html into the DOM with a z-index in the millions, so a sign
+        outranks any backdrop put in front of the room - the labels were
+        printing straight over the greeting. Behind the curtain the room should
+        read as a room anyway, not as an annotated diagram, so they arrive with
+        the sweep.
+
+        After that: always mounted, never conditional on hover. Navigation that
+        only exists while the pointer is already on it is not navigation.
 
         Constant screen size on purpose - no distanceFactor. A label that
         shrinks with distance is unreadable on exactly the objects that are
@@ -149,6 +156,7 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
         drei's wrapper so it never blocks the room behind it, and back on for
         the button itself.
       */}
+      {state.entered && (
       <Html center position={[0, anchorY, 0]} style={{ pointerEvents: "none" }}>
         <div className="room-sign-anchor">
           <button
@@ -176,6 +184,7 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
           </button>
         </div>
       </Html>
+      )}
     </group>
   );
 }

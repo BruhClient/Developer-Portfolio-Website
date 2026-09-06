@@ -461,13 +461,19 @@
    all: the dev server keeps serving the PREVIOUS stylesheet after an edit to
    this file, so new rules simply do not exist in the page and every element
    using them renders unstyled, with no error in the build, the console or the
-   terminal. Restarting the dev server clears it; bumping the file's mtime on
-   its own did not. The project sits in a OneDrive folder and file-watch events
-   there are unreliable, which is the most likely cause - the same sync has
-   already restored deleted files in this repo once.
+   terminal. The project sits in a OneDrive folder and file-watch events there
+   are unreliable, which is the most likely cause - the same sync has already
+   restored deleted files in this repo once.
 
-   If a style you just added appears to do nothing, check whether the rule is
-   actually in the served stylesheet before you go looking for a CSS bug. */
+   What actually clears it, in order of increasing force: bumping the file's
+   mtime sometimes works; restarting the dev server usually works; deleting
+   .next always works. A restart alone is not enough on its own, because
+   Turbopack's cache survives it and hands the same stale chunk back - it looks
+   identical to the bug it is meant to fix, right down to the unchanged chunk
+   filename.
+
+   If a style you just added appears to do nothing, fetch the served stylesheet
+   and look for the rule before you go looking for a CSS bug. */
 @media (prefers-reduced-motion: reduce) {
   .room-sign[data-hint] .room-sign__dot {
     animation: none;
@@ -528,5 +534,175 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Welcome screen.
+
+   The room is a good answer to "who is this person" only once you already know
+   the answer. On a cold arrival it is an unlabelled picture of a bedroom, so
+   the site introduces itself first and offers the three things a visitor might
+   want: the room, the same content as plain text, or the resume with no
+   exploring at all.
+
+   The room is drawn behind it at a low opacity rather than hidden, so the
+   backdrop reads as a curtain in front of something rather than as a loading
+   screen.
+   ───────────────────────────────────────────── */
+/* A <dialog>, so most of this is undoing the UA's own box: the browser gives
+   a modal dialog a centred, shrink-to-fit, bordered white card, and what is
+   wanted is a full-viewport curtain. It sits in the top layer once showModal()
+   runs, which is why it needs no z-index of its own - and why it beats the
+   z-index in the millions that drei puts on the room's signs. */
+.room-welcome {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px clamp(24px, 8vw, 7rem);
+  border: none;
+  color: #f4ead9;
+  /* Heavy where the words are, thin where the room is, so the greeting has its
+     contrast and the room still shows through as something to walk into. */
+  background: linear-gradient(
+    105deg,
+    rgba(8, 9, 16, 0.97) 0%,
+    rgba(8, 9, 16, 0.93) 34%,
+    rgba(8, 9, 16, 0.66) 62%,
+    rgba(8, 9, 16, 0.42) 100%
+  );
+  overflow: auto;
+  animation: room-welcome-in 340ms ease-out both;
+}
+
+/* Transparent, and that matters: ::backdrop paints BETWEEN the page and a
+   top-layer dialog, so giving it a colour hid the room completely and left the
+   dialog's own translucent scrim layered over nothing. */
+.room-welcome::backdrop {
+  background: transparent;
+}
+
+.room-welcome__card {
+  width: min(100%, 34rem);
+  text-align: left;
+}
+
+.room-welcome__eyebrow {
+  margin: 0 0 12px;
+  color: #d9a15f;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.room-welcome__title {
+  margin: 0;
+  color: #f7efe2;
+  /* Fluid, because this is the one line that must not wrap awkwardly on a
+     phone and must not look timid on a desktop. */
+  font-size: clamp(2rem, 7vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.room-welcome__lead {
+  margin: 16px 0 0;
+  max-width: 30rem;
+  color: rgba(244, 234, 217, 0.62);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.room-welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.room-welcome__go,
+.room-welcome__alt {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+/* The room is the primary action, so it is the only filled one. */
+.room-welcome__go {
+  border: 1px solid #ffd9a0;
+  background: #ffd9a0;
+  color: #1a1206;
+}
+
+.room-welcome__go:hover {
+  background: #ffe7c0;
+  border-color: #ffe7c0;
+}
+
+.room-welcome__alt {
+  border: 1px solid rgba(255, 217, 160, 0.26);
+  background: transparent;
+  color: rgba(244, 234, 217, 0.86);
+}
+
+.room-welcome__alt:hover {
+  border-color: rgba(255, 217, 160, 0.6);
+  color: #fff6e6;
+}
+
+.room-welcome__go:focus-visible,
+.room-welcome__alt:focus-visible {
+  outline: 2px solid #ffd9a0;
+  outline-offset: 3px;
+}
+
+.room-welcome__note {
+  margin: 22px 0 0;
+  color: rgba(244, 234, 217, 0.34);
+  font-size: 12px;
+}
+
+/* Too narrow for the gradient to separate words from room - the card spans the
+   whole width, so the thin end would land under the text. Flat scrim instead. */
+@media (max-width: 700px) {
+  .room-welcome {
+    background: rgba(8, 9, 16, 0.93);
+  }
+}
+
+@keyframes room-welcome-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-welcome {
+    animation: none;
   }
 }

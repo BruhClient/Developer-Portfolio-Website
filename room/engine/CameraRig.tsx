@@ -85,21 +85,48 @@ export function CameraRig() {
   const { state, back } = useRoom();
   const [swivel, setSwivel] = useState<Swivel>({ yaw: 0, pitch: 0 });
   const [zoom, setZoom] = useState(1);
-  const [sweepStart] = useState(() => Date.now());
-  const [sweeping, setSweeping] = useState(true);
+  /*
+    When the sweep began, and whether anything has cut it short.
+
+    The start time is a ref rather than state because writing it changes
+    nothing that needs re-rendering - useFrame reads it every frame anyway -
+    and because setting state synchronously inside the effect below would be a
+    cascading render for no gain. Whether it was aborted IS state: that flips
+    from an event listener, which is exactly the case effects are for.
+  */
+  const sweepStart = useRef<number | null>(null);
+  const [sweepAborted, setSweepAborted] = useState(false);
   const drag = useRef<{ x: number; y: number } | null>(null);
   const lookAt = useRef(new THREE.Vector3(HOME.center.x, HOME.center.y, HOME.center.z));
 
-  // Any input at all aborts the establishing sweep. Someone who has started
-  // clicking has already found the room and does not need the tour.
+  /*
+    The establishing sweep, held until the welcome screen is dismissed.
+
+    It used to start on mount, which was fine when the room was the first thing
+    on screen and wrong the moment a backdrop went in front of it: the one
+    unrepeatable four seconds would have played out behind something nobody was
+    looking past, and then the very click that dismissed the backdrop would have
+    counted as the input that aborts it.
+
+    Any input at all still aborts it. Someone who has started clicking has
+    already found the room and does not need the tour.
+  */
   useEffect(() => {
-    const stop = () => setSweeping(false);
-    for (const event of ["pointerdown", "wheel", "keydown"] as const) {
+    if (!state.entered) return;
+
+    sweepStart.current = Date.now();
+
+    const stop = () => setSweepAborted(true);
+    const events = ["pointerdown", "wheel", "keydown"] as const;
+    for (const event of events) {
       window.addEventListener(event, stop, { once: true });
     }
     const done = window.setTimeout(stop, SWEEP_DURATION_MS + 200);
-    return () => window.clearTimeout(done);
-  }, []);
+    return () => {
+      window.clearTimeout(done);
+      for (const event of events) window.removeEventListener(event, stop);
+    };
+  }, [state.entered]);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
@@ -145,8 +172,9 @@ export function CameraRig() {
     let bounds = HOME;
     let level: Level = state.level;
 
-    if (sweeping) {
-      const zone = sweepAt(Date.now() - sweepStart);
+    const startedAt = sweepStart.current;
+    if (startedAt !== null && !sweepAborted) {
+      const zone = sweepAt(Date.now() - startedAt);
       bounds = zone ? boundsForZone(zone) : HOME;
       level = zone ? "zone" : "home";
     } else if (state.level === "item") {

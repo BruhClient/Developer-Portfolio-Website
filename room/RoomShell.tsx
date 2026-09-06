@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { useRoom } from "./engine/roomState";
 import { hasWebGL } from "./fallback/webgl";
 
 /*
@@ -15,6 +16,7 @@ import { hasWebGL } from "./fallback/webgl";
 const Room = dynamic(() => import("./engine/Room").then((m) => m.Room), { ssr: false });
 const Panel = dynamic(() => import("./ui/Panel").then((m) => m.Panel), { ssr: false });
 const Hint = dynamic(() => import("./ui/Hint").then((m) => m.Hint), { ssr: false });
+const Welcome = dynamic(() => import("./ui/Welcome").then((m) => m.Welcome), { ssr: false });
 
 export function RoomShell() {
   /*
@@ -25,6 +27,7 @@ export function RoomShell() {
     way.
   */
   const [supported] = useState(hasWebGL);
+  const { state } = useRoom();
 
   useEffect(() => {
     if (!supported) window.location.replace("/text");
@@ -34,15 +37,25 @@ export function RoomShell() {
 
   return (
     <div className="room-stage fixed inset-0 bg-[#0b0d16]">
-      <Room />
-      <Panel />
-      <Hint />
-      <a
-        href="/text"
-        className="fixed bottom-3 left-3 z-30 text-[11px] text-amber-100/35 underline underline-offset-4 hover:text-amber-100/70"
-      >
-        text version
-      </a>
+      {/*
+        The room mounts and loads its models behind the welcome screen, so
+        entering is instant rather than a second wait - but it is `inert` until
+        then. Without that the six signs are still in the tab ring and still
+        clickable through a backdrop that is only mostly opaque, which is a
+        dialog in appearance only.
+      */}
+      <div className="absolute inset-0" inert={!state.entered}>
+        <Room />
+        <Panel />
+        <Hint />
+        <a
+          href="/text"
+          className="fixed bottom-3 left-3 z-30 text-[11px] text-amber-100/35 underline underline-offset-4 hover:text-amber-100/70"
+        >
+          text version
+        </a>
+      </div>
+      <Welcome />
     </div>
   );
 }
