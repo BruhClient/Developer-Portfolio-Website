@@ -15,14 +15,13 @@ describe("isMobile", () => {
 
 describe("framingFor", () => {
   test("aims at the bounds centre at every level", () => {
-    for (const level of ["home", "zone", "item"] as const) {
+    for (const level of ["home", "item"] as const) {
       expect(framingFor(level, bounds, desktop, fov).target).toEqual(bounds.center);
     }
   });
 
-  test("home and zone stay centred, because no panel is open", () => {
+  test("home stays centred, because no panel is open", () => {
     expect(framingFor("home", bounds, desktop, fov).screenAnchor).toEqual({ x: 0.5, y: 0.5 });
-    expect(framingFor("zone", bounds, desktop, fov).screenAnchor).toEqual({ x: 0.5, y: 0.5 });
   });
 
   test("item framing on desktop leaves the right 45% clear for the panel", () => {
@@ -44,9 +43,8 @@ describe("framingFor", () => {
     );
   });
 
-  test("each level steps closer than the one before it", () => {
-    const at = (l: "home" | "zone" | "item") => framingFor(l, bounds, desktop, fov).distance;
-    expect(at("home")).toBeGreaterThan(at("zone"));
-    expect(at("zone")).toBeGreaterThan(at("item"));
+  test("opening something steps the camera closer than the whole room", () => {
+    const at = (l: "home" | "item") => framingFor(l, bounds, desktop, fov).distance;
+    expect(at("home")).toBeGreaterThan(at("item"));
   });
 });

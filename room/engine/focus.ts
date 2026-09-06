@@ -1,11 +1,19 @@
 /*
-  Where the camera sits for each of the three levels.
+  Where the camera sits at each level.
 
   Pure maths on purpose. The rig in CameraRig.tsx does the tweening and owns the
   three.js objects; everything decidable without a renderer is decided here so it
   can be tested in a node environment, matching the convention in vitest.config.ts.
 */
-export type Level = "home" | "zone" | "item";
+/*
+  Deliberately the same shape as RoomState's own level, and deliberately not
+  imported from it: this module is pure maths and stays free of the store.
+
+  There was a third, "zone", framing a single corner. Only the establishing
+  sweep ever asked for it, and the sweep is gone - the signs tell a visitor
+  what is in the room without the camera having to show them.
+*/
+export type Level = "home" | "item";
 
 export interface Vec3 {
   x: number;
@@ -38,12 +46,11 @@ export function isMobile(viewport: Viewport): boolean {
 }
 
 /*
-  How much air to leave around the subject. Home shows the whole room, zone
-  shows a cluster, item fills the frame with one object.
+  How much air to leave around the subject. Home shows the whole room; item
+  fills the frame with one object.
 */
 const PADDING: Record<Level, number> = {
   home: 1.9,
-  zone: 1.4,
   item: 1.15,
 };
 

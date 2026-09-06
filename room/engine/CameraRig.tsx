@@ -5,8 +5,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { propForBinding } from "../data/navigation";
 import { ROOM, SCENE } from "../data/scene";
-import { ZONES, type ZoneId } from "../data/zones";
-import { SWEEP_DURATION_MS, sweepAt } from "./attract";
 import { framingFor, type Bounds, type Level } from "./focus";
 import { applyDrag, type Swivel } from "./swivel";
 import { useRoom } from "./roomState";
@@ -63,14 +61,6 @@ const HOME: Bounds = {
   radius: ROOM.half * 0.82,
 };
 
-function boundsForZone(id: ZoneId): Bounds {
-  const zone = ZONES[id];
-  return {
-    center: { x: zone.origin.x, y: 0.9, z: zone.origin.z },
-    radius: Math.max(zone.size.w, zone.size.d) * 0.8,
-  };
-}
-
 function boundsForProp(propId: string): Bounds {
   const prop = SCENE.find((p) => p.id === propId);
   if (!prop) return HOME;
@@ -85,48 +75,8 @@ export function CameraRig() {
   const { state, back } = useRoom();
   const [swivel, setSwivel] = useState<Swivel>({ yaw: 0, pitch: 0 });
   const [zoom, setZoom] = useState(1);
-  /*
-    When the sweep began, and whether anything has cut it short.
-
-    The start time is a ref rather than state because writing it changes
-    nothing that needs re-rendering - useFrame reads it every frame anyway -
-    and because setting state synchronously inside the effect below would be a
-    cascading render for no gain. Whether it was aborted IS state: that flips
-    from an event listener, which is exactly the case effects are for.
-  */
-  const sweepStart = useRef<number | null>(null);
-  const [sweepAborted, setSweepAborted] = useState(false);
   const drag = useRef<{ x: number; y: number } | null>(null);
   const lookAt = useRef(new THREE.Vector3(HOME.center.x, HOME.center.y, HOME.center.z));
-
-  /*
-    The establishing sweep, held until the welcome screen is dismissed.
-
-    It used to start on mount, which was fine when the room was the first thing
-    on screen and wrong the moment a backdrop went in front of it: the one
-    unrepeatable four seconds would have played out behind something nobody was
-    looking past, and then the very click that dismissed the backdrop would have
-    counted as the input that aborts it.
-
-    Any input at all still aborts it. Someone who has started clicking has
-    already found the room and does not need the tour.
-  */
-  useEffect(() => {
-    if (!state.entered) return;
-
-    sweepStart.current = Date.now();
-
-    const stop = () => setSweepAborted(true);
-    const events = ["pointerdown", "wheel", "keydown"] as const;
-    for (const event of events) {
-      window.addEventListener(event, stop, { once: true });
-    }
-    const done = window.setTimeout(stop, SWEEP_DURATION_MS + 200);
-    return () => {
-      window.clearTimeout(done);
-      for (const event of events) window.removeEventListener(event, stop);
-    };
-  }, [state.entered]);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
@@ -169,15 +119,25 @@ export function CameraRig() {
   }, [back]);
 
   useFrame(() => {
-    let bounds = HOME;
-    let level: Level = state.level;
+    /*
+      The whole room, unless something is open.
 
-    const startedAt = sweepStart.current;
-    if (startedAt !== null && !sweepAborted) {
-      const zone = sweepAt(Date.now() - startedAt);
-      bounds = zone ? boundsForZone(zone) : HOME;
-      level = zone ? "zone" : "home";
-    } else if (state.level === "item") {
+      There used to be an establishing sweep here: on arrival the camera flew
+      through all six zones in four seconds and settled. It was the answer to
+      "how do you tell someone there are six sections without chrome on
+      screen", and the signs answer that better - they name all six, at once,
+      without moving the camera. What was left was a camera lurching between
+      corners before the visitor had asked for anything, which reads as the
+      page malfunctioning rather than as a tour.
+
+      It also means entering the room is now seamless: the camera has already
+      eased to this framing while the welcome screen was up, so dismissing the
+      welcome moves nothing.
+    */
+    let bounds = HOME;
+    const level: Level = state.level;
+
+    if (state.level === "item") {
       // Keyboard focus wins over the open item, so tabbing moves the camera
       // even while a panel is open.
       const propId =
@@ -220,7 +180,25 @@ export function CameraRig() {
       size.height,
     );
     perspective.updateProjectionMatrix();
+
+    /*
+      Development-only handle, matching __roomState in roomState.ts and there
+      for the same reason: camera behaviour is otherwise unverifiable from
+      outside the page. Screenshots cannot answer "is the camera moving",
+      because the six section objects bob on a sine wave and the signs pulse,
+      so every frame differs no matter what the camera does. Reading the
+      position is the only measurement that means what it says.
+    */
+    if (process.env.NODE_ENV !== "production") {
+      report(camera.position);
+    }
   });
 
   return null;
+}
+
+function report(position: THREE.Vector3): void {
+  if (typeof window === "undefined") return;
+  const at = { x: position.x, y: position.y, z: position.z };
+  Object.assign(window, { __roomCamera: () => at });
 }
