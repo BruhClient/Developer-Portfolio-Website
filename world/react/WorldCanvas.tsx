@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Application, Assets, Container, Rectangle, Sprite, Text, Texture } from "pixi.js";
+import {
+  Application,
+  Assets,
+  Container,
+  Graphics,
+  Rectangle,
+  Sprite,
+  Text,
+  Texture,
+} from "pixi.js";
 import { cameraTopLeft } from "../engine/Camera";
 import { moveAndCollide, type Rect } from "../engine/Collision";
 import { directionVector } from "../engine/Input";
@@ -25,6 +34,8 @@ import { CERTIFICATES, EXPERIENCE } from "@/constants/pages/experience";
 import { DialogueBox } from "./DialogueBox";
 import { WorldFallback } from "./WorldFallback";
 import { ContactModal } from "./ContactModal";
+import { TouchControls } from "./TouchControls";
+import { zoomFor } from "../engine/Zoom";
 import { resolveSpawn, type Point } from "../content/spawn";
 import {
   facingFrom,
@@ -33,7 +44,7 @@ import {
   type Direction,
 } from "../engine/CharacterSprite";
 
-const ZOOM = 2.5;
+const IDLE_FPS = 6;
 const FIXED_MS = 16;
 const MAX_STEPS = 5;
 const SPEED = 1.1;
@@ -149,6 +160,18 @@ export function WorldCanvas() {
   }, [follow]);
 
   const positionRef = useRef<Point | null>(null);
+  const keysRef = useRef<Set<string>>(new Set());
+
+  // Pressing E and tapping A must do the same thing, so both call this.
+  const interact = useCallback(() => {
+    if (dialogueRef.current) return advanceRef.current();
+    if (promptRef.current) setDialogue({ item: promptRef.current, beat: 0 });
+  }, []);
+
+  const interactRef = useRef(interact);
+  useEffect(() => {
+    interactRef.current = interact;
+  }, [interact]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -156,7 +179,7 @@ export function WorldCanvas() {
 
     let disposed = false;
     let app: Application | null = null;
-    const keys = new Set<string>();
+    const keys = keysRef.current;
 
     const onKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
@@ -164,12 +187,7 @@ export function WorldCanvas() {
 
       if (key === "escape") return setDialogue(null);
 
-      if (key === "e") {
-        if (dialogueRef.current) advanceRef.current();
-        else if (promptRef.current)
-          setDialogue({ item: promptRef.current, beat: 0 });
-        return;
-      }
+      if (key === "e") return interactRef.current();
 
       if (key === "r" && dialogueRef.current) followRef.current();
     };
@@ -200,9 +218,10 @@ export function WorldCanvas() {
           Assets.load("/world-assets/" + tileset.image.split(/[\/]/).pop()),
         ),
       );
-      const [idleSheet, runSheet] = await Promise.all([
+      const [idleSheet, runSheet, npcSheet] = await Promise.all([
         Assets.load("/world-assets/characters/Adam_idle.png"),
         Assets.load("/world-assets/characters/Adam_run.png"),
+        Assets.load("/world-assets/characters/Amelia_idle_anim.png"),
       ]);
       if (disposed) return created.destroy(true, { children: true });
 
@@ -210,6 +229,9 @@ export function WorldCanvas() {
       host.appendChild(created.canvas);
 
       const world = new Container();
+      // Explicit depth: floor, then the pedestal lights, then anyone standing
+      // on them, then the interaction prompt over everything.
+      world.sortableChildren = true;
       created.stage.addChild(world);
 
       const cache = new Map<string, Texture>();
@@ -258,6 +280,7 @@ export function WorldCanvas() {
 
       const playerView = new Sprite(idleTex.down[0]);
       playerView.anchor.set(0.5, 1);
+      playerView.zIndex = 2;
       world.addChild(playerView);
 
       const interactables = buildInteractables(anchorsFrom(map), {
@@ -266,6 +289,45 @@ export function WorldCanvas() {
         experience: EXPERIENCE,
         certificates: CERTIFICATES,
       });
+
+      const stillness = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      // Hackathons that placed get a pedestal light, so the trophy room has a
+      // focal point rather than a row of identical plinths.
+      const decorated = new Set(
+        HACKATHONS.filter((entry) => entry.award).map(
+          (entry) => "hackathon:" + entry.slug,
+        ),
+      );
+      const spotlights = interactables
+        .filter((item) => decorated.has(item.id))
+        .map((item) => {
+          const glow = new Graphics();
+          glow
+            .circle(0, 0, 22)
+            .fill({ color: 0xffcf5c, alpha: 0.3 })
+            .circle(0, 0, 11)
+            .fill({ color: 0xfff0c0, alpha: 0.55 });
+          glow.zIndex = 1;
+          glow.position.set(item.x, item.y);
+          world.addChild(glow);
+          return glow;
+        });
+
+      // Travis idles in the lobby. idle_anim is 24 frames, six per direction.
+      const npcAnchor = interactables.find((item) => item.id === "npc:travis");
+      const npcFrames = sliceDirectional(6).down.map((f) =>
+        frameTexture(npcSheet, f),
+      );
+      const npcView = npcAnchor ? new Sprite(npcFrames[0]) : null;
+      if (npcView && npcAnchor) {
+        npcView.anchor.set(0.5, 1);
+        npcView.zIndex = 2;
+        npcView.position.set(npcAnchor.x, npcAnchor.y);
+        world.addChild(npcView);
+      }
 
       const promptView = new Text({
         text: "E",
@@ -277,6 +339,7 @@ export function WorldCanvas() {
         },
       });
       promptView.anchor.set(0.5, 1);
+      promptView.zIndex = 3;
       promptView.visible = false;
       world.addChild(promptView);
 
@@ -298,6 +361,7 @@ export function WorldCanvas() {
       positionRef.current = player;
       let facing: Direction = "down";
       let animMs = 0;
+      let ambientMs = 0;
       let accumulator = 0;
 
       created.ticker.add((ticker) => {
@@ -337,18 +401,32 @@ export function WorldCanvas() {
         promptView.visible = near !== null && !frozen;
         if (near) promptView.position.set(near.x, near.y - 6);
 
+        if (!stillness) {
+          ambientMs += ticker.deltaMS;
+          if (npcView)
+            npcView.texture = npcFrames[frameAt(ambientMs, npcFrames.length, IDLE_FPS)];
+          const pulse = 0.72 + 0.28 * Math.sin(ambientMs / 620);
+          for (const glow of spotlights) glow.alpha = pulse;
+        }
+
+        // Recomputed per frame so rotating a phone or dragging a window resizes
+        // the view without remounting anything.
+        const zoom = zoomFor(
+          { width: created.screen.width, height: created.screen.height },
+          mapSize,
+        );
         const camera = cameraTopLeft(
           player,
           {
-            width: created.screen.width / ZOOM,
-            height: created.screen.height / ZOOM,
+            width: created.screen.width / zoom,
+            height: created.screen.height / zoom,
           },
           mapSize,
         );
-        world.scale.set(ZOOM);
+        world.scale.set(zoom);
         world.position.set(
-          Math.round(-camera.x * ZOOM),
-          Math.round(-camera.y * ZOOM),
+          Math.round(-camera.x * zoom),
+          Math.round(-camera.y * zoom),
         );
       });
     })().catch((error) => {
@@ -385,6 +463,9 @@ export function WorldCanvas() {
         <div ref={hostRef} className="h-dvh w-full touch-none" />
       ) : null}
       <WorldFallback visible={failed} />
+      {!failed && !dialogue && !contactOpen ? (
+        <TouchControls keys={keysRef} onInteract={interact} />
+      ) : null}
       {contactOpen ? (
         <ContactModal onClose={() => setContactOpen(false)} />
       ) : null}
