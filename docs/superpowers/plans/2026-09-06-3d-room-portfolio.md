@@ -55,8 +55,15 @@ R3F v9 is the line that supports React 19, which this project is on. Let npm res
 - [ ] **Step 2: Verify the installed majors**
 
 ```bash
-node -e "for (const p of ['three','@react-three/fiber','@react-three/drei']) console.log(p, require(p+'/package.json').version)"
+node -e "
+const fs=require('fs');
+for (const p of ['three','@react-three/fiber','@react-three/drei','@types/three']) {
+  try { console.log(p, JSON.parse(fs.readFileSync('node_modules/'+p+'/package.json','utf8')).version); }
+  catch(e) { console.log(p, 'NOT INSTALLED'); }
+}"
 ```
+
+Read the manifests off disk rather than `require(p + '/package.json')` — `three` does not expose `./package.json` through its exports map, so the require form throws `ERR_PACKAGE_PATH_NOT_EXPORTED`.
 
 Expected: `@react-three/fiber` is 9.x. If it resolved to 8.x, run `npm install @react-three/fiber@^9`.
 

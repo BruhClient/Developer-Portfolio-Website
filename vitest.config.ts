@@ -12,6 +12,10 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["world/**/*.test.ts", "constants/**/*.test.ts"],
+    include: [
+      "world/**/*.test.ts",
+      "room/**/*.test.ts",
+      "constants/**/*.test.ts",
+    ],
   },
 });
