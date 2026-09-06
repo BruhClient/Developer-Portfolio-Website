@@ -38,6 +38,21 @@ const BASE_PITCH = 30;
 export const FOV = 26;
 
 /*
+  How far the wheel may push the camera, as a multiple of whatever the current
+  level frames.
+
+  The old range was 0.65 to 1.35, which is barely a third either way and made
+  "zoom out" feel broken - especially once you had closed a panel, because the
+  camera was then framed tight on one corner and a third more distance did not
+  get you anywhere near the room. Stepping is multiplicative so a notch moves
+  the same proportion of the way out at every distance, rather than being a
+  large jump up close and an imperceptible one far away.
+*/
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2.4;
+const ZOOM_STEP = 0.08;
+
+/*
   Framing radius, not the room's actual size. focus.ts multiplies it by the home
   padding, so this is tuned to sit the whole seven-tile room in frame with a
   little air - close enough that it reads as a doll's house you could pick up,
@@ -101,7 +116,10 @@ export function CameraRig() {
       drag.current = null;
     };
     const onWheel = (e: WheelEvent) => {
-      setZoom((z) => Math.min(1.35, Math.max(0.65, z + Math.sign(e.deltaY) * 0.06)));
+      setZoom((z) => {
+        const next = z * (1 + Math.sign(e.deltaY) * ZOOM_STEP);
+        return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
+      });
     };
     // Escape moves to useRoomKeys in Task 15; owning it in both would step back
     // two levels on one keypress.
@@ -137,8 +155,6 @@ export function CameraRig() {
       const propId =
         state.focused ?? (state.item ? propForBinding(state.item) : undefined) ?? "";
       bounds = boundsForProp(propId);
-    } else if (state.level === "zone" && state.zone) {
-      bounds = boundsForZone(state.zone);
     }
 
     const framing = framingFor(level, bounds, size, FOV);

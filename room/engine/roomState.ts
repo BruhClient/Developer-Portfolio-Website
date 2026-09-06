@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { BINDINGS } from "../data/bindings";
 import type { ZoneId } from "../data/zones";
-import type { Level } from "./focus";
 
 /*
   Who is looking at what.
@@ -13,8 +12,21 @@ import type { Level } from "./focus";
   the side benefit of being plain data that can be driven from a node test - so
   the level transitions below are covered rather than merely hoped for.
 */
+/*
+  Home or reading something. There is no third state.
+
+  There used to be a "zone" level between them, back when the floor carried a
+  tinted plane and a section name you could click to walk into a corner. Those
+  came out - the room is the navigation, and a room does not label its own
+  corners - and nothing has been able to ENTER the zone level since. It could
+  still be left in one though: closing a panel stepped back to it, which framed
+  the camera tight on a corner with no way out but a second Escape, and read as
+  "I am stuck zoomed in".
+*/
+export type RoomLevel = "home" | "item";
+
 export interface RoomState {
-  level: Level;
+  level: RoomLevel;
   zone: ZoneId | null;
   /** Binding id of the open item, e.g. "project:git-dummy". */
   item: string | null;
@@ -68,25 +80,13 @@ export function openItem(bindingId: string): void {
   set({ ...state, level: "item", zone: content.zone, item: bindingId, opened });
 }
 
-export function openZone(zone: ZoneId): void {
-  set({ ...state, level: "zone", zone, item: null });
-}
-
-export function goHome(): void {
-  set({ ...state, level: "home", zone: null, item: null });
-}
-
 /**
- * Steps back exactly one level, which is what Escape does. Never two: from an
- * open project you land in its zone, not out at the front door. There is no
- * state a visitor cannot get home from.
+ * Closes whatever is open and returns to the whole room. Escape and the panel's
+ * close button both land here, and from home it is a no-op, so there is no
+ * state a visitor cannot get out of.
  */
 export function back(): void {
-  set(
-    state.level === "item"
-      ? { ...state, level: "zone", item: null }
-      : { ...state, level: "home", zone: null, item: null },
-  );
+  set({ ...state, level: "home", zone: null, item: null });
 }
 
 export function setHovered(id: string | null): void {
@@ -101,8 +101,6 @@ export function setFocused(id: string | null): void {
 
 const actions = {
   openItem,
-  openZone,
-  goHome,
   back,
   setHovered,
   setFocused,
