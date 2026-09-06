@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { Toaster } from "sonner";
 
 const display = Archivo({
@@ -69,9 +68,11 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <SiteHeader />
+        {/*
+          No header, no footer, no nav. The room is the navigation, and chrome
+          around it would undo the thing the whole design is for.
+        */}
         <main id="main">{children}</main>
-        <SiteFooter />
         <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>

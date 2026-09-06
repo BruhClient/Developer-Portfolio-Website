@@ -2,9 +2,11 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 /*
-  The world engine is deliberately pure TypeScript with no React and no DOM, so
-  the default node environment is all it needs. Anything that touches Pixi or
-  the browser lives in `world/react/` and is verified by looking at it, not here.
+  The room's logic - swivel, focus framing, tab order, the attract sweep and the
+  room state store - is deliberately pure TypeScript with no React and no DOM,
+  so the default node environment is all it needs. Anything that touches three.js
+  or the browser lives in `room/engine/` and `room/ui/` and is verified by
+  looking at it, not here.
 */
 export default defineConfig({
   resolve: {
@@ -13,7 +15,6 @@ export default defineConfig({
   test: {
     environment: "node",
     include: [
-      "world/**/*.test.ts",
       "room/**/*.test.ts",
       "constants/**/*.test.ts",
     ],

@@ -1,11 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ARCHITECTURE, SCENE } from "../data/scene";
 import { ZONES, ZONE_ORDER } from "../data/zones";
+import { CameraRig } from "./CameraRig";
+import { InteractiveProp } from "./Prop";
+import { useRoom } from "./roomState";
 import { SceneryProp } from "./Scenery";
 import { SceneProbe } from "./SceneProbe";
 import { Floor } from "./Shell";
+
+const IDLE_MS = 8000;
+const NUDGE_EVENTS = ["pointerdown", "pointermove", "wheel", "keydown"] as const;
 
 /*
   A cutaway box: floor, back-left wall, back-right wall, no front walls. The
@@ -16,6 +23,37 @@ import { Floor } from "./Shell";
   make the six zones read as separate places without a single line of UI chrome.
 */
 export function Room() {
+  const { state, back } = useRoom();
+  const [idleTimerFired, setIdleTimerFired] = useState(false);
+
+  /*
+    After eight seconds of nothing at home, objects the visitor has not opened
+    yet pulse faintly. It is the only nudge in the room and the only thing
+    standing in for a nav bar's "there is more here" - so any input at all
+    cancels it, and it never runs while something is already open.
+
+    The timer is only armed at home, and the hint is derived rather than cleared
+    from inside the effect: clearing it there would be a synchronous setState in
+    an effect body, which cascades a render every time the level changes.
+  */
+  useEffect(() => {
+    if (state.level !== "home") return;
+
+    let timer = window.setTimeout(() => setIdleTimerFired(true), IDLE_MS);
+    const reset = () => {
+      setIdleTimerFired(false);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setIdleTimerFired(true), IDLE_MS);
+    };
+    for (const event of NUDGE_EVENTS) window.addEventListener(event, reset);
+    return () => {
+      window.clearTimeout(timer);
+      for (const event of NUDGE_EVENTS) window.removeEventListener(event, reset);
+    };
+  }, [state.level]);
+
+  const idleHint = idleTimerFired && state.level === "home";
+
   return (
     <Canvas
       shadows
@@ -26,6 +64,8 @@ export function Room() {
       // this over entirely once it mounts; this only frames the first paint.
       onCreated={({ camera }) => camera.lookAt(0, 1, -0.5)}
     >
+      <CameraRig />
+
       <color attach="background" args={["#0b0d16"]} />
 
       {/* Nothing goes fully black. */}
@@ -78,12 +118,23 @@ export function Room() {
       <SceneProbe />
 
       <group>
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, -0.02, 0]}
+          onClick={() => back()}
+        >
+          <planeGeometry args={[40, 40]} />
+          <meshBasicMaterial color="#0b0d16" />
+        </mesh>
         <Floor />
         {ARCHITECTURE.map((prop) => (
           <SceneryProp key={prop.id} prop={prop} />
         ))}
         {SCENE.filter((p) => !p.binding).map((prop) => (
           <SceneryProp key={prop.id} prop={prop} />
+        ))}
+        {SCENE.filter((p) => p.binding).map((prop) => (
+          <InteractiveProp key={prop.id} prop={prop} idleHint={idleHint} />
         ))}
       </group>
     </Canvas>

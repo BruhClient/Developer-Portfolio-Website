@@ -1,10 +1,22 @@
-import { WorldCanvas } from "@/world/react/WorldCanvas";
+import { RoomShell } from "@/room/RoomShell";
 
 /*
-  The homepage is the world. Long form content still lives on its own routes:
-  the world sends visitors to /projects/<slug>, /hackathons/<slug> and /about
-  the same way the scrolling site used to link to them.
+  The homepage is the room. There are no other content routes: everything opens
+  in a panel beside it, which is the whole point. /text carries the same content
+  for anyone who cannot run WebGL.
 */
 export default function Home() {
-  return <WorldCanvas />;
+  return (
+    <>
+      <RoomShell />
+      <noscript>
+        <div style={{ padding: 24 }}>
+          <p>
+            This site is an interactive 3D room and needs JavaScript. The full text
+            version is at <a href="/text">/text</a>.
+          </p>
+        </div>
+      </noscript>
+    </>
+  );
 }

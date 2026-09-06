@@ -1,0 +1,163 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import { ROOM, SCENE } from "../data/scene";
+import { ZONES, type ZoneId } from "../data/zones";
+import { SWEEP_DURATION_MS, sweepAt } from "./attract";
+import { framingFor, type Bounds, type Level } from "./focus";
+import { applyDrag, type Swivel } from "./swivel";
+import { useRoom } from "./roomState";
+
+/*
+  Owns the camera.
+
+  Everything decidable without a renderer was decided in swivel.ts and focus.ts;
+  this glues those to three.js and eases between them. Swivel stays live at every
+  level, including with a panel open - the room is never frozen while you read,
+  which is the entire reason this is a side panel and not a full-screen takeover.
+*/
+
+/** The default corner-on view. 45 degrees looks into the open corner. */
+const BASE_YAW = 45;
+const BASE_PITCH = 26;
+const FOV = 50;
+
+const HOME: Bounds = {
+  center: { x: 0, y: 1.1, z: -0.4 },
+  radius: ROOM.half * 1.25,
+};
+
+function boundsForZone(id: ZoneId): Bounds {
+  const zone = ZONES[id];
+  return {
+    center: { x: zone.origin.x, y: 0.9, z: zone.origin.z },
+    radius: Math.max(zone.size.w, zone.size.d) * 0.8,
+  };
+}
+
+function boundsForProp(propId: string): Bounds {
+  const prop = SCENE.find((p) => p.id === propId);
+  if (!prop) return HOME;
+  return {
+    center: { x: prop.position.x, y: prop.position.y + 0.35, z: prop.position.z },
+    radius: 0.8,
+  };
+}
+
+export function CameraRig() {
+  const { camera, size } = useThree();
+  const { state, back } = useRoom();
+  const [swivel, setSwivel] = useState<Swivel>({ yaw: 0, pitch: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [sweepStart] = useState(() => Date.now());
+  const [sweeping, setSweeping] = useState(true);
+  const drag = useRef<{ x: number; y: number } | null>(null);
+  const lookAt = useRef(new THREE.Vector3(HOME.center.x, HOME.center.y, HOME.center.z));
+
+  // Any input at all aborts the establishing sweep. Someone who has started
+  // clicking has already found the room and does not need the tour.
+  useEffect(() => {
+    const stop = () => setSweeping(false);
+    for (const event of ["pointerdown", "wheel", "keydown"] as const) {
+      window.addEventListener(event, stop, { once: true });
+    }
+    const done = window.setTimeout(stop, SWEEP_DURATION_MS + 200);
+    return () => window.clearTimeout(done);
+  }, []);
+
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      drag.current = { x: e.clientX, y: e.clientY };
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!drag.current) return;
+      const dx = e.clientX - drag.current.x;
+      const dy = e.clientY - drag.current.y;
+      drag.current = { x: e.clientX, y: e.clientY };
+      setSwivel((s) => applyDrag(s, dx, dy));
+    };
+    const onUp = () => {
+      drag.current = null;
+    };
+    const onWheel = (e: WheelEvent) => {
+      setZoom((z) => Math.min(1.35, Math.max(0.65, z + Math.sign(e.deltaY) * 0.06)));
+    };
+    // Escape moves to useRoomKeys in Task 15; owning it in both would step back
+    // two levels on one keypress.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") back();
+    };
+
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [back]);
+
+  useFrame(() => {
+    let bounds = HOME;
+    let level: Level = state.level;
+
+    if (sweeping) {
+      const zone = sweepAt(Date.now() - sweepStart);
+      bounds = zone ? boundsForZone(zone) : HOME;
+      level = zone ? "zone" : "home";
+    } else if (state.level === "item") {
+      // Keyboard focus wins over the open item, so tabbing moves the camera
+      // even while a panel is open.
+      const propId =
+        state.focused ?? SCENE.find((p) => p.binding === state.item)?.id ?? "";
+      bounds = boundsForProp(propId);
+    } else if (state.level === "zone" && state.zone) {
+      bounds = boundsForZone(state.zone);
+    }
+
+    const framing = framingFor(level, bounds, size, FOV);
+
+    const yaw = (BASE_YAW + swivel.yaw) * (Math.PI / 180);
+    const pitch = (BASE_PITCH + swivel.pitch) * (Math.PI / 180);
+    const distance = framing.distance * zoom;
+
+    const desired = new THREE.Vector3(
+      framing.target.x + distance * Math.cos(pitch) * Math.sin(yaw),
+      framing.target.y + distance * Math.sin(pitch),
+      framing.target.z + distance * Math.cos(pitch) * Math.cos(yaw),
+    );
+
+    camera.position.lerp(desired, 0.08);
+    lookAt.current.lerp(
+      new THREE.Vector3(framing.target.x, framing.target.y, framing.target.z),
+      0.08,
+    );
+    camera.lookAt(lookAt.current);
+
+    /*
+      Slide the subject to its screen anchor by rendering an offset window of a
+      larger virtual frame. Pushing the window right moves the subject left, so
+      the offset is (0.5 - anchor) - which is how an object ends up framed in
+      the left 55% with the panel occupying the rest.
+    */
+    const perspective = camera as THREE.PerspectiveCamera;
+    perspective.setViewOffset(
+      size.width,
+      size.height,
+      (0.5 - framing.screenAnchor.x) * size.width,
+      (0.5 - framing.screenAnchor.y) * size.height,
+      size.width,
+      size.height,
+    );
+    perspective.updateProjectionMatrix();
+  });
+
+  return null;
+}

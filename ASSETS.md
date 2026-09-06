@@ -1,53 +1,48 @@
-# World assets
+# Room assets
 
-The walkable world is drawn with **Modern Interiors** by LimeZu.
+The 3D room is built from **House & Office** by francoface.
 
-- Source: https://limezu.itch.io/moderninteriors
-- Currently vendored: **Free version v2.2** (`Modern_Interiors_Free_v2.2`)
-- Licence: `public/world-assets/LICENSE.txt`, copied verbatim from the pack
+- Vendored: 42 of the pack's 107 models, listed in `room/data/models.ts`
+- Models: `public/room-assets/models/<name>.fbx`
+- Textures: `public/room-assets/textures/<name>.png`
 
-## Licence summary
+## Re-vendoring
 
-The free version permits use and editing in **non-commercial projects** only. It
-forbids commercial use, and forbids editing and reselling the sprites.
+```bash
+node scripts/vendor-room-assets.mjs "<path to the pack>"
+```
 
-A personal portfolio sits in a grey area: it sells nothing, but it exists to get
-its author hired. The complete pack costs **$1.20** and removes the ambiguity
-entirely, so buy it before this site is promoted anywhere that could be read as
-commercial. Credit LimeZu either way.
+The script copies exactly the models named in `room/data/models.ts` and their
+same-named PNGs from the pack's `Materials/` folder. `room/data/models.test.ts`
+fails if a listed model was never vendored, and `room/data/scene.test.ts` fails
+if the manifest names a model that is not on the list.
 
-## What is vendored, and why these files
+## Two things about this pack that are not obvious
 
-Characters in the free pack are **16x32 per frame**, so the world uses the
-**16x16** tilesets to keep the classic one-tile-wide, two-tiles-tall figure. The
-32x32 and 48x48 variants in the download are the same art at larger scale and are
-not used.
+**Textures are referenced, but by a path that does not survive vendoring.** Each
+FBX names its texture as `Materials\<name>.png`. FBXLoader takes the basename
+and resolves it against its resource path, which defaults to the model's own
+folder — so without `loader.setResourcePath("/room-assets/textures/")` in
+`room/engine/useModels.ts`, every model requests
+`/room-assets/models/<name>.png`, 404s, and the room renders untextured.
 
-| File in repo | From the pack |
-| --- | --- |
-| `public/world-assets/interiors.png` | `Interiors_free/16x16/Interiors_free_16x16.png` |
-| `public/world-assets/room-builder.png` | `Interiors_free/16x16/Room_Builder_free_16x16.png` |
-| `public/world-assets/characters/<Name>_<action>.png` | `Characters_free/<Name>_<action>_16x16.png` |
+**The pack is authored at roughly 40 units per metre.** A desk measures 51 units
+wide, a wall tile 102 tall. `MODEL_SCALE` in `room/data/models.ts` is `1/40`,
+which puts that desk at a believable 1.28m × 0.75m. Positions in
+`room/data/scene.ts` are in tile units (one tile = one metre) and are *not*
+scaled — the factor is applied per model, not to the whole scene.
 
-Characters vendored: Adam, Alex, Amelia, Bob. Actions: `idle`, `idle_anim`,
-`run`, `phone`.
+Models are also re-anchored on load to the centre of their own footprint sitting
+on the floor, because the pack's origins are arbitrary. That is what lets a
+coordinate in `scene.ts` mean "where the object stands".
 
-## Sheet layout
+## Textures are palette swatches
 
-Every character sheet is a single row of 16x32 frames. Direction order across the
-sheet is the pack standard: **right, up, left, down**.
+`desk.png` is 631 bytes at 128×128. They are sampled with `NearestFilter` and no
+mipmaps; any smoothing turns them to mush.
 
-| Sheet | Frames | Meaning |
-| --- | --- | --- |
-| `idle` | 4 | one per direction |
-| `run` | 24 | six per direction |
-| `idle_anim` | 24 | six per direction |
-| `phone` | 9 | down-facing only |
+## Licence
 
-## Upgrading to the paid pack
-
-Replace the files above with the equivalents from the complete pack, keeping the
-same names and the same 16x16 tile size. The complete pack's character sheets
-follow the same frame order, so `world/engine/CharacterSprite.ts` needs no change.
-Furniture tile indices in the map may shift, so re-check room decor after
-swapping.
+Check the pack's own licence before promoting this site anywhere that reads as
+commercial, and credit francoface either way. The credit is in the room, on the
+coffee mug.
