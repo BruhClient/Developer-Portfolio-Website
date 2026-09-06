@@ -11,6 +11,7 @@ import { tabOrder } from "./tabOrder";
 import { SceneryProp } from "./Scenery";
 import { MonitorScreen } from "../ui/MonitorScreen";
 import { Carpets } from "../ui/Carpets";
+import { WallCross } from "../ui/WallCross";
 
 
 /*
@@ -154,6 +155,7 @@ export function Room() {
           <InteractiveProp key={prop.id} prop={prop} hint={hint} />
         ))}
         <MonitorScreen />
+        <WallCross />
       </group>
     </Canvas>
   );
