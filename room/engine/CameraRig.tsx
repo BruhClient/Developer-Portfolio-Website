@@ -21,12 +21,30 @@ import { useRoom } from "./roomState";
 
 /** The default corner-on view. 45 degrees looks into the open corner. */
 const BASE_YAW = 45;
-const BASE_PITCH = 26;
-const FOV = 50;
+const BASE_PITCH = 30;
 
+/*
+  A long lens, exported so the Canvas and the framing maths cannot drift apart.
+
+  Fifty degrees is a room photographed from inside it: near edges splay, the
+  far wall shrinks, and the eye reads depth. Isometric pixel art has no
+  vanishing point at all, and the cheapest honest approximation of that is a
+  narrow lens pulled further back - focus.ts already derives distance from the
+  fov, so lowering this number backs the camera off and flattens the room in
+  one move. Twenty-six is close enough to axonometric to read as a diorama
+  while keeping just enough convergence to tell which wall is which.
+*/
+export const FOV = 26;
+
+/*
+  Framing radius, not the room's actual size. focus.ts multiplies it by the home
+  padding, so this is tuned to sit the whole seven-tile room in frame with a
+  little air - close enough that it reads as a doll's house you could pick up,
+  rather than a room seen from across a car park.
+*/
 const HOME: Bounds = {
-  center: { x: 0, y: 1.1, z: -0.4 },
-  radius: ROOM.half * 1.25,
+  center: { x: 0, y: 0.85, z: 0.15 },
+  radius: ROOM.half * 0.82,
 };
 
 function boundsForZone(id: ZoneId): Bounds {

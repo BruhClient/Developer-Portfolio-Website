@@ -32,7 +32,7 @@ export function RoomShell() {
   if (!supported) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#0b0d16]">
+    <div className="room-stage fixed inset-0 bg-[#0b0d16]">
       <Room />
       <Panel />
       <a

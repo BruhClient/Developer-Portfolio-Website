@@ -4,16 +4,31 @@ import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ARCHITECTURE, SCENE } from "../data/scene";
 import { ZONES, ZONE_ORDER } from "../data/zones";
-import { CameraRig } from "./CameraRig";
+import { CameraRig, FOV } from "./CameraRig";
 import { InteractiveProp } from "./Prop";
 import { useRoom } from "./roomState";
 import { SceneryProp } from "./Scenery";
-import { SceneProbe } from "./SceneProbe";
 import { Floor } from "./Shell";
 import { MonitorScreen } from "../ui/MonitorScreen";
-import { ZoneDecals } from "../ui/ZoneDecal";
+import { Carpets } from "../ui/Carpets";
 
 const IDLE_MS = 8000;
+
+/*
+  Render resolution, as a fraction of the CSS pixel size.
+
+  This is the pixel-art look, and it is done in the renderer rather than in a
+  shader: draw the room small and let the browser blow it back up with nearest
+  sampling (globals.css pins `image-rendering: pixelated` on the canvas). Every
+  edge in the room then lands on the same chunky grid as the pack's own 128px
+  textures, instead of the textures being pixel art inside a smooth render.
+
+  How far to take it is a taste call, and 0.55 took it too far - the furniture
+  started losing its own silhouette and the room read as blurry rather than as
+  drawn. At 0.85 the chunk is still visible on every diagonal edge, which is
+  where you actually see it, without the models turning to mush.
+*/
+const PIXEL_SCALE = 0.85;
 const NUDGE_EVENTS = ["pointerdown", "pointermove", "wheel", "keydown"] as const;
 
 /*
@@ -58,23 +73,31 @@ export function Room() {
 
   return (
     <Canvas
-      shadows
-      dpr={[1, 2]}
-      camera={{ fov: 50, position: [9, 7, 9] }}
-      gl={{ antialias: true }}
+      dpr={PIXEL_SCALE}
+      camera={{ fov: FOV, position: [9, 7, 9] }}
+      // No antialiasing and no shadow maps: both fight the pixel grid, and
+      // smooth edges on a deliberately chunky render just look like a mistake.
+      gl={{ antialias: false }}
       // Aim at roughly eye height in the middle of the room. CameraRig takes
       // this over entirely once it mounts; this only frames the first paint.
       onCreated={({ camera }) => camera.lookAt(0, 1, -0.5)}
     >
       <CameraRig />
 
-      <color attach="background" args={["#0b0d16"]} />
+      <color attach="background" args={["#0d0f1c"]} />
 
-      {/* Nothing goes fully black. */}
-      <ambientLight color="#1a2138" intensity={0.22} />
+      {/*
+        Cartoon lighting: a big soft wash plus a few warm pools, and nothing
+        that models a real light source. The pack's textures already contain
+        their own shading, so the job here is to tint the room, not to relight
+        it - push the key light any harder and the painted highlights start
+        fighting a second set of computed ones.
+      */}
+      <ambientLight color="#b9c4e8" intensity={0.95} />
 
-      {/* Keeps silhouettes legible from the open corner. */}
-      <directionalLight color="#6d84b8" intensity={0.10} position={[8, 10, 8]} />
+      {/* Warm from the open corner, cool from the back, so edges read. */}
+      <hemisphereLight color="#ffe0b8" groundColor="#4a3f63" intensity={0.7} />
+      <directionalLight color="#fff1d6" intensity={0.55} position={[6, 8, 6]} />
 
       {/* One warm pool per zone: this is what makes a zone look like a zone. */}
       {ZONE_ORDER.map((id) => {
@@ -84,52 +107,50 @@ export function Room() {
             key={id}
             color={zone.light.color}
             intensity={zone.light.intensity}
-            distance={4.5}
+            distance={2.6}
             decay={2}
-            castShadow
-            shadow-mapSize={[512, 512]}
-            position={[zone.origin.x, 2.4, zone.origin.z]}
+            position={[zone.origin.x, 2.0, zone.origin.z]}
           />
         );
       })}
 
       {/* The desk lamp, sitting inside the lamp model. */}
-      <pointLight color="#ffbb66" intensity={14} distance={5} decay={2} position={[0.4, 1.35, -4.3]} />
+      <pointLight color="#ffa94d" intensity={5} distance={2.8} decay={2} position={[-1.5, 1.15, -1.9]} />
 
-      {/* Monitor glow, cool against all that warmth. */}
-      <rectAreaLight
-        color="#9fd0ff"
-        intensity={6}
-        width={1.1}
-        height={0.7}
-        position={[1.2, 1.15, -4.1]}
-        rotation={[0, 0, 0]}
-      />
+      {/*
+        Monitor glow, cool against all that warmth. A point light rather than
+        the rectAreaLight this used to be: rectAreaLight only affects Standard
+        and Physical materials, so against Lambert it lit precisely nothing.
+      */}
+      <pointLight color="#9fd0ff" intensity={3.5} distance={2.0} decay={2} position={[-1.0, 1.1, -1.85]} />
 
       {/* Warm light spilling through the ajar contact door. */}
       <spotLight
         color="#ffd9a8"
-        intensity={18}
-        distance={8}
+        intensity={12}
+        distance={4.5}
         angle={0.7}
         penumbra={0.8}
-        position={[5.6, 2, -1.5]}
-        target-position={[3, 0, -1]}
+        position={[1.5, 1.9, -3.1]}
+        target-position={[1.3, 0, -1.0]}
       />
 
-      <SceneProbe />
-
       <group>
+        {/*
+          Click-away target: clicking bare space steps back a level. It has to
+          stay raycastable, so it is transparent rather than `visible={false}` -
+          three skips invisible objects when raycasting.
+        */}
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, -0.02, 0]}
           onClick={() => back()}
         >
-          <planeGeometry args={[40, 40]} />
-          <meshBasicMaterial color="#0b0d16" />
+          <planeGeometry args={[26, 26]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
         <Floor />
-        <ZoneDecals />
+        <Carpets />
         {ARCHITECTURE.map((prop) => (
           <SceneryProp key={prop.id} prop={prop} />
         ))}

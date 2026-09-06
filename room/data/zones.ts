@@ -26,9 +26,9 @@ export const ZONE_ORDER = [
 
 export interface Zone {
   id: ZoneId;
-  /** Shown on the floor decal and announced to screen readers. */
+  /** Announced to screen readers. Nothing prints it on the floor any more. */
   label: string;
-  /** The carpet that marks this zone's clickable floor. */
+  /** The carpet that marks this zone out as a different corner of the room. */
   carpet: ModelName;
   /** Centre of the zone's floor area, in tile units. */
   origin: Vec3;
@@ -38,59 +38,67 @@ export interface Zone {
 }
 
 /*
-  Floor plan, looking in over the open corner. -x is the back-left wall, -z is
-  the back-right wall, +x/+z is the open front.
+  Floor plan, looking in over the open corner. -x is the left wall, -z is the
+  back wall, +x/+z is the open front.
 
-  Experience and Certifications split the back-left wall left/right rather than
-  stacking, so no two zone floors overlap and every carpet stays clickable.
+  A zone is no longer somewhere you click. The floor used to carry a tinted
+  plane and the section name in big letters, and both had to go: the planes read
+  as holes cut in the floorboards, and the lettering was a nav bar that happened
+  to be lying down. What survives is what a zone was always for - a carpet, a
+  warm lamp over it, and a camera target - so a section still reads as a corner
+  of a room rather than as a menu entry.
+
+  The boxes stay disjoint anyway. They are what the establishing sweep and the
+  camera frame on, and two overlapping ones would make "which corner is this"
+  ambiguous. scene.test.ts enforces it.
 */
 export const ZONES: Record<ZoneId, Zone> = {
   experience: {
     id: "experience",
     label: "Experience",
-    carpet: "carpet_black",
-    origin: { x: -3.5, y: 0, z: -1 },
-    size: { w: 3, d: 3 },
-    light: { color: "#ffb46b", intensity: 8 },
+    carpet: "carpetred",
+    origin: { x: -2.0, y: 0, z: -0.6 },
+    size: { w: 1.0, d: 1.0 },
+    light: { color: "#ffb46b", intensity: 3.2 },
   },
   projects: {
     id: "projects",
     label: "Projects",
     carpet: "carpet_blue",
-    origin: { x: 1.5, y: 0, z: -3.5 },
-    size: { w: 4, d: 3 },
-    light: { color: "#ffc98a", intensity: 10 },
+    origin: { x: -0.7, y: 0, z: -1.6 },
+    size: { w: 1.6, d: 1.6 },
+    light: { color: "#ffc07a", intensity: 3.6 },
   },
   hackathons: {
     id: "hackathons",
     label: "Hackathons",
     carpet: "carpetred",
-    origin: { x: 2, y: 0, z: 1.5 },
-    size: { w: 4, d: 3 },
-    light: { color: "#ff9d6b", intensity: 7 },
+    origin: { x: 1.5, y: 0, z: 1.2 },
+    size: { w: 2.0, d: 2.2 },
+    light: { color: "#ff9457", intensity: 3.0 },
   },
   certifications: {
     id: "certifications",
     label: "Certifications",
-    carpet: "carpetcolored",
-    origin: { x: -3.5, y: 0, z: -4 },
-    size: { w: 3, d: 2 },
-    light: { color: "#ffd0a0", intensity: 7 },
+    carpet: "carpetgreen",
+    origin: { x: -2.0, y: 0, z: -1.95 },
+    size: { w: 1.0, d: 1.1 },
+    light: { color: "#ffcf9a", intensity: 3.0 },
   },
   about: {
     id: "about",
     label: "About Me",
-    carpet: "carpetgreen",
-    origin: { x: -2, y: 0, z: 2.5 },
-    size: { w: 4, d: 3 },
-    light: { color: "#ffbe7d", intensity: 8 },
+    carpet: "carpetcolored",
+    origin: { x: -1.75, y: 0, z: 1.35 },
+    size: { w: 1.5, d: 2.2 },
+    light: { color: "#ffb06a", intensity: 3.2 },
   },
   contact: {
     id: "contact",
     label: "Contact Me",
-    carpet: "carpet_black",
-    origin: { x: 4.5, y: 0, z: -1.5 },
-    size: { w: 1.5, d: 2 },
-    light: { color: "#ffd9a8", intensity: 12 },
+    carpet: "carpetcolored",
+    origin: { x: 1.5, y: 0, z: -1.7 },
+    size: { w: 1.8, d: 1.5 },
+    light: { color: "#ffd9a8", intensity: 3.6 },
   },
 };

@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { BINDINGS, titleOf } from "../data/bindings";
 import { MODEL_SCALE } from "../data/models";
 import type { Prop } from "../data/scene";
+import { mountingFor } from "./mount";
 import { useRoom } from "./roomState";
 import { useModel } from "./useModels";
 
@@ -21,7 +22,7 @@ const LIFT = 0.02; // 2cm, the spec's hover lift
   hover reads as "this one is alive", not "everything else just left".
 */
 export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: boolean }) {
-  const model = useModel(prop.model);
+  const model = useModel(prop.model, prop.tint);
   const group = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
   const { state, openItem, setHovered } = useRoom();
@@ -48,12 +49,16 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
 
   if (!model) return null;
 
+  // Yaw outside, tilt inside - see engine/mount.ts. Wall art is modelled lying
+  // flat, so a painting needs standing up before its yaw means anything.
+  const { yaw, tilt } = mountingFor(prop);
+
   return (
     <group
       ref={group}
       name={prop.id}
       position={[prop.position.x, prop.position.y, prop.position.z]}
-      rotation={[0, prop.rotationY * DEG, 0]}
+      rotation={[0, yaw * DEG, 0]}
       scale={(prop.scale ?? 1) * MODEL_SCALE}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -72,7 +77,9 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
         openItem(binding);
       }}
     >
-      <primitive object={model} />
+      <group rotation={[tilt * DEG, 0, 0]}>
+        <primitive object={model} />
+      </group>
 
       {/*
         The rim light and label sit inside a group scaled to MODEL_SCALE, so

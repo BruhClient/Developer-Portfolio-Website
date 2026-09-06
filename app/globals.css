@@ -280,3 +280,21 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────
+   The room canvas.
+
+   The renderer draws at a fraction of CSS resolution (PIXEL_SCALE in
+   room/engine/Room.tsx) and the browser scales the result back up. Left to
+   itself it would smooth that upscale and undo the whole point, so the
+   sampling is pinned to nearest here — the same reason every texture in the
+   room loads with NearestFilter. This is what makes the room read as pixel art
+   rather than as a low-resolution render.
+
+   Scoped through the wrapper rather than set on the canvas directly: react-
+   three-fiber owns that element and spreads stray DOM props onto its container
+   div, so an attribute hook here would silently land on the wrong node.
+   ───────────────────────────────────────────── */
+.room-stage canvas {
+  image-rendering: pixelated;
+}

@@ -41,16 +41,15 @@ function useTiledTexture(name: string, repeat: number): THREE.Texture | null {
 }
 
 export function Floor() {
-  const texture = useTiledTexture("floortile_office", ROOM.size);
+  const texture = useTiledTexture("floortile_1_orange", ROOM.size);
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[ROOM.size, ROOM.size]} />
-      <meshStandardMaterial
+      {/* Lambert to match the props - see useModels.ts on why nothing here is PBR. */}
+      <meshLambertMaterial
         map={texture ?? undefined}
-        color={texture ? "#ffffff" : "#2a2c3a"}
-        roughness={0.95}
-        metalness={0}
+        color={texture ? "#d9c3a5" : "#2a2c3a"}
       />
     </mesh>
   );

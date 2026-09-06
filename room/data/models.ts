@@ -9,12 +9,13 @@
 */
 export const MODELS = [
   // Architecture
-  "floortile_office",
+  "floortile_1_orange",
   "wall_tile",
   "wall_tile_grey_side1",
   "wall_tile_grey_side2",
   "wall_tile_window",
   "corner_pillar_grey",
+  "blinds",
   // Zone carpets
   "carpet_black",
   "carpet_blue",
@@ -47,8 +48,7 @@ export const MODELS = [
   "painting_halflife",
   "bookcase_small",
   // About Me
-  "couch_double",
-  "coffee_table",
+  "bedsingle",
   "bookcasetall",
   "plant1",
   "lamp_tall",
@@ -59,6 +59,30 @@ export const MODELS = [
   "nightstand",
   // Lighting prop
   "lamp",
+  /*
+    Clutter. None of it is interactive and none of it is decoration for its own
+    sake - an empty room reads as a showroom, and the brief was a room someone
+    actually codes in. Mugs nobody washed, a shirt on the floor, game posters
+    and a shelf of paperbacks are what make it look lived in.
+  */
+  "bookshelf",
+  "bookblue",
+  "bookgreen",
+  "bookorange",
+  "bookred",
+  "cupblue",
+  "cupred",
+  "muglightred",
+  "speaker",
+  "speaker2",
+  "plant2",
+  "plant3",
+  "shirt",
+  "sock",
+  "table_small",
+  "painting_mario",
+  "painting_pokeball",
+  "painting_squirtle",
 ] as const;
 
 export type ModelName = (typeof MODELS)[number];
