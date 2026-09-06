@@ -10,6 +10,15 @@ import { ZONE_ORDER, type ZoneId } from "../data/zones";
 */
 export const SWEEP_DURATION_MS = 4000;
 
+/*
+  When first-run guidance may appear on screen.
+
+  After the establishing sweep has landed, so the one line of instruction is not
+  competing with the camera for attention while the room is still introducing
+  itself. Shared so the copy and the sweep cannot drift apart.
+*/
+export const GUIDANCE_AFTER_MS = SWEEP_DURATION_MS + 600;
+
 export interface SweepStop {
   /** null means the home framing. */
   zone: ZoneId | null;

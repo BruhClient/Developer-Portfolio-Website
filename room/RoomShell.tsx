@@ -14,6 +14,7 @@ import { hasWebGL } from "./fallback/webgl";
 */
 const Room = dynamic(() => import("./engine/Room").then((m) => m.Room), { ssr: false });
 const Panel = dynamic(() => import("./ui/Panel").then((m) => m.Panel), { ssr: false });
+const Hint = dynamic(() => import("./ui/Hint").then((m) => m.Hint), { ssr: false });
 
 export function RoomShell() {
   /*
@@ -35,6 +36,7 @@ export function RoomShell() {
     <div className="room-stage fixed inset-0 bg-[#0b0d16]">
       <Room />
       <Panel />
+      <Hint />
       <a
         href="/text"
         className="fixed bottom-3 left-3 z-30 text-[11px] text-amber-100/35 underline underline-offset-4 hover:text-amber-100/70"

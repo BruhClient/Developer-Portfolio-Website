@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ARCHITECTURE, SCENE } from "../data/scene";
 import { ZONES, ZONE_ORDER } from "../data/zones";
@@ -12,7 +11,6 @@ import { SceneryProp } from "./Scenery";
 import { MonitorScreen } from "../ui/MonitorScreen";
 import { Carpets } from "../ui/Carpets";
 
-const IDLE_MS = 8000;
 
 /*
   Render resolution, as a fraction of the CSS pixel size.
@@ -29,7 +27,6 @@ const IDLE_MS = 8000;
   where you actually see it, without the models turning to mush.
 */
 const PIXEL_SCALE = 0.85;
-const NUDGE_EVENTS = ["pointerdown", "pointermove", "wheel", "keydown"] as const;
 
 /*
   A cutaway box: floor, back-left wall, back-right wall, no front walls. The
@@ -41,35 +38,19 @@ const NUDGE_EVENTS = ["pointerdown", "pointermove", "wheel", "keydown"] as const
 */
 export function Room() {
   const { state, back } = useRoom();
-  const [idleTimerFired, setIdleTimerFired] = useState(false);
 
   /*
-    After eight seconds of nothing at home, objects the visitor has not opened
-    yet pulse faintly. It is the only nudge in the room and the only thing
-    standing in for a nav bar's "there is more here" - so any input at all
-    cancels it, and it never runs while something is already open.
+    Whether to nudge, and it is a question about the visitor, not about the
+    clock: has anyone opened anything yet?
 
-    The timer is only armed at home, and the hint is derived rather than cleared
-    from inside the effect: clearing it there would be a synchronous setState in
-    an effect body, which cascades a render every time the level changes.
+    This used to be an idle timer that fired after eight seconds of silence and
+    was cancelled by any input at all - including pointermove. Which meant the
+    person moving their mouse around the room hunting for something to click,
+    the one person who actually needed the hint, was the only person guaranteed
+    never to see it. Now every interactive object carries a marker all the time
+    and the markers simply beat harder until the first thing is opened.
   */
-  useEffect(() => {
-    if (state.level !== "home") return;
-
-    let timer = window.setTimeout(() => setIdleTimerFired(true), IDLE_MS);
-    const reset = () => {
-      setIdleTimerFired(false);
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => setIdleTimerFired(true), IDLE_MS);
-    };
-    for (const event of NUDGE_EVENTS) window.addEventListener(event, reset);
-    return () => {
-      window.clearTimeout(timer);
-      for (const event of NUDGE_EVENTS) window.removeEventListener(event, reset);
-    };
-  }, [state.level]);
-
-  const idleHint = idleTimerFired && state.level === "home";
+  const hint = state.opened.size === 0;
 
   return (
     <Canvas
@@ -158,7 +139,7 @@ export function Room() {
           <SceneryProp key={prop.id} prop={prop} />
         ))}
         {SCENE.filter((p) => p.binding).map((prop) => (
-          <InteractiveProp key={prop.id} prop={prop} idleHint={idleHint} />
+          <InteractiveProp key={prop.id} prop={prop} hint={hint} />
         ))}
         <MonitorScreen />
       </group>

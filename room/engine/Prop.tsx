@@ -21,8 +21,15 @@ const LIFT = 0.02; // 2cm, the spec's hover lift
   Hover lifts it and labels it and does nothing else - no dimming of the room,
   no ghosting of its neighbours. The room stays exactly as it was so that a
   hover reads as "this one is alive", not "everything else just left".
+
+  Every one of them also wears a marker at all times. Twelve of the room's
+  forty-nine objects do something, and until this existed the only way to learn
+  which twelve was to hover the right quarter of the room - fine for someone
+  who came to play, useless for a recruiter giving the page thirty seconds. The
+  marker is also the only affordance that survives on a phone, where there is
+  no hover and so no bubble at all.
 */
-export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: boolean }) {
+export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
   const model = useModel(prop.model, prop.tint);
   const group = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
@@ -61,7 +68,7 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
   useFrame(({ clock }) => {
     if (!group.current) return;
     const pulse =
-      idleHint && unopened && !active
+      hint && unopened && !active
         ? Math.sin(clock.elapsedTime * 2.2) * 0.5 + 0.5
         : 0;
     const target = prop.position.y + (active ? LIFT : 0) + pulse * 0.012;
@@ -115,6 +122,20 @@ export function InteractiveProp({ prop, idleHint }: { prop: Prop; idleHint: bool
           decay={2}
           position={[0, 0.5 / MODEL_SCALE, 0]}
         />
+      )}
+
+      {/*
+        The marker steps aside when the bubble arrives - they occupy the same
+        spot, and by then it has done its job.
+      */}
+      {!active && (
+        <Html center position={[0, anchorY, 0]} style={{ pointerEvents: "none" }}>
+          <span
+            className="room-pip"
+            data-seen={unopened ? undefined : true}
+            data-hint={hint && unopened ? true : undefined}
+          />
+        </Html>
       )}
 
       {active && (
