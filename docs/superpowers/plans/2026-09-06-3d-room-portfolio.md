@@ -1575,10 +1575,18 @@ export function Room() {
 Create `app/preview/page.tsx`:
 
 ```tsx
+"use client";
+
 import dynamic from "next/dynamic";
 
-// Temporary while the room is built alongside the old world. Task 17 deletes
-// this and moves the room onto `/`.
+/*
+  Temporary while the room is built alongside the old world. Task 17 deletes
+  this and moves the room onto `/`.
+
+  This page is a Client Component because Next 16 rejects `ssr: false` on
+  `next/dynamic` inside a Server Component. The real entry point in Task 17
+  (`room/RoomShell.tsx`) is a client component for the same reason.
+*/
 const Room = dynamic(() => import("@/room/engine/Room").then((m) => m.Room), {
   ssr: false,
 });
@@ -1591,6 +1599,10 @@ export default function Preview() {
   );
 }
 ```
+
+**The `"use client"` is required, not stylistic.** Without it Next 16 fails the
+route with `ssr: false is not allowed with next/dynamic in Server Components`
+and no canvas ever mounts.
 
 - [ ] **Step 4: Look at it**
 

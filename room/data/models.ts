@@ -63,6 +63,18 @@ export const MODELS = [
 
 export type ModelName = (typeof MODELS)[number];
 
+/*
+  The pack authors its models at roughly 40 units per metre: a measured desk is
+  51 units wide and a wall tile 102 tall. The scene manifest is written in tile
+  units where one tile is one metre, so every model is scaled by this on the way
+  in. Positions in `scene.ts` are NOT affected - they are already in tile units,
+  which is why this multiplies each prop rather than wrapping the whole group.
+
+  At 1/40 that desk is 1.28 wide and 0.75 tall, which is why desktop items in
+  the manifest sit at y: 0.75.
+*/
+export const MODEL_SCALE = 1 / 40;
+
 /** Where a vendored model and its texture live, relative to `public/`. */
 export function modelUrl(name: ModelName | string): string {
   return `/room-assets/models/${name}.fbx`;

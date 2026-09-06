@@ -248,8 +248,18 @@ through all four hackathons without returning to the room.
 ## 8. Asset pipeline
 
 The pack is 107 binary FBX 7.4 models with 107 same-named PNG textures in
-`Materials/`. The models carry **no embedded texture references**; pairing is by
-filename (`desk.fbx` with `Materials/desk.png`).
+`Materials/`.
+
+**Correction, made during implementation.** This section originally claimed the
+models carry no embedded texture references. They do — each FBX names its
+texture as `Materials\<name>.png`. The original check used `strings`, which is
+not installed in this shell, so it returned nothing and the silence was read as
+absence.
+
+The practical consequence is smaller than it sounds, and better: FBXLoader can
+resolve the textures itself once `setResourcePath("/room-assets/textures/")` is
+set, so each PNG is fetched once instead of twice. Without that line every model
+requests `/room-assets/models/<name>.png`, 404s, and the room renders untextured.
 
 - Only the ~25 models the manifest actually names are vendored into
   `public/room-assets/`, not all 107.

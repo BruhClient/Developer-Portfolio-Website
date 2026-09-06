@@ -22,14 +22,62 @@ export interface Prop {
   binding?: string;
 }
 
-/** Walls and floor. Never interactive, never in the Tab order. */
-export const ARCHITECTURE: readonly Prop[] = [
-  { id: "wall:left", model: "wall_tile_grey_side1", zone: "experience", position: { x: -5, y: 0, z: -1 }, rotationY: 90 },
-  { id: "wall:left-2", model: "wall_tile", zone: "certifications", position: { x: -5, y: 0, z: -4 }, rotationY: 90 },
-  { id: "wall:back", model: "wall_tile_grey_side2", zone: "projects", position: { x: 1.5, y: 0, z: -5 }, rotationY: 0 },
-  { id: "wall:window", model: "wall_tile_window", zone: "projects", position: { x: 3.5, y: 0, z: -5 }, rotationY: 0 },
-  { id: "pillar:corner", model: "corner_pillar_grey", zone: "certifications", position: { x: -5, y: 0, z: -5 }, rotationY: 0 },
-];
+/*
+  The room's footprint, in tiles. The floor spans -HALF..+HALF on both axes and
+  the two walls stand on the -x and -z edges; +x and +z are the open corner the
+  camera looks in through.
+*/
+export const ROOM = { size: 10, half: 5 } as const;
+
+/*
+  Walls, generated rather than hand-listed.
+
+  A wall_tile measures one tile across, so a ten-tile wall is ten of them. That
+  is a loop, not twenty rows of coordinates nobody will ever read - and it means
+  changing ROOM.size moves the walls with it instead of leaving them stranded.
+
+  Unrotated, a wall tile is thin along x, so it runs along z. The back-left wall
+  (x = -5) takes it as-is; the back-right wall (z = -5) turns it 90 degrees.
+*/
+function buildWalls(): Prop[] {
+  const walls: Prop[] = [];
+
+  for (let i = 0; i < ROOM.size; i++) {
+    const offset = -ROOM.half + 0.5 + i;
+
+    // Back-left wall, running along z. Certifications hang on its far half.
+    walls.push({
+      id: `wall:left-${i}`,
+      model: offset < 0 ? "wall_tile" : "wall_tile_grey_side1",
+      zone: offset < -1.5 ? "certifications" : "experience",
+      position: { x: -ROOM.half, y: 0, z: offset },
+      rotationY: 0,
+    });
+
+    // Back-right wall, running along x. One bay is the window, above the desk.
+    const isWindow = offset > 2.5 && offset < 3.5;
+    walls.push({
+      id: `wall:back-${i}`,
+      model: isWindow ? "wall_tile_window" : "wall_tile_grey_side2",
+      zone: offset > 3.5 ? "contact" : "projects",
+      position: { x: offset, y: 0, z: -ROOM.half },
+      rotationY: 90,
+    });
+  }
+
+  walls.push({
+    id: "pillar:corner",
+    model: "corner_pillar_grey",
+    zone: "certifications",
+    position: { x: -ROOM.half, y: 0, z: -ROOM.half },
+    rotationY: 0,
+  });
+
+  return walls;
+}
+
+/** Walls. The floor is a single tiled plane in Shell.tsx, not props. */
+export const ARCHITECTURE: readonly Prop[] = buildWalls();
 
 export const SCENE: readonly Prop[] = [
   // 1. EXPERIENCE
