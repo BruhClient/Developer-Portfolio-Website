@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Travis Ang — portfolio
 
-## Getting Started
+A portfolio you walk around instead of scroll. The homepage is a real-time 3D
+cutaway bedroom; the six sections of a CV are six places in it, and clicking an
+object opens a reader panel beside the room rather than navigating away.
 
-First, run the development server:
+`/` is the only content route. `/text` carries the same content as plain HTML
+for anyone whose browser cannot give us a WebGL context — they are redirected
+there automatically.
+
+## Running it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script            | What it does                                  |
+| ----------------- | --------------------------------------------- |
+| `npm run dev`     | Next dev server                               |
+| `npm run build`   | Production build                              |
+| `npm start`       | Serve the production build                    |
+| `npm run lint`    | ESLint (`eslint-config-next`)                 |
+| `npm test`        | Vitest, once                                  |
+| `npm run test:watch` | Vitest, watching                           |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Layout
 
-## Learn More
+```
+app/            Routes. `/` is the room, `/text` is the no-WebGL fallback.
+room/
+  data/         The room as data — zones, prop manifest, model list, content bindings
+  engine/       three.js / R3F: camera framing, swivel clamping, props, mounting
+  ui/           The reader panel, signs, dock, welcome screen and section bodies
+  fallback/     WebGL probe and the text site
+constants/      The portfolio content itself — projects, hackathons, experience, about
+components/ui/  shadcn primitives
+scripts/        Puppeteer drivers used to check the room in a real browser
+docs/           Design specs and the implementation plan
+public/room-assets/  Vendored FBX models and their textures
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Where the content lives
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Everything the site says about a project, hackathon, role or certificate comes
+from `constants/`. To add a project, append to `PROJECTS` in
+`constants/pages/projects.ts` — nothing else needs a new file.
+`room/data/bindings.ts` maps that content onto the objects in the room, and
+`room/data/bindings.test.ts` fails if a section ends up with nothing to show.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### What the tests cover
 
-## Deploy on Vercel
+The room's logic — camera framing, swivel clamping, tab order, the reader
+rectangle, the state store — is deliberately pure TypeScript with no React and
+no DOM, so it is unit-tested in a plain node environment. Anything that touches
+three.js or the browser is checked by driving a real Chrome with the scripts in
+`scripts/`, not by mocking a renderer.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Assets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The room is built from the **House & Office** pack by francoface. See
+[ASSETS.md](ASSETS.md) for what is vendored, how to re-vendor it, and two
+non-obvious things about the pack that will otherwise cost you an afternoon.
+
+## Stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui ·
+three.js via React Three Fiber and drei · Vitest · EmailJS + Zod for the contact
+form.
