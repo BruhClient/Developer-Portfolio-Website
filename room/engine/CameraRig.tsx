@@ -107,7 +107,19 @@ export function CameraRig() {
     const onUp = () => {
       press.current = null;
     };
+    /*
+      Scrolling the reader must not move the room behind it.
+
+      Same window-scope mistake the drag had, and the same fix: the wheel was
+      listened for globally, so reading down a long project - or a list of
+      hackathons taller than the panel - zoomed the camera a step per notch
+      while the text scrolled. The room ended up somewhere the visitor never
+      asked it to go, and nothing about scrolling a page suggests it would.
+
+      Only the canvas is the room, so only the canvas zooms it.
+    */
     const onWheel = (e: WheelEvent) => {
+      if (e.target !== gl.domElement) return;
       setZoom((z) => {
         const next = z * (1 + Math.sign(e.deltaY) * ZOOM_STEP);
         return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
