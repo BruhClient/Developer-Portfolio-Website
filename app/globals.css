@@ -842,7 +842,7 @@
 }
 
 /*
-  A picture at full bleed.
+  A picture at full bleed - the About header, and anything spanning a gallery.
 
   Hairlines top and bottom instead of the rounded card it used to sit in. A
   full-bleed image with rounded corners reads as a card someone forgot to
@@ -862,17 +862,54 @@
 }
 
 /*
-  Except when the file is smaller than the panel. One screenshot in the set is
-  208px wide - a four-line terminal table - and stretching it across 648px
-  turns crisp text into mush. Full width is what makes a picture look
-  deliberate; upscaling past its own resolution is what makes it look broken,
-  so the cap wins and the image centres at its native size.
+  Except when the file is smaller than the space it is given. One screenshot in
+  the set is 208px wide - a four-line terminal table - and stretching it across
+  a 648px panel turns crisp text into mush. Filling the width is what makes a
+  picture look deliberate; upscaling past its own resolution is what makes it
+  look broken, so the cap wins and the image centres where it sits.
 
   Set per image from the measured table, since CSS cannot ask a file how wide
   it is. `width` is already the intrinsic width, so this is just naming it.
 */
 .reader-shot--native {
   border-inline: 1px solid rgba(255, 217, 160, 0.14);
+}
+
+/*
+  A gallery of shots, packed into columns.
+
+  A column WIDTH, not a count: the reader is 45vw, so it is 648px on a laptop
+  and 460px in a small window, and 290 gives two columns at the first and one
+  at the second with no breakpoint saying so. The phone sheet gets one, which
+  is a plain stack - correctly, since two 190px columns would be unreadable.
+
+  Multi-column balances the columns by height on its own, which is the whole
+  trick; all this has to do is stop a picture being sliced down the middle.
+*/
+.reader-gallery {
+  columns: 290px;
+  column-gap: 6px;
+}
+
+.reader-gallery .reader-shot {
+  break-inside: avoid;
+  margin-bottom: 6px;
+  /* Boxed rather than banded. At full bleed a picture's own edges are the
+     panel's, so two rules were enough; tiled next to a neighbour it needs the
+     other two sides or the gap between images reads as part of the picture. */
+  border: 1px solid rgba(255, 217, 160, 0.14);
+  border-radius: 3px;
+}
+
+/*
+  A strip chart, given the whole width back. `column-span` closes the columns
+  above it and reopens them below, so the masonry packs around it rather than
+  leaving a hole - see PANORAMIC in bodies/Shot.tsx for what qualifies.
+*/
+.reader-gallery .reader-shot--wide {
+  column-span: all;
+  border-radius: 0;
+  border-inline: 0;
 }
 
 /*
@@ -954,4 +991,10 @@
   .room-dock__wide {
     display: none;
   }
+}
+
+/* See the note on <Canvas> in engine/Room.tsx: this is what stops a room sign
+   painting over the reader. */
+.room-canvas {
+  isolation: isolate;
 }

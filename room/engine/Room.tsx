@@ -67,6 +67,16 @@ export function Room() {
 
   return (
     <Canvas
+      /*
+        Keeps the room's own z-indexes inside the room. drei renders the signs
+        as real DOM at a z-index in the millions, and R3F's container is
+        position:relative with z-index:auto - which creates no stacking context
+        - so those millions competed with the rest of the page and won. A sign
+        for an object sitting behind the reader printed straight over whatever
+        you were reading. `isolation: isolate` makes this a stacking context,
+        so the signs can only ever be above the canvas, not above the panel.
+      */
+      className="room-canvas"
       dpr={PIXEL_SCALE}
       camera={{ fov: FOV, position: [9, 7, 9] }}
       // No antialiasing and no shadow maps: both fight the pixel grid, and
