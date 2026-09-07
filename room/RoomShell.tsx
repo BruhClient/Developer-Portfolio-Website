@@ -17,6 +17,7 @@ const Room = dynamic(() => import("./engine/Room").then((m) => m.Room), { ssr: f
 const Panel = dynamic(() => import("./ui/Panel").then((m) => m.Panel), { ssr: false });
 const Hint = dynamic(() => import("./ui/Hint").then((m) => m.Hint), { ssr: false });
 const Welcome = dynamic(() => import("./ui/Welcome").then((m) => m.Welcome), { ssr: false });
+const Dock = dynamic(() => import("./ui/Dock").then((m) => m.Dock), { ssr: false });
 
 export function RoomShell() {
   /*
@@ -48,12 +49,9 @@ export function RoomShell() {
         <Room />
         <Panel />
         <Hint />
-        <a
-          href="/text"
-          className="fixed bottom-3 left-3 z-30 text-[11px] text-amber-100/35 underline underline-offset-4 hover:text-amber-100/70"
-        >
-          text version
-        </a>
+        {/* The text-version link used to sit loose in this corner; it lives in
+            the dock now, next to the other ways out of the room. */}
+        <Dock />
       </div>
       <Welcome />
     </div>

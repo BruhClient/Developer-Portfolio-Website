@@ -488,7 +488,8 @@
    ───────────────────────────────────────────── */
 .room-hint {
   position: fixed;
-  bottom: 22px;
+  /* Clear of the dock, which is 40px tall in the same corner of the screen. */
+  bottom: 66px;
   left: 50%;
   z-index: 20;
   transform: translateX(-50%);
@@ -704,5 +705,111 @@
 @media (prefers-reduced-motion: reduce) {
   .room-welcome {
     animation: none;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   The dock.
+
+   The resume and the three contact channels, always reachable. Both used to
+   live inside the room - the resume behind the Experience panel, the channels
+   behind the door - which serves someone exploring and fails someone who
+   decided in ten seconds that they want the PDF and nothing else.
+
+   Bottom LEFT, not centred: the reader panel takes the right 45% of a desktop
+   window, so a centred bar would end up underneath it.
+   ───────────────────────────────────────────── */
+.room-dock {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* Never wraps. A bar that becomes two rows on a narrow screen moves the
+     first-run line on top of itself; if it genuinely will not fit, it scrolls
+     rather than reflowing everything above it. */
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.room-dock::-webkit-scrollbar {
+  display: none;
+}
+
+.room-dock__resume,
+.room-dock__link,
+.room-dock__text {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    border-color 130ms ease-out,
+    background-color 130ms ease-out,
+    color 130ms ease-out;
+}
+
+/* The one thing here most likely to be wanted, so the one thing with a fill. */
+.room-dock__resume {
+  border: 1px solid rgba(255, 217, 160, 0.5);
+  background: rgba(255, 217, 160, 0.14);
+  color: #ffe7c0;
+}
+
+.room-dock__resume:hover {
+  border-color: #ffd9a0;
+  background: rgba(255, 217, 160, 0.24);
+  color: #fff6e6;
+}
+
+.room-dock__links {
+  display: flex;
+  gap: 6px;
+}
+
+.room-dock__link {
+  border: 1px solid rgba(255, 217, 160, 0.2);
+  background: rgba(14, 16, 24, 0.66);
+  color: rgba(244, 234, 217, 0.8);
+}
+
+.room-dock__link:hover {
+  border-color: rgba(255, 217, 160, 0.55);
+  color: #fff6e6;
+}
+
+/* Quietest of the three: a fallback, not a destination. */
+.room-dock__text {
+  border: 1px solid transparent;
+  color: rgba(244, 234, 217, 0.42);
+}
+
+.room-dock__text:hover {
+  color: rgba(244, 234, 217, 0.85);
+}
+
+.room-dock__resume:focus-visible,
+.room-dock__link:focus-visible,
+.room-dock__text:focus-visible {
+  outline: 2px solid #ffd9a0;
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .room-dock__resume,
+  .room-dock__link,
+  .room-dock__text {
+    padding: 6px 10px;
+    font-size: 11px;
   }
 }
