@@ -9,11 +9,31 @@ import { MODEL_SCALE } from "../data/models";
 import type { Prop } from "../data/scene";
 import { mountingFor } from "./mount";
 import { scaleOf } from "./scale";
+import { overlapsReader } from "../ui/readerRect";
 import { useRoom } from "./roomState";
 import { useModel } from "./useModels";
 
 const DEG = Math.PI / 180;
 const LIFT = 0.02; // 2cm, the spec's hover lift
+
+/*
+  How much bigger the clickable box is than the object inside it, in world
+  units: a little reach on every side, and a floor under the whole thing.
+
+  The models were their own hit targets, and measured at 1280x800 that made
+  four of the six objects 30 to 50 pixels tall on screen - the NES the worst at
+  30. Missing by a few pixels is easy at that size, and a miss is not nothing:
+  it falls through to the click-away plane, which closes whatever is open. So
+  the affordance was "click the console" and the reality was a thirty pixel
+  band with a penalty for missing.
+
+  The floor is what actually fixes the small ones - reach alone is proportional
+  to nothing and leaves a small object small. Half a world unit puts every
+  object at roughly fifty pixels at the home framing, which is about the size
+  of the sign above it.
+*/
+const CLICK_PAD = 0.07;
+const MIN_CLICK = 0.5;
 
 /*
   One clickable object, under a sign that names it.
@@ -36,6 +56,14 @@ const LIFT = 0.02; // 2cm, the spec's hover lift
 export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
   const model = useModel(prop.model, prop.tint);
   const group = useRef<THREE.Group>(null);
+  const sign = useRef<HTMLButtonElement>(null);
+  /* Measured, not guessed: a sign's width is its label's, and its height changes
+     with the narrow-screen rule in globals.css. Cached because reading it is a
+     layout flush and this runs every frame; thrown away when the window
+     resizes, which is the only thing that can change it. */
+  const signBox = useRef<{ width: number; height: number } | null>(null);
+  const measuredAt = useRef(0);
+  const anchorPoint = useRef(new THREE.Vector3());
   const [hover, setHover] = useState(false);
   const [signHover, setSignHover] = useState(false);
   const { state, openItem, setHovered, setFocused } = useRoom();
@@ -66,6 +94,34 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
     return height + margin;
   }, [model, prop.mount]);
 
+  /*
+    An invisible box around the object, carrying the clicks the model's own
+    silhouette is too small and too ragged to catch. Transparent rather than
+    `visible={false}`, because three skips invisible objects when raycasting -
+    the same trick the click-away plane in Room.tsx uses.
+
+    It lives inside the tilt group so it is in the model's own space, which is
+    the space the box below is measured in: wall art is modelled lying flat and
+    stood up by that tilt, and a box measured before it has to be tilted with
+    it.
+  */
+  const clickBox = useMemo(() => {
+    if (!model) return null;
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const centre = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(centre);
+    // Local units, so world measurements divide by this group's own scale.
+    const scale = scaleOf(prop);
+    const grow = (extent: number, axis: number): number =>
+      Math.max(extent + (2 * CLICK_PAD) / scale[axis], MIN_CLICK / scale[axis]);
+    return {
+      size: [grow(size.x, 0), grow(size.y, 1), grow(size.z, 2)] as [number, number, number],
+      centre: [centre.x, centre.y, centre.z] as [number, number, number],
+    };
+  }, [model, prop]);
+
   const isFocused = state.focused === prop.id;
   const active = hover || signHover || isFocused;
 
@@ -81,6 +137,52 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
     const raised = hover || isFocused;
     const target = prop.position.y + (raised ? LIFT : 0) + pulse * 0.012;
     group.current.position.y += (target - group.current.position.y) * 0.2;
+  });
+
+  /*
+    Get the sign out of the reader's way.
+
+    A sign is placed by projecting a point in the room, so it lands wherever
+    the object it names lands - including behind the panel, where it is a label
+    on nothing, and across the panel's edge, where half a word sticking out
+    reads as a rendering fault. `isolation: isolate` on the canvas already
+    stops one painting OVER the reader; this is the other half, and the one a
+    visitor actually notices.
+
+    Screen space, so it has to be measured here rather than declared in CSS:
+    nothing about the reader's layout is knowable to an element positioned by a
+    camera. readerRect.ts holds the panel's geometry as numbers for exactly
+    this, and is tested against the class names Panel.tsx carries.
+  */
+  useFrame(({ camera, size }) => {
+    const el = sign.current;
+    if (!el || !group.current) return;
+
+    if (state.level !== "item") {
+      el.removeAttribute("data-under-reader");
+      return;
+    }
+
+    if (!signBox.current || measuredAt.current !== size.width) {
+      signBox.current = { width: el.offsetWidth, height: el.offsetHeight };
+      measuredAt.current = size.width;
+    }
+
+    group.current.updateWorldMatrix(true, false);
+    const point = anchorPoint.current.set(0, anchorY, 0);
+    group.current.localToWorld(point);
+    point.project(camera);
+
+    // drei centres the wrapper on the anchor and .room-sign-anchor lifts it by
+    // half its height, so the sign's bottom edge sits on the projected point.
+    const x = (point.x * 0.5 + 0.5) * size.width;
+    const y = (0.5 - point.y * 0.5) * size.height;
+    const { width, height } = signBox.current;
+    const hidden = overlapsReader(
+      { left: x - width / 2, right: x + width / 2, top: y - height, bottom: y },
+      size,
+    );
+    el.toggleAttribute("data-under-reader", hidden);
   });
 
   if (!model) return null;
@@ -115,6 +217,12 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
     >
       <group rotation={[tilt * DEG, 0, 0]}>
         <primitive object={model} />
+        {clickBox && (
+          <mesh position={clickBox.centre}>
+            <boxGeometry args={clickBox.size} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+        )}
       </group>
 
       {/*
@@ -157,6 +265,7 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
       <Html center position={[0, anchorY, 0]} style={{ pointerEvents: "none" }}>
         <div className="room-sign-anchor">
           <button
+            ref={sign}
             type="button"
             className="room-sign"
             data-hint={hint || undefined}

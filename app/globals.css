@@ -359,7 +359,19 @@
   transition:
     border-color 130ms ease-out,
     background-color 130ms ease-out,
-    color 130ms ease-out;
+    color 130ms ease-out,
+    opacity 180ms ease-out;
+}
+
+/* A sign that has ended up on the reader steps aside. See the note in
+   engine/Prop.tsx: the room places signs by projecting a point in it, so one
+   can land behind the panel, where it labels nothing, or half across its edge,
+   where it reads as a rendering fault. It goes untouchable as well as
+   invisible - a label you cannot see is not a thing you should be able to
+   press. */
+.room-sign[data-under-reader] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .room-sign__dot {
