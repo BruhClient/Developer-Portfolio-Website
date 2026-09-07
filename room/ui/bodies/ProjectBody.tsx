@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { PageData } from "@/constants/pages/types";
+import { Shot } from "./Shot";
 
 export function ProjectBody({ data }: { data: PageData }) {
   return (
@@ -45,17 +45,13 @@ export function ProjectBody({ data }: { data: PageData }) {
         </ul>
       )}
 
+      {/* The gallery runs to the panel's edges; the prose around it keeps its
+          gutter. A real gap between shots rather than none, so each one reads
+          as its own plate instead of a single scrolling strip. */}
       {data.images.length > 0 && (
-        <div className="space-y-3">
+        <div className="reader-bleed space-y-5">
           {data.images.map((image) => (
-            <Image
-              key={image.src}
-              src={image.src}
-              alt={image.alt}
-              width={880}
-              height={550}
-              className="w-full rounded-lg border border-amber-200/10"
-            />
+            <Shot key={image.src} image={image} />
           ))}
         </div>
       )}

@@ -67,15 +67,11 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
   }, [model, prop.mount]);
 
   const isFocused = state.focused === prop.id;
-  const unopened = !state.opened.has(binding);
   const active = hover || signHover || isFocused;
 
   useFrame(({ clock }) => {
     if (!group.current) return;
-    const pulse =
-      hint && unopened && !active
-        ? Math.sin(clock.elapsedTime * 2.2) * 0.5 + 0.5
-        : 0;
+    const pulse = hint && !active ? Math.sin(clock.elapsedTime * 2.2) * 0.5 + 0.5 : 0;
     /*
       Pointing at the SIGN lights the object but does not lift it. The sign is
       parented to this group, so a lift moves the sign too - a few pixels up,
@@ -163,8 +159,7 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
           <button
             type="button"
             className="room-sign"
-            data-seen={unopened ? undefined : true}
-            data-hint={hint && unopened ? true : undefined}
+            data-hint={hint || undefined}
             data-active={active || undefined}
             data-focused={isFocused || undefined}
             onClick={() => openItem(binding)}

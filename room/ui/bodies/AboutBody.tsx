@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { AboutData } from "@/constants/pages/about";
+import { Shot } from "./Shot";
 
 export function AboutBody({
   data,
@@ -15,13 +15,12 @@ export function AboutBody({
 }) {
   return (
     <article className="space-y-6">
-      <Image
-        src={data.images.portrait.src}
-        alt={data.images.portrait.alt}
-        width={640}
-        height={640}
-        className="w-40 rounded-lg border border-amber-200/10"
-      />
+      {/* A header image rather than the 160px thumbnail this was: full width,
+          cropped to a landscape band so a 3:4 standing photo introduces the
+          section instead of filling it. */}
+      <div className="reader-bleed">
+        <Shot image={data.images.portrait} className="reader-portrait" />
+      </div>
       <p className="text-base leading-relaxed text-amber-50">{data.lead}</p>
 
       {data.sections.map((section) => (

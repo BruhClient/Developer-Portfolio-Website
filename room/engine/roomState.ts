@@ -42,7 +42,9 @@ export interface RoomState {
   hovered: string | null;
   /** Keyboard focus, which is separate from hover. */
   focused: string | null;
-  /** Bindings opened this session; they stop pulsing once opened. */
+  /** Bindings opened this session. Only its emptiness is read: the first-run
+   *  hint - the beating dots and the line along the bottom - stops the moment
+   *  anything at all has been opened. Signs themselves never change. */
   opened: ReadonlySet<string>;
 }
 

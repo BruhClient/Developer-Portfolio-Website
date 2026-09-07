@@ -392,18 +392,14 @@
   animation: room-sign-beat 1.4s ease-in-out infinite;
 }
 
-/* Opened already: still named, so you can find your way back and see at a
-   glance what you have covered, but no longer competing for attention. */
-.room-sign[data-seen] {
-  --sign-bg: rgba(14, 16, 24, 0.45);
-  --sign-border: rgba(255, 217, 160, 0.1);
-  --sign-text: rgba(244, 234, 217, 0.45);
-  --sign-dot: rgba(255, 217, 160, 0.25);
-  --sign-glow: none;
-}
+/* A sign never dims. It used to fade once its section had been opened, on the
+   theory that a visitor wants to see what they have covered - but the six signs
+   ARE the navigation here, there is no rail and no nav bar, and greying out
+   navigation the moment it is used makes the room look progressively more
+   broken the more of it you read. Read or unread, a sign is a label on a thing,
+   and a label does not get quieter because you have already looked at it. */
 
 /* Hover, and keyboard focus with it, so tabbing is as legible as pointing.
-   Last, so it wins over [data-seen] when both are set.
 
    Colour only - deliberately no transform. The sign is now its own hit target,
    and anything that moves it on hover moves it out from under the pointer that
@@ -812,4 +808,87 @@
     padding: 6px 10px;
     font-size: 11px;
   }
+}
+
+/* ─────────────────────────────────────────────
+   The reader's body.
+
+   Text wants a gutter; pictures do not. A screenshot inset by the same 40px as
+   the prose reads as a thumbnail pasted into a document, and in a 648px drawer
+   those two gutters were eating an eighth of every image. So the words keep the
+   padding and the pictures cancel it, which is the oldest trick in magazine
+   layout and the reason a photo in a magazine runs to the trim.
+
+   The padding is a custom property rather than a Tailwind class because the
+   bleed has to be exactly its negative. Written as two separate numbers they
+   drift the first time someone changes the padding at one breakpoint, and the
+   failure is a picture sitting 16px proud of the panel - visible, but only if
+   you happen to look at that breakpoint.
+   ───────────────────────────────────────────── */
+.reader {
+  --reader-pad: 1.5rem;
+  padding: var(--reader-pad);
+}
+
+@media (min-width: 768px) {
+  .reader {
+    --reader-pad: 2.5rem;
+  }
+}
+
+.reader-bleed {
+  margin-inline: calc(var(--reader-pad) * -1);
+  width: calc(100% + var(--reader-pad) * 2);
+}
+
+/*
+  A picture at full bleed.
+
+  Hairlines top and bottom instead of the rounded card it used to sit in. A
+  full-bleed image with rounded corners reads as a card someone forgot to
+  inset, and half the images here are dark charts on a near-black ground: with
+  no edge at all they dissolve into the panel and you cannot tell where the
+  chart stops and the page starts. Two 1px rules are enough to say "this is a
+  picture" without drawing a box around it.
+*/
+.reader-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-top: 1px solid rgba(255, 217, 160, 0.14);
+  border-bottom: 1px solid rgba(255, 217, 160, 0.14);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/*
+  Except when the file is smaller than the panel. One screenshot in the set is
+  208px wide - a four-line terminal table - and stretching it across 648px
+  turns crisp text into mush. Full width is what makes a picture look
+  deliberate; upscaling past its own resolution is what makes it look broken,
+  so the cap wins and the image centres at its native size.
+
+  Set per image from the measured table, since CSS cannot ask a file how wide
+  it is. `width` is already the intrinsic width, so this is just naming it.
+*/
+.reader-shot--native {
+  border-inline: 1px solid rgba(255, 217, 160, 0.14);
+}
+
+/*
+  The About portrait.
+
+  It is a 3:4 standing photo, and at full bleed that is 864px tall in a 900px
+  window: you open About and get a wall of face with the writing pushed off the
+  bottom. Cropped to 3:2 it becomes a header image - still full width, still
+  the same photo, but it introduces the page instead of being the page.
+
+  The crop is anchored at 34% rather than the centre because the subject's head
+  sits just under the top third; a centre crop cut it off at the eyes.
+*/
+.reader-portrait {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  object-position: center 34%;
+  height: auto;
 }

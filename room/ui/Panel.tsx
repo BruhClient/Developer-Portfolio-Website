@@ -29,6 +29,12 @@ import { ToolkitBody } from "./bodies/ToolkitBody";
 
   Desktop: the right 45%. Mobile: a 60%-height bottom sheet, which is why
   focus.ts frames the subject in the top half there instead of the left.
+
+  z-30 - the overlay rung - rather than the dock's 20. On a desktop the two
+  never meet, the reader being on the right and the dock in the bottom-left
+  corner. On a phone the sheet comes up over that same corner, and at equal
+  z-index the dock won on DOM order alone: the resume bar floated on top of
+  whatever you were reading, with the last line of the panel underneath it.
 */
 export function Panel() {
   const { state, openItem, back } = useRoom();
@@ -41,7 +47,7 @@ export function Panel() {
       aria-hidden={!open}
       aria-label={content ? titleOf(content) : undefined}
       className={[
-        "fixed z-20 overflow-y-auto border-amber-200/15 bg-[#0d0f18]/95 backdrop-blur-sm",
+        "fixed z-30 overflow-y-auto border-amber-200/15 bg-[#0d0f18]/95 backdrop-blur-sm",
         "transition-transform duration-500 ease-out",
         "inset-x-0 bottom-0 h-[60svh] rounded-t-2xl border-t",
         "md:inset-y-0 md:left-auto md:right-0 md:h-auto md:w-[45vw] md:rounded-none md:border-l md:border-t-0",
@@ -51,7 +57,7 @@ export function Panel() {
       ].join(" ")}
     >
       {content && (
-        <div className="p-6 md:p-10">
+        <div className="reader">
           <div className="flex items-start justify-between gap-4 pb-6">
             <p className="text-xs uppercase tracking-widest text-amber-200/60">
               {titleOf(content)}
