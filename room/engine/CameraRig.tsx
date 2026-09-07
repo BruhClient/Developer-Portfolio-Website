@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { propForBinding } from "../data/navigation";
 import { ROOM, SCENE } from "../data/scene";
 import { framingFor, type Bounds, type Level } from "./focus";
-import { applyDrag, type Swivel } from "./swivel";
+import { applyDrag, beginPress, movePress, type Press, type Swivel } from "./swivel";
 import { useRoom } from "./roomState";
 
 /*
@@ -71,26 +71,41 @@ function boundsForProp(propId: string): Bounds {
 }
 
 export function CameraRig() {
-  const { camera, size } = useThree();
+  const { camera, gl, size } = useThree();
   const { state, back } = useRoom();
   const [swivel, setSwivel] = useState<Swivel>({ yaw: 0, pitch: 0 });
   const [zoom, setZoom] = useState(1);
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  const press = useRef<Press | null>(null);
   const lookAt = useRef(new THREE.Vector3(HOME.center.x, HOME.center.y, HOME.center.z));
 
   useEffect(() => {
+    /*
+      Only the room turns the room.
+
+      This listened on the window, so a press anywhere started a drag: on a
+      sign, on the reader, on the resume bar. Selecting a line of text in the
+      panel swung the whole room behind it, and - worse - pressing a sign
+      rotated the room out from under the very sign being pressed, so the
+      release landed beside it and nothing opened.
+
+      The canvas is the only element that IS the room. The signs are DOM that
+      drei portals in beside it and the reader is DOM over it, so testing the
+      element the press landed on separates them all in one line. Move and up
+      stay on the window, so a drag that leaves the canvas still tracks.
+    */
     const onDown = (e: PointerEvent) => {
-      drag.current = { x: e.clientX, y: e.clientY };
+      if (e.target !== gl.domElement) return;
+      press.current = beginPress(e.clientX, e.clientY);
     };
     const onMove = (e: PointerEvent) => {
-      if (!drag.current) return;
-      const dx = e.clientX - drag.current.x;
-      const dy = e.clientY - drag.current.y;
-      drag.current = { x: e.clientX, y: e.clientY };
-      setSwivel((s) => applyDrag(s, dx, dy));
+      if (!press.current) return;
+      const step = movePress(press.current, e.clientX, e.clientY);
+      press.current = step.press;
+      if (step.dx === 0 && step.dy === 0) return;
+      setSwivel((s) => applyDrag(s, step.dx, step.dy));
     };
     const onUp = () => {
-      drag.current = null;
+      press.current = null;
     };
     const onWheel = (e: WheelEvent) => {
       setZoom((z) => {
@@ -116,7 +131,7 @@ export function CameraRig() {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
     };
-  }, [back]);
+  }, [back, gl]);
 
   useFrame(() => {
     /*
