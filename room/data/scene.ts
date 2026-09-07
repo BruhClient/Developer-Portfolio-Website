@@ -18,7 +18,13 @@ export interface Prop {
   position: Vec3;
   /** Degrees. */
   rotationY: number;
-  scale?: number;
+  /**
+    A single number scales the model evenly. A triple scales its own local x,
+    y and z - applied before `rotationY`, so the axes are the model's, not the
+    room's. That exists for one case: a pack model whose proportions are wrong
+    rather than whose size is.
+  */
+  scale?: number | readonly [number, number, number];
   /**
     Set on wall-hung art only. The pack models paintings lying flat, so they
     need a tilt before a yaw means anything - see engine/mount.ts. Absent means
@@ -61,6 +67,21 @@ export const ROOM = { size: 5, half: 2.5 } as const;
   vanishing into the plaster came from picking a number by eye instead.
 */
 export const WALL_FACE = -2.36;
+
+/*
+  The door leaf, flattened along its own thickness.
+
+  house_door measures 0.300 x 1.875 x 0.800, and that 0.300 is not a handle
+  inflating the bounding box - the vertices sit in two clusters 0.300 apart,
+  so it really is a slab nearly half as thick as it is wide. Against the width
+  of its own doorway that reads as a bank vault. A third of it lands at 0.100,
+  about one to eight against the leaf's width, which is chunky enough to belong
+  in a voxel room without looking armoured.
+
+  Only the thickness changes. Squashing the height or the width would make it
+  the wrong door for its frame.
+*/
+const DOOR_SQUASH = [1 / 3, 1, 1] as const;
 
 /*
   The pack's walls are near-white, which under a bright cartoon wash blows out
@@ -256,10 +277,12 @@ export const SCENE: readonly Prop[] = [
     Closed is rotationY 90, the leaf being 0.80 across its own z. Open 55
     degrees from there is 145, and holding the hinge still while the model
     rotates about its own centre puts that centre at 2.3 - 0.40 sin145,
-    -2.36 + 0.40 cos145. It then spans x 1.719..2.423, inside the doorway bay
-    and clear of the tile that ends at 1.5.
+    -2.36 + 0.40 cos145.
+
+    Squashing the leaf does not move any of that: the hinge sits at local
+    z +0.40, where x is zero, so scaling x pivots nothing.
   */
-  { id: "contact:door", model: "house_door", zone: "contact", position: { x: 2.071, y: 0, z: -2.032 }, rotationY: 145, binding: "contact" },
+  { id: "contact:door", model: "house_door", zone: "contact", position: { x: 2.071, y: 0, z: -2.032 }, rotationY: 145, scale: DOOR_SQUASH, binding: "contact" },
 
   // ------------------------------------------------ Personality, on the walls
   // Wall art is mounted, not rotated - see engine/mount.ts for why a yaw alone

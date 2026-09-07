@@ -8,6 +8,7 @@ import { BINDINGS, titleOf } from "../data/bindings";
 import { MODEL_SCALE } from "../data/models";
 import type { Prop } from "../data/scene";
 import { mountingFor } from "./mount";
+import { scaleOf } from "./scale";
 import { useRoom } from "./roomState";
 import { useModel } from "./useModels";
 
@@ -98,7 +99,7 @@ export function InteractiveProp({ prop, hint }: { prop: Prop; hint: boolean }) {
       name={prop.id}
       position={[prop.position.x, prop.position.y, prop.position.z]}
       rotation={[0, yaw * DEG, 0]}
-      scale={(prop.scale ?? 1) * MODEL_SCALE}
+      scale={scaleOf(prop)}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHover(true);

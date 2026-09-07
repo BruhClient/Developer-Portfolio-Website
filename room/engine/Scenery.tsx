@@ -1,9 +1,9 @@
 "use client";
 
-import { MODEL_SCALE } from "../data/models";
 import type { Prop } from "../data/scene";
 import { mountingFor } from "./mount";
 import { useModel } from "./useModels";
+import { scaleOf } from "./scale";
 
 const DEG = Math.PI / 180;
 
@@ -21,7 +21,7 @@ export function SceneryProp({ prop }: { prop: Prop }) {
       name={prop.id}
       position={[prop.position.x, prop.position.y, prop.position.z]}
       rotation={[0, yaw * DEG, 0]}
-      scale={(prop.scale ?? 1) * MODEL_SCALE}
+      scale={scaleOf(prop)}
     >
       <group rotation={[tilt * DEG, 0, 0]}>
         <primitive object={model} />
