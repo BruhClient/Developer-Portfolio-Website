@@ -34,7 +34,10 @@ export function Dock() {
       {/* Same-origin, so `download` is honoured rather than handing the PDF
           to the browser's own viewer. */}
       <a className="room-dock__resume" href={RESUME_HREF} download>
-        <span aria-hidden="true">&darr;</span> R&eacute;sum&eacute;
+        <span className="room-dock__glyph" aria-hidden="true">
+          &darr;
+        </span>
+        R&eacute;sum&eacute;
       </a>
 
       <nav className="room-dock__links" aria-label="Elsewhere">
@@ -55,8 +58,15 @@ export function Dock() {
         })}
       </nav>
 
+      {/*
+        "version" is a separate span so a narrow screen can drop it and leave
+        "Text" - the bar is 64px too wide at 320px, and a label cut off
+        mid-word by the scroll is worse than a shorter one. Splitting the text
+        rather than rendering two copies keeps one string in the accessibility
+        tree, which then reads whichever of the two is actually visible.
+      */}
       <a className="room-dock__text" href="/text">
-        Text version
+        Text<span className="room-dock__wide"> version</span>
       </a>
     </div>
   );

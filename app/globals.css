@@ -892,3 +892,66 @@
   object-position: center 34%;
   height: auto;
 }
+
+/* ─────────────────────────────────────────────
+   Touch.
+
+   The signs are the whole navigation, and on a phone they are the only way
+   into the room - there is no rail and no nav bar to fall back on. At 11px
+   they are 21px tall, under the 24px WCAG 2.5.8 asks for and well under the
+   44px a thumb wants, so the one control that matters was the hardest thing
+   on the page to hit.
+
+   Growing them is not the answer: they were deliberately made small so six
+   labels could sit over a room without burying it. So the hit area grows and
+   the sign does not - an invisible cushion, which is the whole point of a
+   pseudo-element here.
+
+   Measured against the six signs' real positions at 320-430px, 9px is as far
+   as this can go before a third pair starts to overlap. It lands at 39px,
+   short of 44 but most of the way there. Experience and About Me overlap at
+   the corners at any size, this rule included; they sit diagonally so the
+   labels themselves stay legible, and each keeps its own area to be hit in.
+
+   Coarse pointers only. On a mouse the extra reach would light the object's
+   rim light from a cursor that is visibly not on the sign.
+   ───────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .room-sign::after {
+    content: "";
+    position: absolute;
+    inset: -9px -6px;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   The dock on a small phone.
+
+   Measured: the bar is 360px wide against 296px of room at 320px, and 336px
+   at 360px. It scrolls rather than wrapping, which keeps it off the first-run
+   line but leaves the last item sliced mid-word with nothing to say it is
+   scrollable. Trimming is better than hiding: every link stays, and the
+   savings come from the label's second word, the download arrow and the
+   horizontal padding - never the vertical, which is what keeps the pills
+   themselves thumb-sized.
+   ───────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .room-dock {
+    gap: 5px;
+  }
+
+  .room-dock__links {
+    gap: 5px;
+  }
+
+  .room-dock__resume,
+  .room-dock__link,
+  .room-dock__text {
+    padding: 6px 8px;
+  }
+
+  .room-dock__glyph,
+  .room-dock__wide {
+    display: none;
+  }
+}
