@@ -50,7 +50,7 @@ const TABBABLE = tabOrder().map((id) => INTERACTIVE.find((prop) => prop.id === i
   make the six zones read as separate places without a single line of UI chrome.
 */
 export function Room() {
-  const { state, back } = useRoom();
+  const { state, close } = useRoom();
 
   /*
     Whether to nudge, and it is a question about the visitor, not about the
@@ -149,7 +149,7 @@ export function Room() {
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, -0.02, 0]}
-          onClick={() => back()}
+          onClick={() => close()}
         >
           <planeGeometry args={[26, 26]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />

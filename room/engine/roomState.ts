@@ -46,6 +46,19 @@ export interface RoomState {
    *  hint - the beating dots and the line along the bottom - stops the moment
    *  anything at all has been opened. Signs themselves never change. */
   opened: ReadonlySet<string>;
+  /*
+    How the reader got to what it is showing, oldest first.
+
+    Opening Hackathons and then picking one out of the list used to leave no way
+    back to the list: the only exits were Escape, which threw away the section
+    too, and the sibling links, which move sideways rather than up. So the
+    reader remembers the path it was led down and offers the last step back.
+
+    Only links followed inside the reader extend it. Clicking an object in the
+    room starts a fresh trail, because the room IS the top level - arriving at
+    a section by turning to it and clicking it is not "deeper" than anything.
+  */
+  trail: readonly string[];
 }
 
 const INITIAL: RoomState = {
@@ -56,6 +69,7 @@ const INITIAL: RoomState = {
   hovered: null,
   focused: null,
   opened: new Set(),
+  trail: [],
 };
 
 let state: RoomState = INITIAL;
@@ -84,21 +98,63 @@ export function resetRoom(): void {
   for (const listener of listeners) listener();
 }
 
-export function openItem(bindingId: string): void {
+function show(bindingId: string, trail: readonly string[]): void {
   const content = BINDINGS[bindingId];
   if (!content) return;
   const opened = new Set(state.opened);
   opened.add(bindingId);
-  set({ ...state, level: "item", zone: content.zone, item: bindingId, opened });
+  set({ ...state, level: "item", zone: content.zone, item: bindingId, opened, trail });
 }
 
 /**
- * Closes whatever is open and returns to the whole room. Escape and the panel's
- * close button both land here, and from home it is a no-op, so there is no
- * state a visitor cannot get out of.
+ * Opens something by clicking it in the room - an object or its sign.
+ *
+ * The room is the top level, so this starts a fresh trail: the back button
+ * should never offer to return you to whatever you happened to be reading
+ * before you turned round and clicked something else.
+ */
+export function openItem(bindingId: string): void {
+  show(bindingId, []);
+}
+
+/**
+ * Follows a link inside the reader: a list entry, a sibling, one of the About
+ * panel's onward links, a section pill. Remembers where you were, so `back`
+ * has somewhere to return to.
+ *
+ * Revisiting somewhere already on the trail cuts back to it rather than
+ * stacking a second copy, so bouncing between a list and its entries cannot
+ * grow an ever-deeper path out of what a visitor experiences as going back.
+ */
+export function follow(bindingId: string): void {
+  if (bindingId === state.item || !BINDINGS[bindingId]) return;
+  const trail = state.item === null ? [] : [...state.trail, state.item];
+  const seen = trail.indexOf(bindingId);
+  show(bindingId, seen >= 0 ? trail.slice(0, seen) : trail);
+}
+
+/**
+ * Steps back one link, to whatever the reader was showing before.
+ *
+ * Falls through to `close` when there is nothing to step back to, so the button
+ * can never leave a visitor pressing something that does nothing.
  */
 export function back(): void {
-  set({ ...state, level: "home", zone: null, item: null });
+  const previous = state.trail[state.trail.length - 1];
+  if (previous === undefined || !BINDINGS[previous]) {
+    close();
+    return;
+  }
+  show(previous, state.trail.slice(0, -1));
+}
+
+/**
+ * Closes whatever is open and returns to the whole room. Escape, the panel's
+ * close button and a click on bare floor all land here, and from home it is a
+ * no-op, so there is no state a visitor cannot get out of.
+ */
+export function close(): void {
+  set({ ...state, level: "home", zone: null, item: null, trail: [] });
 }
 
 /**
@@ -125,7 +181,9 @@ export function setFocused(id: string | null): void {
 const actions = {
   enterRoom,
   openItem,
+  follow,
   back,
+  close,
   setHovered,
   setFocused,
 } as const;

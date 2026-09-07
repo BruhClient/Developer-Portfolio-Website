@@ -37,10 +37,19 @@ import { ToolkitBody } from "./bodies/ToolkitBody";
   whatever you were reading, with the last line of the panel underneath it.
 */
 export function Panel() {
-  const { state, openItem, back } = useRoom();
+  const { state, follow, back, close } = useRoom();
   const open = state.level === "item" && state.item !== null;
   const content = state.item ? resolveBinding(state.item) : undefined;
   const siblings = state.item ? siblingsOf(state.item) : [];
+
+  /*
+    Where the back button goes, named rather than just arrowed. "Back" alone
+    would be a promise the reader cannot keep - the trail can be a section, a
+    sibling or somewhere you arrived from sideways - and naming the destination
+    is the difference between a control you trust and one you have to try.
+  */
+  const parent = state.trail[state.trail.length - 1];
+  const parentTitle = parent ? titleForBinding(parent) : undefined;
 
   return (
     <aside
@@ -59,19 +68,31 @@ export function Panel() {
       {content && (
         <div className="reader">
           <div className="flex items-start justify-between gap-4 pb-6">
-            <p className="text-xs uppercase tracking-widest text-amber-200/60">
-              {titleOf(content)}
-            </p>
+            <div className="min-w-0">
+              {parentTitle && (
+                <button
+                  onClick={back}
+                  aria-label={`Back to ${parentTitle}`}
+                  className="-ml-1 mb-1.5 flex max-w-full items-center gap-1.5 rounded px-1 py-0.5 text-xs text-amber-100/70 hover:text-amber-50"
+                >
+                  <span aria-hidden>←</span>
+                  <span className="truncate">{parentTitle}</span>
+                </button>
+              )}
+              <p className="text-xs uppercase tracking-widest text-amber-200/60">
+                {titleOf(content)}
+              </p>
+            </div>
             <button
-              onClick={back}
+              onClick={close}
               aria-label="Close"
-              className="rounded-full border border-amber-200/25 px-2.5 py-0.5 text-sm text-amber-100/70 hover:bg-amber-200/10"
+              className="shrink-0 rounded-full border border-amber-200/25 px-2.5 py-0.5 text-sm text-amber-100/70 hover:bg-amber-200/10"
             >
               ✕
             </button>
           </div>
 
-          <Body content={content} onPick={openItem} />
+          <Body content={content} onPick={follow} />
 
           {siblings.length > 0 && (
             <nav className="mt-10 border-t border-amber-200/15 pt-5">
@@ -82,7 +103,7 @@ export function Panel() {
                 {siblings.map((sibling) => (
                   <li key={sibling.id}>
                     <button
-                      onClick={() => openItem(sibling.id)}
+                      onClick={() => follow(sibling.id)}
                       className="text-sm text-amber-100/70 underline underline-offset-4 hover:text-amber-50"
                     >
                       {sibling.title}
@@ -108,7 +129,7 @@ export function Panel() {
               {otherSections(content.zone).map((zone, i) => (
                 <li key={zone}>
                   <button
-                    onClick={() => openItem(zone)}
+                    onClick={() => follow(zone)}
                     className={
                       i === 0
                         ? "rounded-full border border-amber-200/45 bg-amber-200/10 px-3 py-1 text-xs text-amber-50"

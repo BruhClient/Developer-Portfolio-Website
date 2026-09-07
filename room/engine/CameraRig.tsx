@@ -72,7 +72,7 @@ function boundsForProp(propId: string): Bounds {
 
 export function CameraRig() {
   const { camera, gl, size } = useThree();
-  const { state, back } = useRoom();
+  const { state, close } = useRoom();
   const [swivel, setSwivel] = useState<Swivel>({ yaw: 0, pitch: 0 });
   const [zoom, setZoom] = useState(1);
   const press = useRef<Press | null>(null);
@@ -113,10 +113,14 @@ export function CameraRig() {
         return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
       });
     };
-    // Escape moves to useRoomKeys in Task 15; owning it in both would step back
-    // two levels on one keypress.
+    /*
+      Escape closes the reader outright rather than walking back up the trail.
+      It is the key you press to get out, so making it take four presses to
+      leave a hackathon reached through a list would be the opposite of what it
+      is for - the panel's own back button is what steps one level.
+    */
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") back();
+      if (e.key === "Escape") close();
     };
 
     window.addEventListener("pointerdown", onDown);
@@ -131,7 +135,7 @@ export function CameraRig() {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
     };
-  }, [back, gl]);
+  }, [close, gl]);
 
   useFrame(() => {
     /*
