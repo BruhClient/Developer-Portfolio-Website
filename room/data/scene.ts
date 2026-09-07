@@ -99,13 +99,27 @@ function buildWalls(): Prop[] {
 
     // One bay of the back wall is the window, over the desk.
     const isWindow = offset > -1.5 && offset < -0.5;
+    /*
+      And one bay is the doorway.
+
+      The door and its frame used to be props standing in FRONT of an unbroken
+      wall, which is why the wall drew over them: a solid tile and a door
+      occupying the same cubic metre, with the depth buffer deciding which won.
+      doorframe_house has exactly the same footprint as wall_tile - 0.25 x 2.20
+      x 1.00 - because it is meant to BE one of the bays, not to be parked
+      against one.
+
+      Untinted, unlike its neighbours: the tint is there to stop white plaster
+      glaring, and cooling a wooden frame to match just makes it look grey.
+    */
+    const isDoorway = offset > 1.5;
     walls.push({
       id: `wall:back-${i}`,
-      model: isWindow ? "wall_tile_window" : "wall_tile",
+      model: isDoorway ? "doorframe_house" : isWindow ? "wall_tile_window" : "wall_tile",
       zone: offset > 0.5 ? "contact" : "projects",
       position: { x: offset, y: 0, z: -ROOM.half },
       rotationY: 90,
-      tint: WALL_TINT,
+      tint: isDoorway ? undefined : WALL_TINT,
     });
   }
 
@@ -148,10 +162,24 @@ export const SCENE: readonly Prop[] = [
 
   // ---------------------------------------------------------- CERTIFICATIONS
   // Framed two-up on the back end of the left wall, above a low shelf.
+  /*
+    Four frames on the left wall, and their spacing is not decoration.
+
+    Everything mounted on this wall sits at exactly WALL_FACE, so any two that
+    overlap are perfectly coplanar - which is not "one in front of the other",
+    it is z-fighting, and it showed up as the art flickering as the camera
+    moved. The pack's paintings are not one size: halflife is 1.125 across
+    against roughly 0.5 for the others, so laying them out on the assumption
+    they match put it through its neighbour.
+
+    A wall-left prop covers z +- w/2 across and y +- d/2 up, where w and d are
+    the model's own width and depth. scene.test.ts recomputes those rectangles
+    from measured sizes and fails if any two touch.
+  */
   { id: "certifications:frame-1", model: "painting_lighthouse", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.95 }, rotationY: 0, mount: "wall-left", binding: "certifications", anchorFor: "certificate:0" },
-  { id: "certifications:frame-2", model: "painting_shaman", zone: "certifications", position: { x: WALL_FACE, y: 1.72, z: -1.15 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:1" },
+  { id: "certifications:frame-2", model: "painting_shaman", zone: "certifications", position: { x: WALL_FACE, y: 1.78, z: -1.15 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:1" },
   { id: "certifications:frame-3", model: "painting_hyperlightdrifter", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.95 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:2" },
-  { id: "certifications:frame-4", model: "painting_halflife", zone: "certifications", position: { x: WALL_FACE, y: 1.02, z: -1.15 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:3" },
+  { id: "certifications:frame-4", model: "painting_halflife", zone: "certifications", position: { x: WALL_FACE, y: 0.90, z: -1.10 }, rotationY: 0, mount: "wall-left", anchorFor: "certificate:3" },
   { id: "certifications:shelf", model: "bookcase_small", zone: "certifications", position: { x: -2.2, y: 0, z: -1.95 }, rotationY: 90 },
   { id: "certifications:plant", model: "plant3", zone: "certifications", position: { x: -2.2, y: 0, z: -2.3 }, rotationY: 0 },
 
@@ -210,8 +238,28 @@ export const SCENE: readonly Prop[] = [
   { id: "hackathons:plant", model: "plant2", zone: "hackathons", position: { x: 2.3, y: 0, z: -0.35 }, rotationY: 0 },
 
   // ------------------------------------------------------------- CONTACT ME
-  { id: "contact:doorframe", model: "doorframe_house", zone: "contact", position: { x: 1.6, y: 0, z: -2.46 }, rotationY: 90 },
-  { id: "contact:door", model: "house_door", zone: "contact", position: { x: 1.3, y: 0, z: -2.3 }, rotationY: 118, binding: "contact" },
+  /*
+    The door, standing open in the doorway bay of the back wall.
+
+    Its frame is now part of the wall itself (see buildWalls), so this only has
+    to be the leaf. Models are re-anchored to the centre of their own footprint,
+    which means rotating one swings it about its middle rather than about a
+    hinge - so the position is worked back from where the hinge should stay put.
+
+    It hinges on the RIGHT jamb, at x 2.3, z -2.36, and that is a rendering
+    decision rather than a joinery one. The camera looks into the room along
+    (1, 0, 1), so a door hung the other way turns its face away and presents
+    only its 0.30 edge - a brown plank standing in the room, which is exactly
+    what the first attempt looked like. Hung this side, the leaf faces the
+    camera almost square on.
+
+    Closed is rotationY 90, the leaf being 0.80 across its own z. Open 55
+    degrees from there is 145, and holding the hinge still while the model
+    rotates about its own centre puts that centre at 2.3 - 0.40 sin145,
+    -2.36 + 0.40 cos145. It then spans x 1.719..2.423, inside the doorway bay
+    and clear of the tile that ends at 1.5.
+  */
+  { id: "contact:door", model: "house_door", zone: "contact", position: { x: 2.071, y: 0, z: -2.032 }, rotationY: 145, binding: "contact" },
 
   // ------------------------------------------------ Personality, on the walls
   // Wall art is mounted, not rotated - see engine/mount.ts for why a yaw alone

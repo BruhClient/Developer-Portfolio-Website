@@ -118,15 +118,16 @@ export function Room() {
       */}
       <pointLight color="#9fd0ff" intensity={3.5} distance={2.0} decay={2} position={[-1.0, 1.1, -1.85]} />
 
-      {/* Warm light spilling through the ajar contact door. */}
+      {/* Warm light spilling through the ajar contact door. Aimed down the
+          doorway bay, which is the wall tile centred on x 2.0. */}
       <spotLight
         color="#ffd9a8"
         intensity={12}
         distance={4.5}
         angle={0.7}
         penumbra={0.8}
-        position={[1.5, 1.9, -3.1]}
-        target-position={[1.3, 0, -1.0]}
+        position={[2.0, 1.9, -3.2]}
+        target-position={[1.9, 0, -1.2]}
       />
 
       <group>
