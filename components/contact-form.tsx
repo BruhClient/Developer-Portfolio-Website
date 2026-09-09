@@ -1,60 +1,50 @@
 "use client";
 
 /**
- * The contact form and direct channels, extracted so one implementation can
- * serve two surfaces: the ordinary page section, and the Surface Pro's display
- * once the travelling device reaches the contact station and the panel becomes
- * live DOM rather than a painted texture.
+ * The contact form, as it appears in the room's reader panel.
  *
- * There is only ever one of these mounted — the section renders the form or
- * yields the job to the device, never both — so the emailjs wiring, the schema
- * and the field ids exist in exactly one place.
+ * It is styled here rather than by the shadcn tokens the primitives default to.
+ * Those tokens are the light theme - cream card, coffee button - and the reader
+ * is a near-black panel with warm amber on it, so the form arrived looking like
+ * a window cut through to a different website. The palette below is the room's
+ * own: the amber borders the panel uses, the dark ground the room sits on, and
+ * the same soft-amber pill the dock gives the resume.
  */
 
 import { useState, type FormEvent } from "react";
 import emailjs from "@emailjs/browser";
 import { toast } from "sonner";
-import { ArrowUpRight, Loader2, Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { ContactSchema, type ContactErrors } from "@/schemas/contact-schema";
-import { CONTACT_CHANNELS } from "@/constants/contact";
 
 const MESSAGE_LIMIT = 500;
 
-/** Direct channels, as a definition list. */
-export function ContactChannels({ idPrefix = "page" }: { idPrefix?: string }) {
-  return (
-    <dl className="space-y-px overflow-hidden rounded-xl border border-border">
-      {CONTACT_CHANNELS.map((link) => {
-        const external = link.href.startsWith("http");
-        return (
-          <div key={`${idPrefix}-${link.label}`} className="bg-card">
-            <a
-              href={link.href}
-              target={external ? "_blank" : undefined}
-              rel={external ? "noopener noreferrer" : undefined}
-              className="group flex cursor-pointer items-center justify-between gap-4 px-5 py-4 transition-colors duration-200 hover:bg-secondary"
-            >
-              <dt className="label-mono text-muted-foreground">{link.label}</dt>
-              <dd className="flex items-center gap-2 text-sm font-medium transition-colors duration-200 group-hover:text-primary">
-                {link.value}
-                <ArrowUpRight
-                  aria-hidden="true"
-                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
-              </dd>
-            </a>
-          </div>
-        );
-      })}
-    </dl>
-  );
-}
+/** Section labels in the reader are small amber caps; these match them. */
+const LABEL_TEXT = "text-xs uppercase tracking-widest text-amber-200/70";
+const LABEL = `mb-2 block ${LABEL_TEXT}`;
+
+/**
+ * A field on the room's ground rather than on a white card: the panel is dark,
+ * so an input has to be darker than the panel to read as a well rather than a
+ * tile. The amber focus ring replaces the default blue, which was the one
+ * colour on screen belonging to nothing else.
+ */
+const FIELD = [
+  "border-amber-200/20 bg-[#080a12]/80 text-amber-50",
+  /* 50%, not the 30% this started at: against the well that was 2.5:1, which
+     is a hint you have to lean in to read. This is 4.9:1. */
+  "placeholder:text-amber-100/50",
+  "focus-visible:border-amber-200/60 focus-visible:ring-amber-200/25",
+  "aria-invalid:border-red-400/70 aria-invalid:ring-red-400/20",
+].join(" ");
+
+const ERROR = "mt-2 text-xs text-red-300";
 
 export function ContactForm({
-  /** Namespaces the field ids, so the page and panel copies can never collide. */
+  /** Namespaces the field ids, so two copies could never collide. */
   idPrefix = "contact",
   className = "",
 }: {
@@ -119,11 +109,16 @@ export function ContactForm({
     <form
       onSubmit={handleSubmit}
       noValidate
-      className={`rounded-xl border border-border bg-card p-6 sm:p-8 ${className}`}
+      /*
+        Barely a card. A hard surface here would be a second panel inside the
+        panel; a hairline and the faintest warm wash are enough to say the
+        fields belong together.
+      */
+      className={`rounded-xl border border-amber-200/15 bg-amber-200/3 p-5 sm:p-6 ${className}`}
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor={id("name")} className="mb-2 block text-sm font-medium">
+          <label htmlFor={id("name")} className={LABEL}>
             Name
           </label>
           <Input
@@ -135,17 +130,17 @@ export function ContactForm({
             onChange={(e) => setName(e.target.value)}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? id("name-error") : undefined}
-            className="h-11"
+            className={`h-11 ${FIELD}`}
           />
           {errors.name && (
-            <p id={id("name-error")} role="alert" className="mt-2 text-xs text-destructive">
+            <p id={id("name-error")} role="alert" className={ERROR}>
               {errors.name}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor={id("email")} className="mb-2 block text-sm font-medium">
+          <label htmlFor={id("email")} className={LABEL}>
             Email
           </label>
           <Input
@@ -159,10 +154,10 @@ export function ContactForm({
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? id("email-error") : undefined}
-            className="h-11"
+            className={`h-11 ${FIELD}`}
           />
           {errors.email && (
-            <p id={id("email-error")} role="alert" className="mt-2 text-xs text-destructive">
+            <p id={id("email-error")} role="alert" className={ERROR}>
               {errors.email}
             </p>
           )}
@@ -171,13 +166,13 @@ export function ContactForm({
 
       <div className="mt-5">
         <div className="mb-2 flex items-baseline justify-between gap-3">
-          <label htmlFor={id("message")} className="text-sm font-medium">
+          <label htmlFor={id("message")} className={LABEL_TEXT}>
             Message
           </label>
           <span
-            className={`label-mono ${
-              remaining < 0 ? "text-destructive" : "text-muted-foreground"
-            }`}
+            /* 55% clears 4.5:1 at this size; 40% did not, and a counter you
+               cannot read is just decoration next to the word Message. */
+            className={`label-mono ${remaining < 0 ? "text-red-300" : "text-amber-100/55"}`}
           >
             {remaining}
           </span>
@@ -190,10 +185,10 @@ export function ContactForm({
           onChange={(e) => setMessage(e.target.value)}
           aria-invalid={Boolean(errors.message)}
           aria-describedby={errors.message ? id("message-error") : undefined}
-          className="min-h-40 resize-y"
+          className={`min-h-40 resize-y ${FIELD}`}
         />
         {errors.message && (
-          <p id={id("message-error")} role="alert" className="mt-2 text-xs text-destructive">
+          <p id={id("message-error")} role="alert" className={ERROR}>
             {errors.message}
           </p>
         )}
@@ -203,7 +198,12 @@ export function ContactForm({
         type="submit"
         size="lg"
         disabled={isSending}
-        className="mt-7 h-12 w-full cursor-pointer rounded-full text-sm font-medium transition-colors duration-200 disabled:cursor-not-allowed sm:w-auto sm:px-8"
+        /*
+          The dock's resume pill, at button size - soft amber on the dark rather
+          than the coffee-brown default, so the room's one loud-ish control
+          still belongs to the room.
+        */
+        className="mt-7 h-12 w-full cursor-pointer rounded-full border border-amber-200/50 bg-amber-200/15 text-sm font-medium text-amber-50 transition-colors duration-200 hover:border-amber-200/70 hover:bg-amber-200/25 disabled:cursor-not-allowed sm:w-auto sm:px-8"
       >
         {isSending ? (
           <>
