@@ -57,7 +57,12 @@ export function Panel() {
       aria-hidden={!open}
       aria-label={content ? titleOf(content) : undefined}
       className={[
-        "fixed z-30 overflow-y-auto border-amber-200/15 bg-[#0d0f18]/95 backdrop-blur-sm",
+        /*
+          A column: a header that stays and a body that scrolls. The aside used
+          to be the scroll container itself, which took the back and close
+          buttons away with the content the moment anyone read past the fold.
+        */
+        "reader-panel fixed z-30 flex flex-col border-amber-200/15 bg-[#0d0f18]/95 backdrop-blur-sm",
         "transition-transform duration-500 ease-out",
         "inset-x-0 bottom-0 h-[60svh] rounded-t-2xl border-t",
         "md:inset-y-0 md:left-auto md:right-0 md:h-auto md:w-[45vw] md:rounded-none md:border-l md:border-t-0",
@@ -67,89 +72,111 @@ export function Panel() {
       ].join(" ")}
     >
       {content && (
-        <div className="reader">
-          <div className="flex items-start justify-between gap-4 pb-6">
-            <div className="min-w-0">
+        <>
+          <div className="reader-head flex shrink-0 items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               {parentTitle && (
+                /*
+                  A bordered control rather than a line of dim text. It is the
+                  way out of a page someone opened by accident, and at the size
+                  it was - 12px, 70% opacity, no edge - it read as a caption on
+                  the title beneath it.
+                */
                 <button
                   onClick={back}
                   aria-label={`Back to ${parentTitle}`}
-                  className="-ml-1 mb-1.5 flex max-w-full items-center gap-1.5 rounded px-1 py-0.5 text-xs text-amber-100/70 hover:text-amber-50"
+                  /*
+                    The pill is 30px tall, which is right for the header and
+                    wrong for a thumb. The pseudo-element widens what you can
+                    actually hit to ~46px without making the bar taller - the
+                    control people most need on a phone should not be the one
+                    hardest to land on.
+                  */
+                  className="relative flex min-w-0 shrink items-center gap-1.5 rounded-full border border-amber-200/30 py-1.5 pl-2.5 pr-3 text-xs text-amber-100/90 transition-colors before:absolute before:-inset-x-1 before:-inset-y-2.5 before:content-[''] hover:border-amber-200/60 hover:bg-amber-200/10 hover:text-amber-50"
                 >
                   <span aria-hidden>←</span>
                   <span className="truncate">{parentTitle}</span>
                 </button>
               )}
-              <p className="text-xs uppercase tracking-widest text-amber-200/60">
+              {/* The title steps aside on a narrow screen when there is a back
+                  button to show; the panel already names itself in its label. */}
+              <p
+                className={[
+                  "truncate text-xs uppercase tracking-widest text-amber-200/60",
+                  parentTitle ? "hidden sm:block" : "",
+                ].join(" ")}
+              >
                 {titleOf(content)}
               </p>
             </div>
             <button
               onClick={close}
               aria-label="Close"
-              className="shrink-0 rounded-full border border-amber-200/25 px-2.5 py-0.5 text-sm text-amber-100/70 hover:bg-amber-200/10"
+              className="relative shrink-0 rounded-full border border-amber-200/25 px-2.5 py-1 text-sm text-amber-100/70 before:absolute before:-inset-2 before:content-[''] hover:bg-amber-200/10"
             >
               ✕
             </button>
           </div>
 
-          <Body content={content} onPick={follow} />
+          <div className="reader min-h-0 flex-1 overflow-y-auto">
+            <Body content={content} onPick={follow} />
 
-          {siblings.length > 0 && (
-            <nav className="mt-10 border-t border-amber-200/15 pt-5">
-              <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
-                More in this section
-              </p>
-              {/* One line for the group rather than a cue on each title: five
+            {siblings.length > 0 && (
+              <nav className="mt-10 border-t border-amber-200/15 pt-5">
+                <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
+                  More in this section
+                </p>
+                {/* One line for the group rather than a cue on each title: five
                   copies of the same sentence is noise, not an affordance. */}
-              <GroupCue>Click any title to read it →</GroupCue>
-              <ul className="space-y-1">
-                {siblings.map((sibling) => (
-                  <li key={sibling.id}>
-                    <button
-                      onClick={() => follow(sibling.id)}
-                      aria-label={`${sibling.title} — read it`}
-                      className="text-sm text-amber-100/70 underline underline-offset-4 hover:text-amber-50"
-                    >
-                      {sibling.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
+                <GroupCue>Click any title to read it →</GroupCue>
+                <ul className="space-y-1">
+                  {siblings.map((sibling) => (
+                    <li key={sibling.id}>
+                      <button
+                        onClick={() => follow(sibling.id)}
+                        aria-label={`${sibling.title} — read it`}
+                        className="text-sm text-amber-100/70 underline underline-offset-4 hover:text-amber-50"
+                      >
+                        {sibling.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
 
-          {/*
+            {/*
             Where next. The room has no rail by design, which is fine once you
             know the room but leaves someone who has opened one thing with no
             idea there are five more. Each panel hands you on to the rest, in
             the spec's order so it reads as a tour, and picking one turns the
             room to that section's object on the way.
           */}
-          <nav className="mt-8 border-t border-amber-200/15 pt-5">
-            <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
-              Explore the room
-            </p>
-            <GroupCue>Click a section to open it →</GroupCue>
-            <ul className="flex flex-wrap gap-1.5">
-              {otherSections(content.zone).map((zone, i) => (
-                <li key={zone}>
-                  <button
-                    onClick={() => follow(zone)}
-                    aria-label={`${sectionLabel(zone)} — open this section`}
-                    className={
-                      i === 0
-                        ? "rounded-full border border-amber-200/45 bg-amber-200/10 px-3 py-1 text-xs text-amber-50"
-                        : "rounded-full border border-amber-200/20 px-3 py-1 text-xs text-amber-100/65 hover:border-amber-200/45 hover:text-amber-50"
-                    }
-                  >
-                    {i === 0 ? `Next · ${sectionLabel(zone)}` : sectionLabel(zone)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
+            <nav className="mt-8 border-t border-amber-200/15 pt-5">
+              <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
+                Explore the room
+              </p>
+              <GroupCue>Click a section to open it →</GroupCue>
+              <ul className="flex flex-wrap gap-1.5">
+                {otherSections(content.zone).map((zone, i) => (
+                  <li key={zone}>
+                    <button
+                      onClick={() => follow(zone)}
+                      aria-label={`${sectionLabel(zone)} — open this section`}
+                      className={
+                        i === 0
+                          ? "rounded-full border border-amber-200/45 bg-amber-200/10 px-3 py-1 text-xs text-amber-50"
+                          : "rounded-full border border-amber-200/20 px-3 py-1 text-xs text-amber-100/65 hover:border-amber-200/45 hover:text-amber-50"
+                      }
+                    >
+                      {i === 0 ? `Next · ${sectionLabel(zone)}` : sectionLabel(zone)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        </>
       )}
     </aside>
   );

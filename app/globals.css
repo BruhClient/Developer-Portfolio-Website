@@ -837,15 +837,40 @@
    failure is a picture sitting 16px proud of the panel - visible, but only if
    you happen to look at that breakpoint.
    ───────────────────────────────────────────── */
-.reader {
+/*
+  The padding lives on the panel rather than on the scrolling body, because the
+  header sits outside that body now and has to line up with it. One variable,
+  two elements, no chance of the back button and the title below it sitting on
+  different left edges.
+*/
+.reader-panel {
   --reader-pad: 1.5rem;
-  padding: var(--reader-pad);
 }
 
 @media (min-width: 768px) {
-  .reader {
+  .reader-panel {
     --reader-pad: 2.5rem;
   }
+}
+
+.reader {
+  padding: var(--reader-pad);
+  /* The header already separates this from the top edge. */
+  padding-top: calc(var(--reader-pad) * 0.5);
+}
+
+/*
+  The bar that does not scroll.
+
+  Back and close used to sit at the top of the scrolling content, which meant
+  they were gone the moment you read anything: a hackathon panel is some 2800px
+  tall in a 900px window, so for the other 1900px the only ways out were the
+  keyboard or scrolling back up to find them. They are the two controls most
+  likely to be wanted at an arbitrary moment, so they stay put.
+*/
+.reader-head {
+  padding: calc(var(--reader-pad) * 0.6) var(--reader-pad);
+  border-bottom: 1px solid rgb(254 243 199 / 0.12);
 }
 
 .reader-bleed {
