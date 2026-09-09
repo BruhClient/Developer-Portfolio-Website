@@ -10,6 +10,7 @@ import {
 } from "../data/bindings";
 import { otherSections } from "../data/navigation";
 import { useRoom } from "../engine/roomState";
+import { GroupCue } from "./Cue";
 import { AboutBody } from "./bodies/AboutBody";
 import { CertificateBody } from "./bodies/CertificateBody";
 import { ContactBody } from "./bodies/ContactBody";
@@ -96,14 +97,18 @@ export function Panel() {
 
           {siblings.length > 0 && (
             <nav className="mt-10 border-t border-amber-200/15 pt-5">
-              <p className="pb-2 text-xs uppercase tracking-widest text-amber-200/50">
+              <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
                 More in this section
               </p>
+              {/* One line for the group rather than a cue on each title: five
+                  copies of the same sentence is noise, not an affordance. */}
+              <GroupCue>Click any title to read it →</GroupCue>
               <ul className="space-y-1">
                 {siblings.map((sibling) => (
                   <li key={sibling.id}>
                     <button
                       onClick={() => follow(sibling.id)}
+                      aria-label={`${sibling.title} — read it`}
                       className="text-sm text-amber-100/70 underline underline-offset-4 hover:text-amber-50"
                     >
                       {sibling.title}
@@ -122,14 +127,16 @@ export function Panel() {
             room to that section's object on the way.
           */}
           <nav className="mt-8 border-t border-amber-200/15 pt-5">
-            <p className="pb-2.5 text-xs uppercase tracking-widest text-amber-200/50">
+            <p className="pb-1 text-xs uppercase tracking-widest text-amber-200/50">
               Explore the room
             </p>
+            <GroupCue>Click a section to open it →</GroupCue>
             <ul className="flex flex-wrap gap-1.5">
               {otherSections(content.zone).map((zone, i) => (
                 <li key={zone}>
                   <button
                     onClick={() => follow(zone)}
+                    aria-label={`${sectionLabel(zone)} — open this section`}
                     className={
                       i === 0
                         ? "rounded-full border border-amber-200/45 bg-amber-200/10 px-3 py-1 text-xs text-amber-50"

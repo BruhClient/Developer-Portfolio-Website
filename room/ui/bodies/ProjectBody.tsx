@@ -1,5 +1,6 @@
 import type { PageData } from "@/constants/pages/types";
 import { Gallery } from "./Shot";
+import { Cue } from "../Cue";
 
 export function ProjectBody({ data }: { data: PageData }) {
   return (
@@ -36,9 +37,11 @@ export function ProjectBody({ data }: { data: PageData }) {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
+                aria-label={`${link.label} — opens in a new tab`}
+                className="group flex items-center gap-2 rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
               >
                 {link.label}
+                <Cue kind="external">Opens in a new tab</Cue>
               </a>
             </li>
           ))}

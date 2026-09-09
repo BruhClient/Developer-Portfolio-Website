@@ -1,4 +1,5 @@
 import type { ExperienceEntry } from "@/constants/pages/experience";
+import { Cue } from "../Cue";
 
 export function ExperienceBody({
   entries,
@@ -12,9 +13,11 @@ export function ExperienceBody({
       <a
         href={resumeHref}
         download
-        className="inline-block rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
+        aria-label="Download resume — saves a PDF"
+        className="group inline-flex items-center gap-2 rounded-md border border-amber-200/30 px-3 py-1.5 text-xs text-amber-100 hover:bg-amber-200/10"
       >
         Download resume
+        <Cue kind="download">Saves a PDF</Cue>
       </a>
 
       {entries.map((entry) => (
@@ -42,9 +45,13 @@ export function ExperienceBody({
               href={entry.link.href}
               target="_blank"
               rel="noreferrer"
-              className="inline-block text-xs text-amber-200 underline underline-offset-4"
+              aria-label={`${entry.link.label} — opens in a new tab`}
+              className="group inline-flex items-center gap-2 text-xs text-amber-200"
             >
-              {entry.link.label}
+              {/* Underline on the label alone - on the <a> it is drawn through
+                  the cue as well. */}
+              <span className="underline underline-offset-4">{entry.link.label}</span>
+              <Cue kind="external">Opens in a new tab</Cue>
             </a>
           )}
         </article>
