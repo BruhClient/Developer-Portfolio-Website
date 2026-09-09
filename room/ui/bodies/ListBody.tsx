@@ -19,11 +19,20 @@ export function ListBody({ of, onPick }: { of: string[]; onPick: (id: string) =>
                 sentence on every row of the list.
               */
               aria-label={`${title} — read more`}
-              className="group w-full rounded-md border border-amber-200/15 px-3 py-2.5 text-left text-sm text-amber-50/90 hover:border-amber-200/40 hover:bg-amber-200/5"
+              /*
+                A column, rather than a title with things after it.
+
+                The kicker was the only thing breaking the line, being the one
+                block in here - so a row without one (every project has no
+                cardKicker; every hackathon has one) put the cue inline after
+                the title, where its margin-top could not move it. Stacking the
+                row explicitly makes the spacing the same either way.
+              */
+              className="group flex w-full flex-col items-start rounded-md border border-amber-200/15 px-3 py-2.5 text-left text-sm text-amber-50/90 hover:border-amber-200/40 hover:bg-amber-200/5"
             >
-              {title}
+              <span>{title}</span>
               {content.kind === "project" && content.data.cardKicker && (
-                <span className="block pt-0.5 text-xs text-amber-100/45">
+                <span className="pt-0.5 text-xs text-amber-100/45">
                   {content.data.cardKicker}
                 </span>
               )}
