@@ -17,6 +17,7 @@ export default defineConfig({
     include: [
       "room/**/*.test.ts",
       "constants/**/*.test.ts",
+      "lib/**/*.test.ts",
     ],
   },
 });
