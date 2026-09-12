@@ -12,6 +12,8 @@ import { SceneryProp } from "./Scenery";
 import { MonitorScreen } from "../ui/MonitorScreen";
 import { Carpets } from "../ui/Carpets";
 import { WallCross } from "../ui/WallCross";
+import { Chin } from "../ui/Chin";
+import { Guitar } from "../ui/Guitar";
 
 
 /*
@@ -167,6 +169,8 @@ export function Room() {
         ))}
         <MonitorScreen />
         <WallCross />
+        <Chin />
+        <Guitar />
       </group>
     </Canvas>
   );
